@@ -1,0 +1,18 @@
+[
+  {
+    "_id": "RATE001",
+    "jobId": "JOB001",
+    "fromUserId": "EMPUSER001",
+    "toUserId": "USER001",
+    "rating": 4.5,
+    "review": "Good work, on time."
+  },
+  {
+    "_id": "RATE002",
+    "jobId": "JOB002",
+    "fromUserId": "EMPUSER002",
+    "toUserId": "USER002",
+    "rating": 4,
+    "review": "Solid wiring job."
+  }
+]

@@ -1,0 +1,26 @@
+[
+  {
+    "_id": "SKILL001",
+    "name": { "mr": "प्लंबर", "hi": "प्लंबर", "en": "Plumber" },
+    "categoryId": "CAT001",
+    "isActive": true
+  },
+  {
+    "_id": "SKILL002",
+    "name": { "mr": "इलेक्ट्रिशियन", "hi": "इलेक्ट्रीशियन", "en": "Electrician" },
+    "categoryId": "CAT001",
+    "isActive": true
+  },
+  {
+    "_id": "SKILL003",
+    "name": { "mr": "सुतार", "hi": "बढ़ई", "en": "Carpenter" },
+    "categoryId": "CAT002",
+    "isActive": true
+  },
+  {
+    "_id": "SKILL004",
+    "name": { "mr": "रंगारी", "hi": "पेंटर", "en": "Painter" },
+    "categoryId": "CAT002",
+    "isActive": true
+  }
+]

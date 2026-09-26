@@ -1,0 +1,20 @@
+[
+  {
+    "_id": "VP001",
+    "workerId": "WORKER001",
+    "language": "mr",
+    "audioUrl": "https://example.com/audio/worker001_mr.mp3",
+    "transcript": "मी रमेश, मी प्लंबर आहे, माझा पाच वर्षांचा अनुभव आहे.",
+    "extractedFields": { "skills": ["plumbing"], "experienceYears": 5 },
+    "confidence": 0.87
+  },
+  {
+    "_id": "VP002",
+    "workerId": "WORKER002",
+    "language": "hi",
+    "audioUrl": "https://example.com/audio/worker002_hi.mp3",
+    "transcript": "मैं सुरेश हूं, मैं इलेक्ट्रीशियन का काम करता हूं।",
+    "extractedFields": { "skills": ["electrical"], "experienceYears": 4 },
+    "confidence": 0.79
+  }
+]

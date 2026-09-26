@@ -1,0 +1,56 @@
+[
+  {
+    "_id": "WORKER001",
+    "userId": "USER001",
+    "fullName": "Ramesh Patil",
+    "bio": { "en": "Experienced plumber with 5 years of residential repair work." },
+    "location": { "type": "Point", "coordinates": [73.8567, 18.5204] },
+    "availability": "available",
+    "expectedPay": 800,
+    "ratingAvg": 4.5,
+    "languages": ["mr", "hi"],
+    "preferredJobCategories": ["CAT001"],
+    "preferredWorkRadiusKm": 25,
+    "experienceYears": 5
+  },
+  {
+    "_id": "WORKER002",
+    "userId": "USER002",
+    "fullName": "Suresh Jadhav",
+    "bio": { "en": "Electrician skilled in house wiring and repair." },
+    "location": { "type": "Point", "coordinates": [73.8077, 18.5074] },
+    "availability": "available",
+    "expectedPay": 900,
+    "ratingAvg": 4.0,
+    "languages": ["hi", "en"],
+    "preferredJobCategories": ["CAT001"],
+    "preferredWorkRadiusKm": 20,
+    "experienceYears": 4
+  },
+  {
+    "_id": "WORKER003",
+    "userId": "USER003",
+    "fullName": "Amit Kadam",
+    "bio": { "en": "Carpenter, furniture repair and installation." },
+    "location": { "type": "Point", "coordinates": [73.7769, 18.5642] },
+    "availability": "busy",
+    "expectedPay": 1000,
+    "ratingAvg": 4.8,
+    "languages": ["hi"],
+    "preferredJobCategories": ["CAT002"],
+    "preferredWorkRadiusKm": 15,
+    "experienceYears": 7
+  },
+  {
+    "_id": "WORKER004",
+    "userId": "USER004",
+    "fullName": "Mahesh Bhosale",
+    "location": { "type": "Point", "coordinates": [74.2433, 16.7050] },
+    "availability": "available",
+    "ratingAvg": 0,
+    "languages": ["mr"],
+    "preferredJobCategories": ["CAT002"],
+    "preferredWorkRadiusKm": 20,
+    "experienceYears": 3
+  }
+]

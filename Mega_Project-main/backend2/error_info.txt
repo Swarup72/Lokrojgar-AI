@@ -1,0 +1,71 @@
+================================================================================
+ERROR DIAGNOSTIC LOG & RESOLUTION REPORT
+================================================================================
+Date/Time: 2026-09-23
+Endpoint: GET http://localhost:8000/api/v1/employer-profile/me
+
+--------------------------------------------------------------------------------
+1. ISSUE SUMMARY
+--------------------------------------------------------------------------------
+Symptom:
+  - Request to `GET http://localhost:8000/api/v1/employer-profile/me` hung 
+    indefinitely without returning any response or HTTP error code.
+
+Root Cause:
+  - In `src/middlewares/auth.middleware.js`, the call to `next()` inside the 
+    `verifyJWT` middleware was commented out (`// next();`).
+  - As a result, after verifying the JWT token and attaching `req.user`, Express 
+    never called the next middleware/controller handler, causing the client request 
+    to remain pending until server/client timeout.
+
+--------------------------------------------------------------------------------
+2. COMPONENT & FILE DETAILS
+--------------------------------------------------------------------------------
+Affected Middleware File:
+  `d:\New folder (2)\backend\backend\src\middlewares\auth.middleware.js`
+
+Affected Route File:
+  `d:\New folder (2)\backend\backend\src\routes\employerProfile.routes.js`
+
+Controller File:
+  `d:\New folder (2)\backend\backend\src\controllers\employerProfile.controller.js`
+
+--------------------------------------------------------------------------------
+3. RESOLUTION / CODE CHANGES APPLIED
+--------------------------------------------------------------------------------
+Change 1 (auth.middleware.js):
+  - Uncommented `next()` in `verifyJWT` so Express request flow continues.
+  
+  Code Before:
+    req.user = user;
+    // next();
+
+  Code After:
+    req.user = user;
+    next();
+
+Change 2 (employerProfile.routes.js):
+  - Removed duplicate `verifyJWT` execution on `router.get("/me")` since 
+    `router.use(verifyJWT)` was already applied globally to the router.
+
+  Code Before:
+    router.get("/me", verifyJWT, getEmployerProfile);
+
+  Code After:
+    router.get("/me", getEmployerProfile);
+
+--------------------------------------------------------------------------------
+4. ADDITIONAL RESPONSE NOTES FOR GET /me
+--------------------------------------------------------------------------------
+If after this fix you receive any specific HTTP status code, refer to the following:
+
+- HTTP 401 Unauthorized:
+  - Missing or invalid JWT Access Token in header (`Authorization: Bearer <token>`).
+
+- HTTP 403 Forbidden:
+  - The authenticated user does not have the `employer` or `admin` role.
+
+- HTTP 404 Not Found ("Employer profile not found"):
+  - The logged-in employer user has not initialized their profile yet.
+  - Fix: Call `POST /api/v1/employer-profile` with initial business details first.
+================================================================================

@@ -1,0 +1,34 @@
+[
+  {
+    "_id": "WS001",
+    "workerId": "WORKER001",
+    "skillId": "SKILL001",
+    "proficiency": "expert",
+    "verificationStatus": "verified",
+    "verifiedAt": "2026-01-15T00:00:00Z",
+    "verifiedByAdminId": "ADMIN001"
+  },
+  {
+    "_id": "WS002",
+    "workerId": "WORKER002",
+    "skillId": "SKILL002",
+    "proficiency": "intermediate",
+    "verificationStatus": "pending"
+  },
+  {
+    "_id": "WS003",
+    "workerId": "WORKER003",
+    "skillId": "SKILL003",
+    "proficiency": "expert",
+    "verificationStatus": "verified",
+    "verifiedAt": "2026-02-01T00:00:00Z",
+    "verifiedByAdminId": "ADMIN001"
+  },
+  {
+    "_id": "WS004",
+    "workerId": "WORKER004",
+    "skillId": "SKILL004",
+    "proficiency": "beginner",
+    "verificationStatus": "unverified"
+  }
+]
