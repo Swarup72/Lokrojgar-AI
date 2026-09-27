@@ -30,7 +30,7 @@ export const processVoiceProfileAudio = async (audioFilePath, language = "mr") =
     const fileBuffer = fs.readFileSync(audioFilePath);
     const base64Audio = fileBuffer.toString("base64");
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
 
     const prompt = `Listen to this audio in ${language === "mr" ? "Marathi" : language === "hi" ? "Hindi" : "English"}.
 1. Provide an accurate transcript.

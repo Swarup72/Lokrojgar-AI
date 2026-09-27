@@ -33,7 +33,7 @@ export const translateTextToAllLanguages = async (text, sourceLang = "en") => {
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-3.5-flash-lite" });
     const prompt = `Translate the following text into Marathi, Hindi, and English. Return strictly a JSON object with keys "mr", "hi", and "en".
 
 Text: "${text}"
