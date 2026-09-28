@@ -1,10 +1,12 @@
 /**
  * Real end-to-end integration test: Node -> FastAPI -> Python AI.
  *
- * Unlike every other test in this repo, this one makes a REAL HTTP call to
- * a REAL running FastAPI process - nothing is mocked. It is intentionally
- * kept in tests/integration/ (not tests/*.test.js) so the default
- * `node --test tests/*.test.js` command never depends on FastAPI being up.
+ * Covers all three centralized AI features - recommendation, voice, and
+ * translation. Unlike every other test in this repo, this one makes a REAL
+ * HTTP call to a REAL running FastAPI process - nothing is mocked. It is
+ * intentionally kept in tests/integration/ (not tests/*.test.js) so the
+ * default `node --test tests/*.test.js` command never depends on FastAPI
+ * being up.
  *
  * Run manually, with the AI service already running:
  *
@@ -18,6 +20,8 @@ import {
   getRecommendedJobsForWorker,
   getRecommendedWorkersForJob,
   scoreWorkerJobPair,
+  forwardAudioForExtraction,
+  translateText,
 } from "../../src/services/aiService.client.js";
 
 // Realistic, Node/Mongoose-shaped fixture data - camelCase, _id as plain
@@ -103,4 +107,38 @@ test("integration: scoreWorkerJobPair returns ranking + explanation from FastAPI
     result.explanation.factors.map((f) => f.factor),
     ["skill", "location", "availability", "pay", "rating", "relevance"]
   );
+});
+
+// --- Voice + translation ----------------------------------------------------
+// Both round-trip through the real FastAPI process. Neither test requires a
+// real (paid) SARVAM_API_KEY: if ai-service has one configured, the request
+// succeeds for real; if not (the default for this repo's test environment),
+// FastAPI must still respond with a real, well-formed 503 - proving the
+// actual multipart/JSON wire format and error propagation work end-to-end,
+// without depending on a live third-party provider being reachable.
+
+test("integration: forwardAudioForExtraction round-trips through a real FastAPI process", async () => {
+  try {
+    const result = await forwardAudioForExtraction({
+      audioBuffer: Buffer.from("fake-audio-bytes-not-real-speech"),
+      filename: "clip.wav",
+      contentType: "audio/wav",
+      language: "mr",
+    });
+    assert.ok(typeof result.transcript === "string");
+    assert.ok(result.extracted_profile);
+  } catch (error) {
+    assert.strictEqual(error.statusCode, 503);
+  }
+});
+
+test("integration: translateText round-trips through a real FastAPI process", async () => {
+  try {
+    const result = await translateText({ text: "Hello", sourceLang: "en" });
+    assert.strictEqual(result.en, "Hello");
+    assert.ok(result.mr);
+    assert.ok(result.hi);
+  } catch (error) {
+    assert.strictEqual(error.statusCode, 503);
+  }
 });

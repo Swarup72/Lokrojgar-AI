@@ -12,6 +12,19 @@
 const getBaseUrl = () => process.env.AI_SERVICE_URL || "http://localhost:8000";
 const getApiKey = () => process.env.AI_SERVICE_API_KEY || "";
 
+async function handleAiServiceResponse(response, path) {
+  if (!response.ok) {
+    const errorBody = await response.json().catch(() => ({}));
+    const error = new Error(
+      errorBody.detail || `AI service request to ${path} failed with status ${response.status}`
+    );
+    error.statusCode = response.status;
+    throw error;
+  }
+
+  return response.json();
+}
+
 async function postToAiService(path, payload) {
   const headers = { "Content-Type": "application/json" };
   const apiKey = getApiKey();
@@ -25,16 +38,28 @@ async function postToAiService(path, payload) {
     body: JSON.stringify(payload),
   });
 
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => ({}));
-    const error = new Error(
-      errorBody.detail || `AI service request to ${path} failed with status ${response.status}`
-    );
-    error.statusCode = response.status;
-    throw error;
+  return handleAiServiceResponse(response, path);
+}
+
+/**
+ * Same as postToAiService, but for multipart/form-data bodies (file
+ * uploads). No Content-Type header is set here - fetch() sets it itself,
+ * including the multipart boundary, when the body is a FormData instance.
+ */
+async function postMultipartToAiService(path, formData) {
+  const headers = {};
+  const apiKey = getApiKey();
+  if (apiKey) {
+    headers["X-AI-Service-Key"] = apiKey;
   }
 
-  return response.json();
+  const response = await fetch(`${getBaseUrl()}${path}`, {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  return handleAiServiceResponse(response, path);
 }
 
 /**
@@ -105,4 +130,37 @@ export const scoreWorkerJobPair = ({ worker, workerSkills = [], job, weights }) 
     job,
     weights,
   });
+};
+
+/**
+ * Forward a voice recording to FastAPI's /voice/extract for transcription +
+ * structured profile extraction. Sends the already-read file bytes as
+ * multipart/form-data - this client does not touch the filesystem itself.
+ *
+ * @param {object} params
+ * @param {Buffer} params.audioBuffer - full contents of the audio file
+ * @param {string} params.filename
+ * @param {string} params.contentType
+ * @param {string} params.language
+ * @returns {Promise<{transcript: string, extracted_profile: object, confidence: number|null}>}
+ */
+export const forwardAudioForExtraction = ({ audioBuffer, filename, contentType, language }) => {
+  const formData = new FormData();
+  formData.append("audio", new Blob([audioBuffer], { type: contentType }), filename);
+  formData.append("language", language);
+
+  return postMultipartToAiService("/voice/extract", formData);
+};
+
+/**
+ * Translate text into all three app languages via FastAPI's
+ * /translation/translate.
+ *
+ * @param {object} params
+ * @param {string} params.text
+ * @param {string} params.sourceLang
+ * @returns {Promise<{mr: string, hi: string, en: string}>}
+ */
+export const translateText = ({ text, sourceLang }) => {
+  return postToAiService("/translation/translate", { text, source_lang: sourceLang });
 };

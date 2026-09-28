@@ -1,75 +1,82 @@
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from "fs";
-
-const genAI = process.env.GEMINI_API_KEY
-  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
-  : null;
+import path from "path";
+import { forwardAudioForExtraction } from "./aiService.client.js";
+import logger from "../utils/logger.js";
 
 /**
- * Transcribe Marathi or Hindi audio file and extract worker profile fields using LLM.
+ * Thrown when the AI service can't process the request at all - either it
+ * explicitly said so (503), or it couldn't be reached (network error, which
+ * carries no statusCode). Distinct from a real provider failure so the
+ * controller can return a clean 503 without pretending a request was even
+ * attempted.
+ */
+export class AiServiceUnavailableError extends Error {}
+
+// Mirrors backend2's own ALLOWED_AUDIO_TYPES (multer.middleware.js) - the
+// file on disk was already validated against that list, so this only needs
+// to map its extension back to a Content-Type for the outgoing multipart
+// request. Falls back to a generic type for anything unexpected rather than
+// rejecting - FastAPI/Sarvam decide whether the actual bytes are usable.
+const EXTENSION_CONTENT_TYPES = {
+  ".mp3": "audio/mpeg",
+  ".wav": "audio/wav",
+  ".ogg": "audio/ogg",
+  ".mp4": "audio/mp4",
+  ".m4a": "audio/m4a",
+  ".webm": "audio/webm",
+};
+
+const resolveContentType = (filePath) =>
+  EXTENSION_CONTENT_TYPES[path.extname(filePath).toLowerCase()] || "application/octet-stream";
+
+// A network-level failure (AI service unreachable) surfaces as a fetch()
+// rejection with no .statusCode at all - distinct from FastAPI explicitly
+// responding 503, but both mean the same thing to this caller: voice
+// processing isn't available right now.
+const isServiceUnavailable = (error) => error.statusCode === undefined || error.statusCode === 503;
+
+/**
+ * Transcribe Marathi/Hindi/English audio and extract structured worker
+ * profile fields, via the centralized Python AI service.
  *
- * @param {string} audioFilePath - Path to local audio file
- * @param {string} language - Audio language ('mr', 'hi', 'en')
- * @returns {Promise<{ transcript: string, extractedProfile: Object }>}
+ * Interface preserved exactly for existing callers:
+ * processVoiceProfileAudio(audioFilePath, language) -> { transcript, extractedProfile, confidence }.
+ *
+ * @param {string} audioFilePath - local path to the audio file (must still
+ *   exist on disk - caller is responsible for not deleting it beforehand).
+ * @param {string} language - "mr" | "hi" | "en" | "auto", defaults to "mr".
+ * @returns {Promise<{transcript: string, extractedProfile: object, confidence: number|null}>}
  */
 export const processVoiceProfileAudio = async (audioFilePath, language = "mr") => {
-  if (!genAI) {
-    return {
-      transcript: "Voice processing simulation (GEMINI_API_KEY required)",
-      extractedProfile: {
-        fullName: "Sample Worker",
-        experienceYears: 2,
-        expectedPay: 500,
-        skills: ["General Work"],
-        city: "Mumbai",
-      },
-    };
-  }
+  logger.info("Voice processing started", { language });
 
+  // Read synchronously, in full, before anything else runs - the caller
+  // (voiceProfile.controller.js) awaits this whole function before it ever
+  // uploads/deletes the local file, so by the time we get here the file is
+  // guaranteed to still be on disk.
+  const audioBuffer = fs.readFileSync(audioFilePath);
+
+  let response;
   try {
-    const fileBuffer = fs.readFileSync(audioFilePath);
-    const base64Audio = fileBuffer.toString("base64");
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const prompt = `Listen to this audio in ${language === "mr" ? "Marathi" : language === "hi" ? "Hindi" : "English"}.
-1. Provide an accurate transcript.
-2. Extract worker profile details in JSON format:
-{
-  "transcript": "...",
-  "extractedProfile": {
-    "fullName": "...",
-    "experienceYears": 0,
-    "expectedPay": 0,
-    "skills": ["..."],
-    "city": "...",
-    "bio": "..."
-  }
-}`;
-
-    const result = await model.generateContent([
-      prompt,
-      {
-        inlineData: {
-          mimeType: "audio/mp3",
-          data: base64Audio,
-        },
-      },
-    ]);
-
-    const text = result.response.text();
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-
-    if (jsonMatch) {
-      return JSON.parse(jsonMatch[0]);
-    }
-
-    return {
-      transcript: text,
-      extractedProfile: {},
-    };
+    response = await forwardAudioForExtraction({
+      audioBuffer,
+      filename: path.basename(audioFilePath),
+      contentType: resolveContentType(audioFilePath),
+      language,
+    });
   } catch (error) {
-    console.error("AI Voice Processing Error:", error);
-    throw new Error(`Failed to process voice profile: ${error.message}`);
+    if (isServiceUnavailable(error)) {
+      throw new AiServiceUnavailableError("Voice processing service is currently unavailable.");
+    }
+    logger.error("Voice processing failed", error);
+    throw error;
   }
+
+  logger.info("Voice processing completed");
+
+  return {
+    transcript: response.transcript,
+    extractedProfile: response.extracted_profile,
+    confidence: response.confidence,
+  };
 };

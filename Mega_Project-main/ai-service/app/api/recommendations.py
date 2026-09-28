@@ -1,9 +1,9 @@
-import os
 from typing import Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
+from app.api.auth import verify_api_key
 from app.models.job import Job
 from app.models.worker import WorkerProfile
 from app.models.worker_skill import WorkerSkill
@@ -14,24 +14,6 @@ from app.recommendation.pipeline import score_worker_job_pair
 from app.recommendation.recommend import recommend_jobs_for_worker, recommend_workers_for_job
 
 router = APIRouter()
-
-
-def verify_api_key(x_ai_service_key: Optional[str] = Header(default=None)) -> None:
-    """
-    Gate the recommendation endpoints behind AI_SERVICE_API_KEY, read fresh
-    on every request (not cached at import time) so tests/deployments can
-    configure it without restarting the process.
-
-    If no key is configured, requests are allowed - this is meant for
-    local development, where there's nothing to check against.
-    """
-
-    configured_key = os.environ.get("AI_SERVICE_API_KEY", "")
-    if not configured_key:
-        return
-
-    if x_ai_service_key != configured_key:
-        raise HTTPException(status_code=401, detail="Missing or invalid AI service API key")
 
 
 # --- Request models -----------------------------------------------------

@@ -3,15 +3,19 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.recommendations import router as recommendations_router
+from app.api.translation import router as translation_router
+from app.api.voice import router as voice_router
 
 load_dotenv()
 
 app = FastAPI(
     title="LokRozgar AI Service",
     description=(
-        "Stateless recommendation/matching/ranking/explanation service. "
-        "Owns no database - Node/Express remains the only owner of MongoDB "
-        "and sends this service the data it needs per request."
+        "Centralized AI service: voice transcription/profile extraction, "
+        "job-posting translation (both backed by Sarvam AI), and "
+        "recommendation/matching/ranking/explanation. Owns no database - "
+        "Node/Express remains the only owner of MongoDB and sends this "
+        "service the data it needs per request."
     ),
 )
 
@@ -26,3 +30,5 @@ async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse
 
 
 app.include_router(recommendations_router)
+app.include_router(voice_router)
+app.include_router(translation_router)

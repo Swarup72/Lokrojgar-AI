@@ -3,6 +3,8 @@ import assert from "node:assert";
 import {
   getRecommendedJobsForWorker,
   getRecommendedWorkersForJob,
+  forwardAudioForExtraction,
+  translateText,
 } from "../src/services/aiService.client.js";
 
 test("getRecommendedJobsForWorker posts to the correct endpoint with correct payload and headers", async () => {
@@ -123,6 +125,130 @@ test("client falls back to a generic error message when the AI service response 
       (err) => {
         assert.strictEqual(err.statusCode, 500);
         assert.match(err.message, /failed with status 500/);
+        return true;
+      }
+    );
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+// --- forwardAudioForExtraction ---------------------------------------------
+
+test("forwardAudioForExtraction posts multipart/form-data with the audio blob and language field", async () => {
+  const originalFetch = global.fetch;
+  let capturedUrl;
+  let capturedOptions;
+
+  global.fetch = async (url, options) => {
+    capturedUrl = url;
+    capturedOptions = options;
+    return {
+      ok: true,
+      json: async () => ({ transcript: "hello", extracted_profile: {}, confidence: 0.9 }),
+    };
+  };
+  process.env.AI_SERVICE_URL = "http://test-ai:9000";
+  process.env.AI_SERVICE_API_KEY = "secret123";
+
+  try {
+    const result = await forwardAudioForExtraction({
+      audioBuffer: Buffer.from("fake-audio-bytes"),
+      filename: "clip.wav",
+      contentType: "audio/wav",
+      language: "mr",
+    });
+
+    assert.strictEqual(capturedUrl, "http://test-ai:9000/voice/extract");
+    assert.strictEqual(capturedOptions.method, "POST");
+    assert.strictEqual(capturedOptions.headers["X-AI-Service-Key"], "secret123");
+    // No manual Content-Type - fetch() sets the multipart boundary itself.
+    assert.strictEqual("Content-Type" in capturedOptions.headers, false);
+
+    assert.ok(capturedOptions.body instanceof FormData);
+    const audioField = capturedOptions.body.get("audio");
+    assert.strictEqual(audioField.name, "clip.wav");
+    assert.strictEqual(audioField.type, "audio/wav");
+    assert.strictEqual(Buffer.from(await audioField.arrayBuffer()).toString(), "fake-audio-bytes");
+    assert.strictEqual(capturedOptions.body.get("language"), "mr");
+
+    assert.deepStrictEqual(result, { transcript: "hello", extracted_profile: {}, confidence: 0.9 });
+  } finally {
+    global.fetch = originalFetch;
+    delete process.env.AI_SERVICE_URL;
+    delete process.env.AI_SERVICE_API_KEY;
+  }
+});
+
+test("forwardAudioForExtraction surfaces AI service errors with status code", async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: false,
+    status: 503,
+    json: async () => ({ detail: "Sarvam AI is not configured" }),
+  });
+
+  try {
+    await assert.rejects(
+      () =>
+        forwardAudioForExtraction({
+          audioBuffer: Buffer.from("x"),
+          filename: "a.wav",
+          contentType: "audio/wav",
+          language: "mr",
+        }),
+      (err) => {
+        assert.strictEqual(err.statusCode, 503);
+        return true;
+      }
+    );
+  } finally {
+    global.fetch = originalFetch;
+  }
+});
+
+// --- translateText ----------------------------------------------------------
+
+test("translateText posts JSON with text and source_lang to the translation endpoint", async () => {
+  const originalFetch = global.fetch;
+  let capturedUrl;
+  let capturedOptions;
+
+  global.fetch = async (url, options) => {
+    capturedUrl = url;
+    capturedOptions = options;
+    return { ok: true, json: async () => ({ mr: "अ", hi: "आ", en: "hello" }) };
+  };
+  process.env.AI_SERVICE_URL = "http://test-ai:9000";
+
+  try {
+    const result = await translateText({ text: "hello", sourceLang: "en" });
+
+    assert.strictEqual(capturedUrl, "http://test-ai:9000/translation/translate");
+    assert.strictEqual(capturedOptions.headers["Content-Type"], "application/json");
+    const body = JSON.parse(capturedOptions.body);
+    assert.strictEqual(body.text, "hello");
+    assert.strictEqual(body.source_lang, "en");
+    assert.deepStrictEqual(result, { mr: "अ", hi: "आ", en: "hello" });
+  } finally {
+    global.fetch = originalFetch;
+    delete process.env.AI_SERVICE_URL;
+  }
+});
+
+test("translateText surfaces AI service errors with status code", async () => {
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: false,
+    status: 502,
+    json: async () => ({ detail: "upstream failure" }),
+  });
+
+  try {
+    await assert.rejects(
+      () => translateText({ text: "hello", sourceLang: "en" }),
+      (err) => {
+        assert.strictEqual(err.statusCode, 502);
         return true;
       }
     );
