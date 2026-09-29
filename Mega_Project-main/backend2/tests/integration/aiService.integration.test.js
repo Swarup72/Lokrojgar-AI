@@ -12,10 +12,19 @@
  *
  *   cd ai-service && .venv/bin/uvicorn app.main:app --port 8000 &
  *   cd backend2 && node --test tests/integration/aiService.integration.test.js
+ *
+ * The recommendation and translation tests talk to that shared instance.
+ * The voice "provider unavailable" test spawns its own short-lived,
+ * separately-ported instance instead (see withSarvamUnconfiguredAiService
+ * below) so it stays deterministic regardless of whether the shared
+ * instance's ai-service/.env has a real SARVAM_API_KEY configured.
  */
 
 import test from "node:test";
 import assert from "node:assert";
+import { spawn } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   getRecommendedJobsForWorker,
   getRecommendedWorkersForJob,
@@ -109,28 +118,98 @@ test("integration: scoreWorkerJobPair returns ranking + explanation from FastAPI
   );
 });
 
-// --- Voice + translation ----------------------------------------------------
-// Both round-trip through the real FastAPI process. Neither test requires a
-// real (paid) SARVAM_API_KEY: if ai-service has one configured, the request
-// succeeds for real; if not (the default for this repo's test environment),
-// FastAPI must still respond with a real, well-formed 503 - proving the
-// actual multipart/JSON wire format and error propagation work end-to-end,
-// without depending on a live third-party provider being reachable.
+// --- Voice: provider-unavailable contract -----------------------------------
+//
+// This specifically tests "SARVAM_API_KEY not configured -> 503", which is a
+// precondition of the AI SERVICE'S OWN environment, not of the request. The
+// shared ai-service instance the tests above talk to may have a real
+// SARVAM_API_KEY configured (e.g. for genuine manual end-to-end testing) - in
+// that case /voice/extract legitimately reaches Sarvam's real API, and no
+// choice of audio fixture can force a 503 out of it: real audio succeeds
+// (200), garbage bytes are rejected by Sarvam's own validation (400
+// invalid_request_error), and valid-but-silent audio yields an empty
+// transcript (502) - never 503. All three are the error-mapping code
+// working correctly, not a bug: a genuine provider response is always
+// surfaced as its real status, distinct from "not configured".
+//
+// So proving the "not configured" contract deterministically - regardless of
+// whatever real key ai-service/.env happens to have locally - requires an
+// ai-service instance where SARVAM_API_KEY is provably absent. This spawns
+// one: python-dotenv's load_dotenv() (app/main.py) never overrides an
+// already-set environment variable, even an empty one (confirmed by direct
+// testing), so setting SARVAM_API_KEY="" in the child process's env keeps it
+// unconfigured no matter what .env contains.
 
-test("integration: forwardAudioForExtraction round-trips through a real FastAPI process", async () => {
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const AI_SERVICE_DIR = path.resolve(__dirname, "../../../ai-service");
+const UNAVAILABLE_TEST_PORT = 8099;
+const UNAVAILABLE_TEST_URL = `http://localhost:${UNAVAILABLE_TEST_PORT}`;
+
+async function waitForHealth(url, retries = 50) {
+  for (let attempt = 0; attempt < retries; attempt++) {
+    try {
+      const response = await fetch(`${url}/health`);
+      if (response.ok) return;
+    } catch {
+      // Not up yet - keep polling.
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  throw new Error(`ai-service on ${url} did not become healthy in time`);
+}
+
+async function withSarvamUnconfiguredAiService(fn) {
+  const child = spawn(
+    path.join(AI_SERVICE_DIR, ".venv", "bin", "uvicorn"),
+    ["app.main:app", "--port", String(UNAVAILABLE_TEST_PORT)],
+    {
+      cwd: AI_SERVICE_DIR,
+      env: { ...process.env, SARVAM_API_KEY: "", AI_SERVICE_API_KEY: "" },
+      stdio: "ignore",
+    }
+  );
+
   try {
-    const result = await forwardAudioForExtraction({
-      audioBuffer: Buffer.from("fake-audio-bytes-not-real-speech"),
-      filename: "clip.wav",
-      contentType: "audio/wav",
-      language: "mr",
+    await waitForHealth(UNAVAILABLE_TEST_URL);
+    await fn();
+  } finally {
+    child.kill();
+  }
+}
+
+test("integration: forwardAudioForExtraction surfaces a real 503 when Sarvam is not configured", async () => {
+  const originalUrl = process.env.AI_SERVICE_URL;
+  process.env.AI_SERVICE_URL = UNAVAILABLE_TEST_URL;
+
+  try {
+    await withSarvamUnconfiguredAiService(async () => {
+      await assert.rejects(
+        () =>
+          forwardAudioForExtraction({
+            audioBuffer: Buffer.from("fake-audio-bytes-not-real-speech"),
+            filename: "clip.wav",
+            contentType: "audio/wav",
+            language: "mr",
+          }),
+        (error) => {
+          assert.strictEqual(error.statusCode, 503);
+          return true;
+        }
+      );
     });
-    assert.ok(typeof result.transcript === "string");
-    assert.ok(result.extracted_profile);
-  } catch (error) {
-    assert.strictEqual(error.statusCode, 503);
+  } finally {
+    if (originalUrl === undefined) delete process.env.AI_SERVICE_URL;
+    else process.env.AI_SERVICE_URL = originalUrl;
   }
 });
+
+// --- Translation --------------------------------------------------------
+// Round-trips through the shared, externally-run FastAPI process. Unlike
+// voice, this doesn't require forcing "unavailable" deterministically:
+// translateTextToAllLanguages() already falls back to source-text
+// passthrough on ANY failure (see translation.service.js), so both a real
+// translation (real key configured) and a 503 (no key) are equally valid,
+// already-covered outcomes here - neither is a bug in the other's absence.
 
 test("integration: translateText round-trips through a real FastAPI process", async () => {
   try {
