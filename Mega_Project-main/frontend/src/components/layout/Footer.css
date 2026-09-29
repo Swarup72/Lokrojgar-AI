@@ -1,0 +1,25 @@
+.app-footer {
+  border-top: 1px solid var(--color-border);
+  background: var(--color-surface);
+  margin-top: auto;
+  padding: 24px 0;
+}
+
+.app-footer-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.app-footer strong {
+  color: var(--color-primary);
+}
+
+.app-footer-tagline {
+  color: var(--color-faint);
+  font-size: var(--text-xs);
+}

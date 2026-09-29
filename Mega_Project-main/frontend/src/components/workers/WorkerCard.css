@@ -1,0 +1,73 @@
+.worker-card {
+  display: flex;
+  gap: 16px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+}
+
+.worker-card-icon {
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.worker-card-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.worker-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.worker-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.worker-card-title-row h3 {
+  font-size: var(--text-md);
+  color: var(--color-ink);
+}
+
+.worker-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  color: var(--color-text-3);
+  font-size: var(--text-xs);
+}
+
+.worker-card-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.worker-card-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 14px;
+}
+
+.worker-card-actions form {
+  width: 100%;
+}

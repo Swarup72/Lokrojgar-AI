@@ -1,0 +1,50 @@
+import client from "./client";
+
+/**
+ * Public. NOTE: intentionally no "search" keyword param - the backend
+ * accepts one but never applies it (confirmed dead), so exposing a text
+ * search box here would promise functionality that silently does nothing.
+ * Each job comes back populated (categoryId/skillIds/employerId) plus
+ * server-localized `titleText`/`descriptionText` convenience fields.
+ * @param {{page?:number, limit?:number, categoryId?:string, payType?:string, minPay?:number, status?:string}} params
+ * @returns {Promise<{docs:object[], totalDocs:number, page:number, limit:number, totalPages:number, hasPrevPage:boolean, hasNextPage:boolean, prevPage:number|null, nextPage:number|null}>}
+ */
+export function search(params = {}) {
+  return client.get("/jobs/search", { params }).then((res) => res.data.data);
+}
+
+/**
+ * Public. Real "near me" filter - not a substitute for keyword search.
+ * Returns a bare, unpaginated array (server caps at 50). Unlike `search()`,
+ * these jobs are NOT populated - `categoryId`/`skillIds`/`employerId` are
+ * raw ObjectId strings, and each job carries a `distanceMeters` field from
+ * the $geoNear aggregation.
+ */
+export function nearby({ longitude, latitude, radiusKm }) {
+  return client.get("/jobs/nearby", { params: { longitude, latitude, radiusKm } }).then((res) => res.data.data);
+}
+
+/** Employer only. Unpaginated - returns every job the employer has ever posted. */
+export function getEmployerMine() {
+  return client.get("/jobs/employer/mine").then((res) => res.data.data);
+}
+
+/**
+ * The backend's createJobValidator (Zod) requires `title`/`description` to
+ * already be `{mr?,hi?,en?}` objects, NOT plain strings - a single-language
+ * post should be shaped as e.g. `{title: {en: "Plumber needed"}}` with
+ * `originalLanguage: "en"`. The controller then auto-translates that one
+ * populated key into the other two languages server-side.
+ * @param {{title:{mr?:string,hi?:string,en?:string}, description?:{mr?:string,hi?:string,en?:string}, originalLanguage:string, categoryId:string, skillIds?:string[], city?:string, address?:string, coordinates:[number,number], payType:string, payAmount:number, requiredWorkers:number, startDate:string, experienceRequired?:number, preferredLanguages?:string[], shiftType?:string, startTime?:string, endTime?:string}} payload
+ */
+export function create(payload) {
+  return client.post("/jobs", payload).then((res) => res.data.data);
+}
+
+export function cancel(jobId) {
+  return client.post(`/jobs/${jobId}/cancel`).then((res) => res.data.data);
+}
+
+export function close(jobId) {
+  return client.post(`/jobs/${jobId}/close`).then((res) => res.data.data);
+}

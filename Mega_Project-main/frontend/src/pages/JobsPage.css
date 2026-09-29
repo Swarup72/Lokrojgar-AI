@@ -1,0 +1,20 @@
+.jobs-page {
+  padding: 32px 0 60px;
+}
+
+.jobs-page-title {
+  font-size: var(--text-2xl);
+  margin-bottom: 20px;
+}
+
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.jobs-page-loading {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}

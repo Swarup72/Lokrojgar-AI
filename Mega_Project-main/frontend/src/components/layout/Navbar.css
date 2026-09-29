@@ -1,0 +1,140 @@
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  min-height: var(--nav-height);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.navbar-inner {
+  min-height: var(--nav-height);
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 0 28px;
+  width: 100%;
+  max-width: var(--container);
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.navbar-logo-icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-primary-50);
+  border-radius: 11px;
+  font-size: 20px;
+}
+
+.navbar-logo-text {
+  font-weight: 800;
+  font-size: var(--text-md);
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.navbar-logo-ai {
+  color: var(--color-primary);
+}
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.navbar-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  min-height: 40px;
+  padding: 0 10px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+}
+
+.navbar-link:hover {
+  color: var(--color-primary);
+  background: var(--color-primary-50);
+}
+
+.navbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.nav-login-btn,
+.nav-register-btn,
+.nav-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  white-space: nowrap;
+}
+
+.nav-login-btn {
+  color: var(--color-text-2);
+  background: transparent;
+}
+
+.nav-login-btn:hover {
+  background: var(--color-surface-alt);
+}
+
+.nav-register-btn {
+  color: #fff;
+  background: var(--color-primary);
+}
+
+.nav-register-btn:hover {
+  background: var(--color-primary-hover);
+}
+
+.nav-logout-btn {
+  color: var(--color-text-2);
+  background: var(--color-surface-alt);
+  border: 1px solid var(--color-border);
+}
+
+.nav-logout-btn:hover {
+  background: var(--color-danger-bg-soft);
+  color: var(--color-danger-text);
+}
+
+@media (max-width: 900px) {
+  .navbar-inner {
+    padding: 0 12px;
+  }
+
+  .navbar-link span {
+    display: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .navbar-logo-text {
+    display: none;
+  }
+}

@@ -1,0 +1,23 @@
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-faint);
+}
+
+.rating-stars svg.filled {
+  color: #f59e0b;
+  fill: #f59e0b;
+}
+
+.rating-stars-value {
+  margin-left: 6px;
+  font-weight: 700;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+}
+
+.rating-stars-count {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}

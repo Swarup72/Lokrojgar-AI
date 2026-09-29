@@ -1,0 +1,108 @@
+.auth-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 0;
+  min-height: 70vh;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+}
+
+.auth-title {
+  font-size: var(--text-xl);
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.auth-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.auth-field em {
+  color: var(--color-faint);
+  font-weight: 400;
+  font-style: normal;
+}
+
+.auth-input-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  color: var(--color-faint);
+  background: var(--color-surface);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.auth-input-wrap:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--ring-focus);
+  background: #fff;
+}
+
+.auth-input-wrap input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background: transparent;
+}
+
+.auth-field select {
+  min-height: 52px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+}
+
+.auth-role-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.auth-role-toggle button {
+  flex: 1;
+  background: var(--color-surface);
+  color: var(--color-text-3);
+  border: 1px solid var(--color-border);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+.auth-role-toggle button.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  border-color: var(--color-primary-200);
+}
+
+.auth-field-error {
+  color: var(--color-danger-text);
+  background: var(--color-danger-bg-soft);
+  border: 1px solid var(--color-danger-border);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  margin-bottom: 16px;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 20px;
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+}

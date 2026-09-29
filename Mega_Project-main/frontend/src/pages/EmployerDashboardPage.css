@@ -1,0 +1,60 @@
+.employer-dashboard {
+  padding: 32px 0 60px;
+}
+
+.employer-dashboard h1 {
+  font-size: var(--text-2xl);
+  margin-bottom: 20px;
+}
+
+.employer-dashboard-actions {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 40px;
+}
+
+.employer-dashboard-section h2 {
+  font-size: var(--text-lg);
+  margin-bottom: 16px;
+}
+
+.employer-job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.employer-job-card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.employer-job-card-header h3 {
+  font-size: var(--text-md);
+  margin-bottom: 4px;
+}
+
+.employer-job-card-header p {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.employer-job-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.employer-job-card-actions .btn {
+  padding: 8px 14px;
+  font-size: var(--text-xs);
+}
+
+@media (max-width: 600px) {
+  .employer-dashboard-actions {
+    flex-direction: column;
+  }
+}

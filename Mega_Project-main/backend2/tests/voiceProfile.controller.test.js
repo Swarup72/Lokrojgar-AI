@@ -4,20 +4,25 @@ import { mock } from "node:test";
 import fs from "fs";
 
 process.env.AI_SERVICE_URL = "http://test-ai:9000";
+process.env.B2_APPLICATION_KEY_ID = "test-key-id";
+process.env.B2_APPLICATION_KEY = "test-app-key";
+process.env.B2_BUCKET_NAME = "test-bucket";
+process.env.B2_REGION = "us-test-000";
+process.env.B2_ENDPOINT = "https://s3.us-test-000.backblazeb2.com";
 
-import { v2 as cloudinary } from "cloudinary";
 import WorkerProfile from "../src/models/workerProfile.model.js";
 import VoiceProfile from "../src/models/voiceProfile.model.js";
 import { uploadAudioAndExtract, confirmAndApplyToProfile } from "../src/controllers/voiceProfile.controller.js";
+import { getB2Client } from "../src/utils/b2.js";
 
-// uploadAudioService (storage.service.js) is a plain named function export -
-// ESM namespace exports are non-configurable, so it cannot be mocked
-// directly (confirmed: attempting to do so throws "Cannot redefine
-// property"). Mocking cloudinary.uploader.upload instead - a genuinely
-// mutable property on the shared cloudinary SDK object - lets the REAL
-// uploadAudioService -> uploadOnCloudinary code run for real, including its
-// real fs.existsSync/fs.unlinkSync cleanup logic, and only replaces the
-// actual network call.
+// uploadVoiceProfileAudioService (storage.service.js) is a plain named
+// function export - ESM namespace exports are non-configurable, so it
+// cannot be mocked directly (confirmed: attempting to do so throws "Cannot
+// redefine property"). Mocking the shared S3Client's .send() instead - a
+// genuinely mutable property on the client instance returned by
+// getB2Client() - lets the REAL uploadVoiceProfileAudioService ->
+// uploadAudioToB2 code run for real, including its real key-generation and
+// content-type logic, and only replaces the actual network call.
 //
 // ai.service.js's own HTTP call to the AI service is likewise mocked via
 // global.fetch (forwardAudioForExtraction is a plain ESM export, same
@@ -91,12 +96,15 @@ test("uploadAudioAndExtract: transcription reads the local file BEFORE it is del
       }),
     };
   });
-  const uploadMock = mock.method(cloudinary.uploader, "upload", async () => {
+  const b2Client = getB2Client();
+  const uploadMock = mock.method(b2Client, "send", async (command) => {
     callOrder.push("upload");
-    // The real uploadOnCloudinary (utils/cloudinary.js) deletes the local
-    // file itself, using the real fs calls, right after this resolves -
-    // that deletion is NOT mocked, it's the real code path under test.
-    return { secure_url: "https://cloudinary.example/audio.mp3" };
+    // The real uploadAudioToB2 (utils/b2.js) reads the file into memory
+    // itself before calling this - it does NOT delete the local file (that
+    // is the controller's job, in its finally block), so nothing here needs
+    // to reproduce a deletion side effect the way the old Cloudinary mock did.
+    assert.strictEqual(command.constructor.name, "PutObjectCommand");
+    return { ETag: '"fake-etag"' };
   });
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => worker);
   const voiceProfileUpsertMock = mock.method(VoiceProfile, "findOneAndUpdate", async (_filter, update) => ({

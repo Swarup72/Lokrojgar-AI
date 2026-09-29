@@ -1,0 +1,61 @@
+.worker-skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.worker-skills-empty {
+  color: var(--color-faint);
+  font-size: var(--text-sm);
+}
+
+.worker-skill-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px 8px 14px;
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-sm);
+}
+
+.worker-skill-tag em {
+  color: var(--color-primary-300);
+  font-style: normal;
+  font-size: var(--text-xs);
+}
+
+.worker-skill-tag button {
+  background: transparent;
+  color: var(--color-primary);
+  padding: 2px;
+  border-radius: 50%;
+  display: inline-flex;
+}
+
+.worker-skill-tag button:hover {
+  background: var(--color-primary-100);
+}
+
+.worker-skills-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.worker-skills-add select {
+  min-height: 42px;
+  padding: 0 12px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.worker-skills-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: var(--text-sm);
+}

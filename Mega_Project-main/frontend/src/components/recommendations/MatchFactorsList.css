@@ -1,0 +1,23 @@
+.match-factors-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.match-factors-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+}
+
+.match-factors-list li.available {
+  color: var(--color-success-text);
+}
+
+.match-factors-list li.unavailable {
+  color: var(--color-faint);
+}

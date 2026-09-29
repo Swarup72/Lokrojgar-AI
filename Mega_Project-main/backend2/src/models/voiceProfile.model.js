@@ -14,7 +14,11 @@ const voiceProfileSchema = new mongoose.Schema(
       required: true,
     },
 
-    audioUrl: {
+    // Backblaze B2 object key (private bucket), not a URL - confirmed via
+    // repo-wide search that no other backend or frontend code reads this
+    // field, so this rename is safe. Generate a short-lived signed URL via
+    // getSignedAudioUrl() if playback is ever needed.
+    audioKey: {
       type: String,
       required: true,
       trim: true,

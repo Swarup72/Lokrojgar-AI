@@ -4,7 +4,8 @@ import WorkerProfile from "../models/workerProfile.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadAudioService } from "../services/storage.service.js";
+import { uploadVoiceProfileAudioService } from "../services/storage.service.js";
+import { B2ConfigError } from "../utils/b2.js";
 import { processVoiceProfileAudio, AiServiceUnavailableError } from "../services/ai.service.js";
 import logger from "../utils/logger.js";
 
@@ -22,12 +23,11 @@ export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
   let uploadResult;
 
   try {
-    // Transcription MUST run before the Cloudinary upload - uploadAudioService
-    // deletes the local temp file on success (see utils/cloudinary.js), and
-    // processVoiceProfileAudio needs to read that same file from disk. This
-    // ordering is the fix for a previously-confirmed bug where the file was
-    // deleted before it was ever read, which only stayed hidden because no
-    // AI provider key was configured.
+    // Transcription runs before the B2 upload, preserving the order already
+    // proven correct for Cloudinary (see git history) - though unlike
+    // uploadOnCloudinary, uploadAudioToB2 never deletes the local file
+    // itself, so this order is no longer load-bearing. Keeping it anyway:
+    // no reason to reorder working, tested code for this migration.
     try {
       ({ transcript, extractedProfile, confidence } = await processVoiceProfileAudio(
         localFilePath,
@@ -41,13 +41,25 @@ export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
       throw new ApiError(500, "Failed to process voice recording. Please try again.");
     }
 
-    uploadResult = await uploadAudioService(localFilePath);
-    if (!uploadResult) throw new ApiError(500, "Failed to upload audio file");
+    try {
+      uploadResult = await uploadVoiceProfileAudioService(localFilePath, {
+        workerId: workerProfile._id.toString(),
+        originalName: req.file.originalname,
+        contentType: req.file.mimetype,
+      });
+    } catch (error) {
+      if (error instanceof B2ConfigError) {
+        logger.error("Backblaze B2 is not configured", error.message);
+        throw new ApiError(503, "Audio storage is currently unavailable. Please try again later.");
+      }
+      logger.error("Backblaze B2 upload failed", error.message);
+      throw new ApiError(500, "Failed to upload audio file");
+    }
   } finally {
-    // uploadOnCloudinary already deletes the local file on both its own
-    // success and failure paths. This is a defensive backstop for the case
-    // where processing failed BEFORE the upload step ever ran, so the file
-    // would otherwise be left behind in ./public/temp.
+    // Defensive backstop: uploadAudioToB2 never deletes the local file
+    // itself (by design - see utils/b2.js), so this is the only place the
+    // temp file is removed, on every path (success, transcription failure,
+    // or upload failure alike).
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
@@ -58,7 +70,7 @@ export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
     {
       workerId: workerProfile._id,
       language: language || "mr",
-      audioUrl: uploadResult.secure_url,
+      audioKey: uploadResult.key,
       transcript,
       extractedFields: extractedProfile,
       confidence,

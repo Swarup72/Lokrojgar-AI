@@ -1,0 +1,22 @@
+.match-score-badge {
+  display: inline-block;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 800;
+}
+
+.match-score-high {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.match-score-medium {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.match-score-low {
+  background: var(--color-surface-alt);
+  color: var(--color-text-3);
+}
