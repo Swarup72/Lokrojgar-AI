@@ -60,3 +60,34 @@ export const verifyJWT = asyncHandler(async (req, res, next) => {
   req.user = user;
   next();
 });
+
+/**
+ * Optional JWT verification: attaches req.user if a valid token is provided,
+ * but allows the request to proceed if no token or an invalid token is provided.
+ */
+export const optionalVerifyJWT = asyncHandler(async (req, res, next) => {
+  const token =
+    req.cookies?.accessToken ||
+    req.headers.authorization?.replace("Bearer ", "").trim();
+
+  if (!token) {
+    req.user = null;
+    return next();
+  }
+
+  try {
+    const decodedToken = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET || "access_secret"
+    );
+    const user = await User.findById(decodedToken?._id).select("-passwordHash");
+    if (user && !user.isBlocked) {
+      req.user = user;
+    } else {
+      req.user = null;
+    }
+  } catch {
+    req.user = null;
+  }
+  next();
+});

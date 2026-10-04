@@ -12,6 +12,63 @@
 const getBaseUrl = () => process.env.AI_SERVICE_URL || "http://localhost:8000";
 const getApiKey = () => process.env.AI_SERVICE_API_KEY || "";
 
+// Every AI-service call gets a finite timeout, so a hung FastAPI process
+// can't leave the Node request (and the user behind it) waiting forever.
+// Two budgets, because the endpoints fall into two very different groups:
+//  - scoring/recommendations/translation: pure computation or one external
+//    call, normally well under a second or two.
+//  - local-model inference (/voice/extract = MLX Whisper + local LLM,
+//    /skills/resolve = local LLM): measured 15-90s per request locally, and
+//    requests are not serialized, so concurrent ones take longer.
+// These are hang backstops, not performance targets - both are env-tunable.
+export const DEFAULT_AI_SERVICE_TIMEOUT_MS = 30_000;
+export const DEFAULT_AI_SERVICE_INFERENCE_TIMEOUT_MS = 300_000;
+
+const readTimeoutMs = (envName, fallback) => {
+  const value = Number(process.env[envName]);
+  return Number.isFinite(value) && value > 0 ? value : fallback;
+};
+
+export const getAiServiceTimeoutMs = () =>
+  readTimeoutMs("AI_SERVICE_TIMEOUT_MS", DEFAULT_AI_SERVICE_TIMEOUT_MS);
+export const getAiServiceInferenceTimeoutMs = () =>
+  readTimeoutMs("AI_SERVICE_INFERENCE_TIMEOUT_MS", DEFAULT_AI_SERVICE_INFERENCE_TIMEOUT_MS);
+
+/**
+ * Thrown when an AI-service call exceeds its timeout. Deliberately carries
+ * no .statusCode - exactly like an unreachable service - so every existing
+ * caller keeps treating it as "AI service unavailable" (503 / translation
+ * fallback / skill left unresolved) with no caller changes, while
+ * `isTimeout` still lets it be told apart from other failures.
+ */
+export class AiServiceTimeoutError extends Error {
+  constructor(path, timeoutMs) {
+    super(`AI service request to ${path} timed out after ${timeoutMs}ms`);
+    this.name = "AiServiceTimeoutError";
+    this.isTimeout = true;
+    this.path = path;
+    this.timeoutMs = timeoutMs;
+  }
+}
+
+// The same AbortSignal covers the whole exchange - connecting, waiting for
+// headers, and reading the body - so a server that sends headers and then
+// stalls mid-body is still cut off.
+async function fetchWithTimeout(path, options, timeoutMs) {
+  try {
+    const response = await fetch(`${getBaseUrl()}${path}`, {
+      ...options,
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    return await handleAiServiceResponse(response, path);
+  } catch (error) {
+    if (error?.name === "TimeoutError") {
+      throw new AiServiceTimeoutError(path, timeoutMs);
+    }
+    throw error;
+  }
+}
+
 async function handleAiServiceResponse(response, path) {
   if (!response.ok) {
     const errorBody = await response.json().catch(() => ({}));
@@ -25,20 +82,14 @@ async function handleAiServiceResponse(response, path) {
   return response.json();
 }
 
-async function postToAiService(path, payload) {
+async function postToAiService(path, payload, timeoutMs = getAiServiceTimeoutMs()) {
   const headers = { "Content-Type": "application/json" };
   const apiKey = getApiKey();
   if (apiKey) {
     headers["X-AI-Service-Key"] = apiKey;
   }
 
-  const response = await fetch(`${getBaseUrl()}${path}`, {
-    method: "POST",
-    headers,
-    body: JSON.stringify(payload),
-  });
-
-  return handleAiServiceResponse(response, path);
+  return fetchWithTimeout(path, { method: "POST", headers, body: JSON.stringify(payload) }, timeoutMs);
 }
 
 /**
@@ -46,20 +97,14 @@ async function postToAiService(path, payload) {
  * uploads). No Content-Type header is set here - fetch() sets it itself,
  * including the multipart boundary, when the body is a FormData instance.
  */
-async function postMultipartToAiService(path, formData) {
+async function postMultipartToAiService(path, formData, timeoutMs = getAiServiceTimeoutMs()) {
   const headers = {};
   const apiKey = getApiKey();
   if (apiKey) {
     headers["X-AI-Service-Key"] = apiKey;
   }
 
-  const response = await fetch(`${getBaseUrl()}${path}`, {
-    method: "POST",
-    headers,
-    body: formData,
-  });
-
-  return handleAiServiceResponse(response, path);
+  return fetchWithTimeout(path, { method: "POST", headers, body: formData }, timeoutMs);
 }
 
 /**
@@ -149,7 +194,7 @@ export const forwardAudioForExtraction = ({ audioBuffer, filename, contentType, 
   formData.append("audio", new Blob([audioBuffer], { type: contentType }), filename);
   formData.append("language", language);
 
-  return postMultipartToAiService("/voice/extract", formData);
+  return postMultipartToAiService("/voice/extract", formData, getAiServiceInferenceTimeoutMs());
 };
 
 /**
@@ -163,4 +208,22 @@ export const forwardAudioForExtraction = ({ audioBuffer, filename, contentType, 
  */
 export const translateText = ({ text, sourceLang }) => {
   return postToAiService("/translation/translate", { text, source_lang: sourceLang });
+};
+
+/**
+ * Stage 2 semantic skill resolution via FastAPI's /skills/resolve - only
+ * called for raw skill phrases Node's own deterministic normalization
+ * (utils/skillNormalization.js, Stage 1) could not already resolve by
+ * exact multilingual name match or a known alias. The local LLM selects
+ * only from the `catalog` entries actually supplied - it never invents a
+ * skill or an id.
+ *
+ * @param {object} params
+ * @param {string} params.transcript - full voice transcript, for context only
+ * @param {string[]} params.rawSkills - unresolved raw skill phrases
+ * @param {{id: string, name: {mr:string, hi:string, en:string}}[]} params.catalog - active Skill catalog entries
+ * @returns {Promise<{results: {rawSkill:string, resolved:boolean, canonicalSkillId:string|null, canonicalSkillName:string|null, confidence:number, reason:string}[]}>}
+ */
+export const resolveSkillsSemantically = ({ transcript, rawSkills, catalog }) => {
+  return postToAiService("/skills/resolve", { transcript, rawSkills, catalog }, getAiServiceInferenceTimeoutMs());
 };

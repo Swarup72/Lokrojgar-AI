@@ -7,6 +7,7 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { sendNotificationService } from "../services/notification.service.js";
+import { incrementFilledWorkers } from "../utils/jobAssignment.js";
 
 export const searchTalent = asyncHandler(async (req, res) => {
   const { availability = "available", categoryId, minRating = 0 } = req.query;
@@ -48,7 +49,7 @@ export const sendOffer = asyncHandler(async (req, res) => {
   // Send notification to worker
   await sendNotificationService({
     userId: worker.userId,
-    type: "JOB_OFFER",
+    type: "job_alert",
     templateKey: "JOB_ALERT",
     templateData: {
       jobTitle: job.title?.en || "Job Offer",
@@ -93,13 +94,11 @@ export const acceptOrRejectOffer = asyncHandler(async (req, res) => {
       status: "accepted",
     });
 
-    const job = await Job.findById(offer.jobId);
-    if (job) {
-      job.filledWorkers = (job.filledWorkers || 0) + 1;
-      if (job.filledWorkers >= job.requiredWorkers) job.status = "assigned";
-      else job.status = "partially_assigned";
-      await job.save();
-    }
+    // Same shared counter as application acceptance - must also be atomic,
+    // or this path's save() would overwrite a concurrent atomic increment.
+    // Application.create() above already rejects a second acceptance for the
+    // same {jobId, workerId} via its unique index, so this can't double-count.
+    await incrementFilledWorkers(offer.jobId);
   }
 
   return res.status(200).json(new ApiResponse(200, offer, `Offer ${status}`));

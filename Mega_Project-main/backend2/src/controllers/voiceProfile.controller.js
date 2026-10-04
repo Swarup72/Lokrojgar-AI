@@ -1,12 +1,12 @@
 import fs from "fs";
 import VoiceProfile from "../models/voiceProfile.model.js";
 import WorkerProfile from "../models/workerProfile.model.js";
+import WorkerSkill from "../models/workerSkill.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadVoiceProfileAudioService } from "../services/storage.service.js";
-import { B2ConfigError } from "../utils/b2.js";
 import { processVoiceProfileAudio, AiServiceUnavailableError } from "../services/ai.service.js";
+import { resolveSkillsFromText, resolveJobCategoriesFromText } from "../utils/skillNormalization.js";
 import logger from "../utils/logger.js";
 
 export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
@@ -20,14 +20,13 @@ export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
   let transcript;
   let extractedProfile;
   let confidence;
-  let uploadResult;
 
   try {
-    // Transcription runs before the B2 upload, preserving the order already
-    // proven correct for Cloudinary (see git history) - though unlike
-    // uploadOnCloudinary, uploadAudioToB2 never deletes the local file
-    // itself, so this order is no longer load-bearing. Keeping it anyway:
-    // no reason to reorder working, tested code for this migration.
+    // The recording is a processing artifact, not stored user data: it is
+    // transcribed here and then deleted in the finally block below. Nothing
+    // in the product reads a saved recording back (verified by a
+    // repository-wide search), so uploading it to permanent storage only
+    // accumulated audio nobody could ever reach.
     try {
       ({ transcript, extractedProfile, confidence } = await processVoiceProfileAudio(
         localFilePath,
@@ -40,26 +39,10 @@ export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
       logger.error("Voice processing failed", error);
       throw new ApiError(500, "Failed to process voice recording. Please try again.");
     }
-
-    try {
-      uploadResult = await uploadVoiceProfileAudioService(localFilePath, {
-        workerId: workerProfile._id.toString(),
-        originalName: req.file.originalname,
-        contentType: req.file.mimetype,
-      });
-    } catch (error) {
-      if (error instanceof B2ConfigError) {
-        logger.error("Backblaze B2 is not configured", error.message);
-        throw new ApiError(503, "Audio storage is currently unavailable. Please try again later.");
-      }
-      logger.error("Backblaze B2 upload failed", error.message);
-      throw new ApiError(500, "Failed to upload audio file");
-    }
   } finally {
-    // Defensive backstop: uploadAudioToB2 never deletes the local file
-    // itself (by design - see utils/b2.js), so this is the only place the
-    // temp file is removed, on every path (success, transcription failure,
-    // or upload failure alike).
+    // The ONLY place the recording is removed, and it runs on every path -
+    // success, transcription failure, or extraction failure alike. Nothing
+    // else in this flow deletes it, so this block is load-bearing.
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
@@ -70,7 +53,6 @@ export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
     {
       workerId: workerProfile._id,
       language: language || "mr",
-      audioKey: uploadResult.key,
       transcript,
       extractedFields: extractedProfile,
       confidence,
@@ -104,15 +86,47 @@ export const confirmAndApplyToProfile = asyncHandler(async (req, res) => {
       [voiceProfile.language || "mr"]: confirmedFields.bio,
     };
   }
-  // confirmedFields.skills / confirmedFields.preferredJobCategories are
-  // intentionally NOT applied here. Both are free-text AI output and would
-  // need resolving against real catalog ObjectIds (Skill / JobCategory) -
-  // no safe existing lookup mechanism exists in this codebase for that, and
-  // inventing one was explicitly out of scope for this migration. They stay
-  // visible in VoiceProfile.extractedFields for the frontend to show the
-  // worker, but are not auto-applied to WorkerSkill/WorkerProfile.
+  // confirmedFields.skills / .preferredJobCategories are free text from
+  // voice extraction - resolved against the real Skill/JobCategory catalog
+  // via deterministic normalization (see utils/skillNormalization.js) so
+  // the existing ID-based matching system can actually use them. A value
+  // that doesn't match anything in the catalog (e.g. an occupation with no
+  // corresponding seeded Skill yet) is never force-matched or invented -
+  // it comes back in `unresolved` so the worker can see it stayed as free
+  // text, per the "do not silently modify worker information" rule.
+  let skillResolution = { resolved: [], unresolved: [] };
+  if (Array.isArray(confirmedFields.skills) && confirmedFields.skills.length > 0) {
+    skillResolution = await resolveSkillsFromText(confirmedFields.skills, voiceProfile.transcript);
+    for (const { id: skillId } of skillResolution.resolved) {
+      await WorkerSkill.findOneAndUpdate(
+        { workerId: workerProfile._id, skillId },
+        { $setOnInsert: { workerId: workerProfile._id, skillId, proficiency: "intermediate" } },
+        { upsert: true, new: true }
+      );
+    }
+  }
+
+  let categoryResolution = { resolved: [], unresolved: [] };
+  if (Array.isArray(confirmedFields.preferredJobCategories) && confirmedFields.preferredJobCategories.length > 0) {
+    categoryResolution = await resolveJobCategoriesFromText(confirmedFields.preferredJobCategories);
+    const existingIds = new Set(workerProfile.preferredJobCategories.map((id) => id.toString()));
+    for (const { id: categoryId } of categoryResolution.resolved) {
+      if (!existingIds.has(categoryId)) {
+        workerProfile.preferredJobCategories.push(categoryId);
+        existingIds.add(categoryId);
+      }
+    }
+  }
 
   await workerProfile.save();
 
-  return res.status(200).json(new ApiResponse(200, workerProfile, "Profile updated from voice input"));
+  return res.status(200).json(
+    new ApiResponse(200, {
+      workerProfile,
+      voiceSkillResolution: {
+        skills: skillResolution,
+        preferredJobCategories: categoryResolution,
+      },
+    }, "Profile updated from voice input")
+  );
 });

@@ -22,6 +22,18 @@ let cachedConfigKey = null;
 
 const REQUIRED_VARS = ["B2_APPLICATION_KEY_ID", "B2_APPLICATION_KEY", "B2_BUCKET_NAME", "B2_REGION", "B2_ENDPOINT"];
 
+// STATUS: this module currently has no production consumer.
+//
+// It existed for voice-profile recordings, which are now treated as a
+// processing artifact - transcribed and deleted in the same request, never
+// uploaded (see controllers/voiceProfile.controller.js). The helpers are
+// kept, working and tested, because B2 remains the project's object-storage
+// option and the historical voice-profile objects still need a way to be
+// listed and deleted. Chat audio and all images/PDFs go to Cloudinary and
+// never touched this module.
+//
+// deleteAudioFromB2 / getSignedAudioUrl have never had a production caller.
+
 export class B2ConfigError extends Error {}
 export class B2UploadError extends Error {}
 

@@ -164,7 +164,12 @@ async function withSarvamUnconfiguredAiService(fn) {
     ["app.main:app", "--port", String(UNAVAILABLE_TEST_PORT)],
     {
       cwd: AI_SERVICE_DIR,
-      env: { ...process.env, SARVAM_API_KEY: "", AI_SERVICE_API_KEY: "" },
+      // STT_PROVIDER is pinned to "sarvam" here because ai-service now
+      // defaults to the local Whisper provider, which never touches
+      // SARVAM_API_KEY at all - without this override, the request below
+      // would silently take the Whisper path instead of exercising the
+      // "Sarvam not configured" contract this test is actually about.
+      env: { ...process.env, SARVAM_API_KEY: "", AI_SERVICE_API_KEY: "", STT_PROVIDER: "sarvam" },
       stdio: "ignore",
     }
   );

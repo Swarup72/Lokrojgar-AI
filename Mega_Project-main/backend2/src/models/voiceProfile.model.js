@@ -14,13 +14,16 @@ const voiceProfileSchema = new mongoose.Schema(
       required: true,
     },
 
-    // Backblaze B2 object key (private bucket), not a URL - confirmed via
-    // repo-wide search that no other backend or frontend code reads this
-    // field, so this rename is safe. Generate a short-lived signed URL via
-    // getSignedAudioUrl() if playback is ever needed.
+    // LEGACY. Voice recordings are a processing artifact now: they are
+    // transcribed and deleted, never uploaded to permanent storage, so new
+    // documents do not set this. The field is kept (and only kept) because
+    // existing documents still carry the B2 object key of audio uploaded
+    // under the old behaviour - it is the only record of which stored
+    // objects are still referenced, which the cleanup of that old audio
+    // depends on. No code reads it; do not start writing it again.
     audioKey: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
     },
 

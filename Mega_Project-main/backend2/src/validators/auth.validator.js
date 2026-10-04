@@ -19,7 +19,12 @@ export const registerValidator = z.object({
   body: z.object({
     phone: z.string().min(10, "Phone number is required"),
     password: z.string().min(6, "Password must be at least 6 characters"),
-    roles: z.array(z.enum(["worker", "employer", "admin"])).min(1, "At least one role is required"),
+    // "admin" is intentionally excluded here - public self-registration must
+    // never be able to grant admin. Admin is still a valid User.roles enum
+    // value (see constants.js ROLES) for internal/trusted assignment; this
+    // validator only narrows what the PUBLIC /auth/register endpoint accepts,
+    // enforced before the request ever reaches the controller/User.create().
+    roles: z.array(z.enum(["worker", "employer"])).min(1, "At least one role is required"),
     fullName: z.string().optional(),
     businessName: z.string().optional(),
     businessType: z.string().optional(),

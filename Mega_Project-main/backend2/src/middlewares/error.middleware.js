@@ -19,8 +19,8 @@ export const errorHandler = (err, req, res, next) => {
 
   if (!(error instanceof ApiError)) {
     const statusCode =
-      error.statusCode || (error.name === "ValidationError" ? 400 : 500);
-    const message = error.message || "Internal Server Error";
+      error.statusCode || (error.name === "ValidationError" || error.name === "CastError" ? 400 : 500);
+    const message = error.name === "CastError" ? "Malformed ID format" : error.message || "Internal Server Error";
     error = new ApiError(statusCode, message, error?.errors || [], err.stack);
   }
 

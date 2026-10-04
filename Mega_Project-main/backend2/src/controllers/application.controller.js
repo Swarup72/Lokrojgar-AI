@@ -8,6 +8,7 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { scoreWorkerJobPair } from "../services/aiService.client.js";
 import { sendNotificationService } from "../services/notification.service.js";
+import { incrementFilledWorkers } from "../utils/jobAssignment.js";
 
 export const applyForJob = asyncHandler(async (req, res) => {
   const { jobId, coverNote } = req.body;
@@ -59,21 +60,39 @@ export const applyForJob = asyncHandler(async (req, res) => {
   // persisting it now along with matchScore. Neither value is coerced:
   // matchFactors.pay/rating stay null exactly as the AI service returned
   // them, matching Application.matchFactors' non-required Number fields.
-  const application = await Application.create({
-    jobId,
-    workerId: workerProfile._id,
-    matchScore,
-    matchFactors,
-    status: "applied",
-    coverNote: coverNote || "",
-  });
+  //
+  // The findOne check above is an optimization only, not the uniqueness
+  // guarantee - two concurrent requests can both pass it before either
+  // creates a document. The real, final authority is Application's own
+  // unique index on {jobId, workerId} (application.model.js), enforced by
+  // MongoDB itself. Application currently has exactly one unique index, so
+  // a duplicate-key error (code 11000) from this specific create() call can
+  // only mean that index was violated - if a second unique index is ever
+  // added to this model, this check should be revisited to stay specific
+  // to the jobId/workerId collision rather than any duplicate-key error.
+  let application;
+  try {
+    application = await Application.create({
+      jobId,
+      workerId: workerProfile._id,
+      matchScore,
+      matchFactors,
+      status: "applied",
+      coverNote: coverNote || "",
+    });
+  } catch (error) {
+    if (error.code === 11000) {
+      throw new ApiError(409, "You have already applied to this job");
+    }
+    throw error;
+  }
 
   // Notify employer
   const employer = await EmployerProfile.findById(job.employerId);
   if (employer) {
     await sendNotificationService({
       userId: employer.userId,
-      type: "JOB_APPLICATION",
+      type: "application_update",
       templateKey: "NEW_MESSAGE",
       templateData: {
         senderName: workerProfile.fullName,
@@ -165,29 +184,34 @@ export const acceptOrRejectApplication = asyncHandler(async (req, res) => {
     throw new ApiError(403, "Unauthorized access to this application");
   }
 
-  app.status = status;
-  await app.save();
-
   if (status === "accepted") {
-    const job = await Job.findById(app.jobId._id);
-    if (job) {
-      job.filledWorkers = (job.filledWorkers || 0) + 1;
-      if (job.filledWorkers >= job.requiredWorkers) {
-        job.status = "assigned";
-      } else {
-        job.status = "partially_assigned";
-      }
-      await job.save();
+    // Atomic conditional transition: only the request that actually moves
+    // this application INTO "accepted" may count it as a filled worker.
+    // A repeat accept (sequential or concurrent) matches nothing here and
+    // skips the increment, so one application can never be counted twice.
+    const transitioned = await Application.findOneAndUpdate(
+      { _id: app._id, status: { $ne: "accepted" } },
+      { $set: { status: "accepted" } },
+      { returnDocument: "after" }
+    );
+    app.status = "accepted";
+
+    let job = null;
+    if (transitioned) {
+      job = await incrementFilledWorkers(app.jobId._id);
     }
 
-    // Notify worker
+    // Notify worker (unchanged: sent on every successful accept response)
     await sendNotificationService({
       userId: app.workerId.userId,
-      type: "APPLICATION_ACCEPTED",
+      type: "application_update",
       templateKey: "APPLICATION_ACCEPTED",
-      templateData: { jobTitle: job?.title?.en || "Job" },
+      templateData: { jobTitle: (job || app.jobId)?.title?.en || "Job" },
       refId: app._id,
     });
+  } else {
+    app.status = status;
+    await app.save();
   }
 
   return res.status(200).json(new ApiResponse(200, app, `Application ${status}`));

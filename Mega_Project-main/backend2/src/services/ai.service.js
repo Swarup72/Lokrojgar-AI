@@ -66,6 +66,7 @@ export const processVoiceProfileAudio = async (audioFilePath, language = "mr") =
     });
   } catch (error) {
     if (isServiceUnavailable(error)) {
+      if (error.isTimeout) logger.warn("Voice processing timed out", error.message);
       throw new AiServiceUnavailableError("Voice processing service is currently unavailable.");
     }
     logger.error("Voice processing failed", error);

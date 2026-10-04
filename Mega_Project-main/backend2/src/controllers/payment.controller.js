@@ -29,7 +29,7 @@ export const recordCashOrUPI = asyncHandler(async (req, res) => {
 
   await sendNotificationService({
     userId: payeeId,
-    type: "PAYMENT_RECEIVED",
+    type: "payment_update",
     templateKey: "PAYMENT_RECEIVED",
     templateData: { amount },
     refId: payment._id,
@@ -88,7 +88,7 @@ export const verifyRazorpayPaymentEndpoint = asyncHandler(async (req, res) => {
   if (payment) {
     await sendNotificationService({
       userId: payment.payeeId,
-      type: "PAYMENT_RECEIVED",
+      type: "payment_update",
       templateKey: "PAYMENT_RECEIVED",
       templateData: { amount: payment.amount },
       refId: payment._id,

@@ -1,5 +1,4 @@
 import { uploadOnCloudinary, deleteFromCloudinary } from "../utils/cloudinary.js";
-import { uploadAudioToB2, deleteAudioFromB2, getSignedAudioUrl } from "../utils/b2.js";
 
 /**
  * Upload image asset to Cloudinary.
@@ -13,10 +12,8 @@ export const uploadImageService = async (localFilePath) => {
 /**
  * Upload audio file (chat voice message) to Cloudinary.
  *
- * NOT used by voice-profile - see uploadVoiceProfileAudioService below,
- * which stores voice-profile recordings in Backblaze B2 instead. Kept here
- * unchanged for chat's uploadVoiceMessage, a genuinely separate feature
- * that was out of scope for the B2 migration.
+ * Used by chat's uploadVoiceMessage. Voice-profile recordings do not go
+ * through here (or anywhere else) - they are transcribed and deleted.
  * @param {string} localFilePath
  * @returns {Promise<Object>}
  */
@@ -24,20 +21,10 @@ export const uploadAudioService = async (localFilePath) => {
   return await uploadOnCloudinary(localFilePath, "lokrozgar/audio");
 };
 
-/**
- * Upload a voice-profile recording to Backblaze B2 (private bucket) instead
- * of Cloudinary. Returns a stable object key, not a URL - the bucket is
- * private, so playback (if ever needed) goes through getSignedAudioUrl
- * below rather than a permanently-stored link.
- * @param {string} localFilePath
- * @param {{workerId: string, originalName?: string, contentType?: string}} options
- * @returns {Promise<{key: string, bucket: string, size: number}>}
- */
-export const uploadVoiceProfileAudioService = async (localFilePath, options) => {
-  return await uploadAudioToB2(localFilePath, options);
-};
-
-export { deleteAudioFromB2, getSignedAudioUrl };
+// Voice-profile recordings are NOT uploaded anywhere: they are transcribed
+// and deleted in the same request (see voiceProfile.controller.js). The
+// former uploadVoiceProfileAudioService / B2 re-exports were removed with
+// that behaviour. The B2 helpers themselves remain in utils/b2.js.
 
 /**
  * Upload PDF document (resume, verification doc) to Cloudinary.
