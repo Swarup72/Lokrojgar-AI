@@ -83,9 +83,18 @@ def recommend_workers_for_job(
     to score_worker_job_pair() filters it down to the current candidate
     via the pipeline's own filter_worker_skills_by_worker() - this
     function does not filter it itself.
+
+    The job itself must be eligible, using the exact same rule
+    recommend_jobs_for_worker() applies to its candidate jobs
+    (candidates.py). An ineligible job returns no matches without scoring
+    any worker - eligibility gates candidate selection, it is never
+    expressed as a score.
     """
 
     _check_top_k(top_k)
+
+    if not filter_open_jobs([job]):
+        return RecommendationResult(anchor_id=job.job_id, direction="job_to_workers", matches=[])
 
     pair_results: list[PairMatchResult] = []
     for worker in workers:

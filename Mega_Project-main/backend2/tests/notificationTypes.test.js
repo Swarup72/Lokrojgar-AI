@@ -201,7 +201,7 @@ test("accepting an application persists an application_update notification to th
       }),
     })),
     mock.method(Application, "findOneAndUpdate", async () => ({ _id: APPLICATION_ID, status: "accepted" })),
-    mock.method(Job, "findByIdAndUpdate", async () => ({ _id: JOB_ID, title: { en: "Plumber needed" } })),
+    mock.method(Job, "findOneAndUpdate", async () => ({ _id: JOB_ID, title: { en: "Plumber needed" } })),
   ];
   t.after(() => mocks.forEach((m) => m.mock.restore()));
 

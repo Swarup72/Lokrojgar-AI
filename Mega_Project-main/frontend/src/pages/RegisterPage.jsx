@@ -123,24 +123,27 @@ export function RegisterPage() {
 
           {role === USER_ROLES.WORKER ? (
             <label className="auth-field">
-              <span>
-                {t("auth.register.fullName")} <em>({t("common.optional")})</em>
-              </span>
+              <span>{t("auth.register.fullName")}</span>
               <div className="auth-input-wrap">
                 <User size={18} aria-hidden="true" />
-                <input type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} />
+                {/* Required: the server cannot create the WorkerProfile
+                    without it, and a worker with no profile cannot use any
+                    worker feature. */}
+                <input type="text" required value={fullName} onChange={(event) => setFullName(event.target.value)} />
               </div>
             </label>
           ) : (
             <>
               <label className="auth-field">
-                <span>
-                  {t("auth.register.businessName")} <em>({t("common.optional")})</em>
-                </span>
+                <span>{t("auth.register.businessName")}</span>
                 <div className="auth-input-wrap">
                   <Building2 size={18} aria-hidden="true" />
+                  {/* Required: the server cannot create the EmployerProfile
+                      without it, and an employer with no profile cannot post
+                      a job. */}
                   <input
                     type="text"
+                    required
                     value={businessName}
                     onChange={(event) => setBusinessName(event.target.value)}
                   />

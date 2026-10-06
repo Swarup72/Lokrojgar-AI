@@ -14,9 +14,23 @@ export const validate = (schema) => async (req, res, next) => {
       params: req.params,
     });
 
-    // Assign validated and sanitized values back to request
+    // Assign validated and sanitized values back to request.
+    //
+    // req.query must go through defineProperty: Express 5 exposes it as a
+    // getter-only accessor, so a plain assignment throws "Cannot set
+    // property query of #<IncomingMessage> which has only a getter". That
+    // turned every route whose validator declares a query schema into an
+    // unconditional 500 - including GET /applications/job/:jobId, for the
+    // job's own owner.
     if (parsed.body) req.body = parsed.body;
-    if (parsed.query) req.query = parsed.query;
+    if (parsed.query) {
+      Object.defineProperty(req, "query", {
+        value: parsed.query,
+        writable: true,
+        enumerable: true,
+        configurable: true,
+      });
+    }
     if (parsed.params) req.params = parsed.params;
 
     next();

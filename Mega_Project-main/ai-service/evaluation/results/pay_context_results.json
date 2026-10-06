@@ -1,0 +1,629 @@
+{
+  "config": {
+    "extraction_provider": "local_llm",
+    "local_llm_model": "mlx-community/Qwen3-4B-Instruct-2507-4bit"
+  },
+  "summary": {
+    "fullName": {
+      "correct": 9,
+      "total": 9,
+      "accuracy": 1.0
+    },
+    "experienceYears": {
+      "correct": 9,
+      "total": 9,
+      "accuracy": 1.0
+    },
+    "expectedPay": {
+      "correct": 4,
+      "total": 9,
+      "accuracy": 0.4444444444444444
+    },
+    "city": {
+      "correct": 9,
+      "total": 9,
+      "accuracy": 1.0
+    },
+    "skills": {
+      "correct": 9,
+      "total": 9,
+      "accuracy": 1.0
+    }
+  },
+  "failures_by_field": {
+    "fullName": {},
+    "experienceYears": {},
+    "expectedPay": {
+      "wrong_value": 5
+    },
+    "city": {},
+    "skills": {}
+  },
+  "determinism": [],
+  "rows": [
+    {
+      "id": "C01-exp-plus-pay",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मला चार वर्षांचा अनुभव आहे. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "U01 minus the name and city sentences.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 14.9,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 4.0,
+        "expectedPay": 7000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 7000.0,
+          "scored": true,
+          "correct": false,
+          "classification": "wrong_value"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C02-name-plus-pay",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "U01 minus the experience and city sentences.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 10.1,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": 7000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 7000.0,
+          "scored": true,
+          "correct": false,
+          "classification": "wrong_value"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C03-pay-plus-city",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मला सातशे रुपये रोज पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "U01 minus the name and experience sentences.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 10.7,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C04-u01-with-ascii-digits",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला चार वर्षांचा अनुभव आहे. मला 700 रुपये रोज पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "U01 with the pay written as digits instead of the number word सातशे.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.5,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": "मी कोल्हापूरमध्ये राहतो आणि चार वर्षांचा अनुभव आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C05-u01-pay-last",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला चार वर्षांचा अनुभव आहे. मी कोल्हापूरमध्ये राहतो. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "U01 with the pay sentence moved to the end - tests sentence position.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.4,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": 7000.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": "मी कोल्हापूरमध्ये राहतो आणि चार वर्षांचा अनुभव आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 7000.0,
+          "scored": true,
+          "correct": false,
+          "classification": "wrong_value"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C06-u01-aathshe",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला चार वर्षांचा अनुभव आहे. मला आठशे रुपये रोज पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "U01 with आठशे (800) instead of सातशे - tests whether the word itself matters.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.3,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": "मी कोल्हापूरमध्ये राहतो आणि चार वर्षांचा अनुभव आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C07-city-then-pay",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मी कोल्हापूरमध्ये राहतो. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "Same two sentences as C03 but in the opposite order - isolates 'something precedes the pay sentence'.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.1,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C08-pay-then-exp",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मला सातशे रुपये रोज पाहिजे. मला चार वर्षांचा अनुभव आहे.",
+      "notes": "Same two sentences as C01 but in the opposite order.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 4.8,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 4.0,
+        "expectedPay": 7000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 7000.0,
+          "scored": true,
+          "correct": false,
+          "classification": "wrong_value"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C09-name-then-pay-no-roj",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला सातशे रुपये पाहिजे.",
+      "notes": "C02 without रोज - checks whether the daily-rate word is part of the trigger.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.2,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": 7000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 7000.0,
+          "scored": true,
+          "correct": false,
+          "classification": "wrong_value"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    }
+  ]
+}

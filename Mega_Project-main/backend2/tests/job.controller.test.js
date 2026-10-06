@@ -1141,3 +1141,74 @@ test("createJobValidator: rejects negative pay amount", () => {
     createJobValidator.parse({ body: payload });
   }, /Pay amount cannot be negative/);
 });
+
+// =============================================================================
+// Module 4 audit: an AI match whose id was never sent must not reach React.
+//
+// Node resolves each match back to the document it sent via jobsById /
+// workersById. If the AI echoed an id outside that set, the entry was
+// forwarded with no `job` (or `worker`) key at HTTP 200, and the dashboard
+// crashed on match.job._id. Scores and ordering are untouched by the guard.
+// =============================================================================
+
+test("M4: recommended-workers drops a worker_id that was not in the candidate set", async (t) => {
+  const job = fakeJob("open");
+  const originalFetch = global.fetch;
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      anchor_id: "JOB001",
+      direction: "job_to_workers",
+      matches: [
+        // One real candidate, one id Node never sent.
+        { worker_id: "WORKER_A", ranking: { overall_score: 70, match_factors: { skill: 50 } }, explanation: { summary: "ok" } },
+        { worker_id: "GHOST_WORKER", ranking: { overall_score: 99, match_factors: { skill: 99 } }, explanation: { summary: "ghost" } },
+      ],
+    }),
+  });
+  const employerFindOneMock = mock.method(EmployerProfile, "findOne", async () => ({ _id: OWNER_EMPLOYER_PROFILE_ID }));
+  const jobFindOneMock = mock.method(Job, "findOne", (filter) => ({
+    populate: async () => (filter._id === job._id && filter.employerId === job.employerId ? job : null),
+  }));
+  const workerFindMock = mock.method(WorkerProfile, "find", () => ({ limit: async () => WORKERS }));
+  const workerSkillFindMock = mock.method(WorkerSkill, "find", async () => []);
+  t.after(() => {
+    global.fetch = originalFetch;
+    employerFindOneMock.mock.restore();
+    jobFindOneMock.mock.restore();
+    workerFindMock.mock.restore();
+    workerSkillFindMock.mock.restore();
+  });
+
+  const { error, res } = await callRecommendedWorkers();
+
+  assert.strictEqual(error, null);
+  assert.strictEqual(res.statusCode, 200);
+  // Only the resolvable candidate survives...
+  assert.strictEqual(res.body.data.length, 1, "the unresolvable match must be dropped");
+  assert.strictEqual(res.body.data[0].worker._id, "WORKER_A");
+  // ...and every entry the client receives has a real worker object.
+  for (const entry of res.body.data) {
+    assert.ok(entry.worker, "every returned entry must carry its worker document");
+    assert.ok(entry.worker._id, "WorkerCard reads entry.worker._id and must not crash");
+  }
+  // Scores and the AI's explanation still pass through untouched.
+  assert.strictEqual(res.body.data[0].matchScore, 70);
+  assert.deepStrictEqual(res.body.data[0].matchFactors, { skill: 50 });
+  assert.deepStrictEqual(res.body.data[0].explanation, { summary: "ok" });
+});
+
+test("M4: a fully resolvable response is returned unchanged, in AI order", async (t) => {
+  const { aiCalls } = mockRecommendedWorkersScenario(t, { job: fakeJob("open") });
+
+  const { error, res } = await callRecommendedWorkers();
+
+  assert.strictEqual(error, null);
+  assert.strictEqual(aiCalls.length, 1);
+  assert.deepStrictEqual(
+    res.body.data.map((m) => m.worker._id),
+    ["WORKER_B", "WORKER_A"],
+    "the guard must not reorder or drop valid matches"
+  );
+  assert.strictEqual(res.body.data[0].matchScore, 90);
+});

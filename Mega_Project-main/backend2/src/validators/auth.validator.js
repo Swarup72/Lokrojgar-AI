@@ -29,6 +29,29 @@ export const registerValidator = z.object({
     businessName: z.string().optional(),
     businessType: z.string().optional(),
     preferredLanguage: z.enum(["mr", "hi", "en"]).optional(),
+  }).superRefine((body, ctx) => {
+    // A role is meaningless without its profile. register() only creates a
+    // WorkerProfile/EmployerProfile when the corresponding name is present,
+    // and both models declare that name as required - so registering a role
+    // without it silently produced a User with no profile at all. Every
+    // later action for that role then failed with "profile not found" (404),
+    // which the UI renders as "We couldn't find what you were looking for."
+    // Rejecting here keeps that state unreachable instead of letting an
+    // account be created half-formed.
+    if (body.roles.includes("worker") && !body.fullName?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["fullName"],
+        message: "Full name is required to register as a worker",
+      });
+    }
+    if (body.roles.includes("employer") && !body.businessName?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ["businessName"],
+        message: "Business name is required to register as an employer",
+      });
+    }
   }),
 });
 

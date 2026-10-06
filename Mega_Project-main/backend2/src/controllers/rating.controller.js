@@ -7,6 +7,14 @@ import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
+// An application in EITHER of these states evidences a real working
+// relationship for this job. "completed" matters as much as "accepted":
+// PATCH /applications/:id/complete moves an accepted application to
+// "completed", and filtering on "accepted" alone meant that doing the right
+// thing - marking the work finished - silently made the job unrateable by
+// both parties (measured: 403 for employer AND worker).
+const RATEABLE_APPLICATION_STATUSES = ["accepted", "completed"];
+
 /**
  * Derives who req.user is ALLOWED to rate for this (already-completed) job,
  * entirely from server-side relationships - never from anything the client
@@ -26,9 +34,10 @@ async function getLegitimateRatingTargets(job, requesterUserId) {
   const isEmployer = !!employerProfile && employerProfile.userId.toString() === requesterUserId.toString();
 
   if (isEmployer) {
-    const acceptedApplications = await Application.find({ jobId: job._id, status: "accepted" }).populate(
-      "workerId"
-    );
+    const acceptedApplications = await Application.find({
+      jobId: job._id,
+      status: { $in: RATEABLE_APPLICATION_STATUSES },
+    }).populate("workerId");
     const workerUserIds = acceptedApplications
       .map((application) => application.workerId?.userId?.toString())
       .filter(Boolean);
@@ -41,7 +50,7 @@ async function getLegitimateRatingTargets(job, requesterUserId) {
   const acceptedApplication = await Application.findOne({
     jobId: job._id,
     workerId: workerProfile._id,
-    status: "accepted",
+    status: { $in: RATEABLE_APPLICATION_STATUSES },
   });
   if (!acceptedApplication) return new Set();
 
@@ -112,28 +121,49 @@ export const submitRating = asyncHandler(async (req, res) => {
     throw error;
   }
 
-  // Automatically update target profile's ratingAvg and ratingCount
-  const workerProfile = await WorkerProfile.findOne({ userId: toUserId });
-  const employerProfile = await EmployerProfile.findOne({ userId: toUserId });
+  // Atomic aggregate update. The previous read -> compute in JS -> save()
+  // lost concurrent updates: four legitimate ratings for the same worker
+  // landed 4 Rating documents but left ratingCount=3 and ratingAvg=3.67
+  // instead of 3.50. Every expression in a single $set stage sees the
+  // PRE-update document, so ratingAvg is derived from the old count while
+  // ratingCount increments - one document update, nothing to interleave.
+  // The old sum is recovered as ratingAvg * ratingCount, which keeps both
+  // profile schemas unchanged (no ratingSum field, no migration).
+  const aggregateUpdate = [
+    {
+      $set: {
+        ratingAvg: {
+          $round: [
+            {
+              $divide: [
+                {
+                  $add: [
+                    { $multiply: [{ $ifNull: ["$ratingAvg", 0] }, { $ifNull: ["$ratingCount", 0] }] },
+                    ratingDoc.rating,
+                  ],
+                },
+                { $add: [{ $ifNull: ["$ratingCount", 0] }, 1] },
+              ],
+            },
+            2,
+          ],
+        },
+        ratingCount: { $add: [{ $ifNull: ["$ratingCount", 0] }, 1] },
+      },
+    },
+  ];
 
-  if (workerProfile) {
-    const oldCount = workerProfile.ratingCount || 0;
-    const oldAvg = workerProfile.ratingAvg || 0;
-    const newCount = oldCount + 1;
-    const newAvg = (oldAvg * oldCount + score) / newCount;
-
-    workerProfile.ratingCount = newCount;
-    workerProfile.ratingAvg = Math.round(newAvg * 100) / 100;
-    await workerProfile.save();
-  } else if (employerProfile) {
-    const oldCount = employerProfile.ratingCount || 0;
-    const oldAvg = employerProfile.ratingAvg || 0;
-    const newCount = oldCount + 1;
-    const newAvg = (oldAvg * oldCount + score) / newCount;
-
-    employerProfile.ratingCount = newCount;
-    employerProfile.ratingAvg = Math.round(newAvg * 100) / 100;
-    await employerProfile.save();
+  // The rating itself is already persisted; a profile that does not exist
+  // simply has no aggregate to update, exactly as before.
+  const updatedWorker = await WorkerProfile.findOneAndUpdate({ userId: toUserId }, aggregateUpdate, {
+    returnDocument: "after",
+    updatePipeline: true,
+  });
+  if (!updatedWorker) {
+    await EmployerProfile.findOneAndUpdate({ userId: toUserId }, aggregateUpdate, {
+      returnDocument: "after",
+      updatePipeline: true,
+    });
   }
 
   return res.status(201).json(new ApiResponse(201, ratingDoc, "Rating submitted and profile score updated"));

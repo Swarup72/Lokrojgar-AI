@@ -27,6 +27,24 @@
   font-weight: 600;
 }
 
+.voice-success-skills {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-width: 420px;
+}
+
+.voice-success-skills p {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-align: left;
+}
+
+.voice-success-skills-unresolved {
+  color: var(--color-warning, var(--color-muted));
+}
+
 .voice-success-actions {
   display: flex;
   gap: 12px;

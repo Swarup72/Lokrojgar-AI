@@ -10,9 +10,11 @@ import "./VoiceProfileReview.css";
  * backend actually returned a value - a null/missing field renders as a
  * genuinely empty, editable input, never a fabricated placeholder value.
  *
- * `skills`/`preferredJobCategories` are shown read-only: the backend
- * silently ignores them even if included in the confirm payload (they're
- * free text, not catalog ObjectIds), so this component never sends them.
+ * `skills`/`preferredJobCategories` are shown read-only (the worker cannot
+ * edit the free text here) but ARE sent to confirm - the backend resolves
+ * them against the real Skill/JobCategory catalog and reports back which
+ * ones it could link vs. which stayed unrecognized (shown on the success
+ * screen), rather than silently discarding them.
  *
  * @param {{extractedFields: object, recordedLanguage: string, onConfirm: (fields:object) => void, onBack: () => void, saving: boolean}} props
  */
@@ -39,6 +41,10 @@ export function VoiceProfileReview({ extractedFields, recordedLanguage, onConfir
     if (availability) confirmedFields.availability = availability;
     if (languages.length > 0) confirmedFields.languages = languages;
     if (bio) confirmedFields.bio = bio;
+    if (extractedFields.skills?.length > 0) confirmedFields.skills = extractedFields.skills;
+    if (extractedFields.preferredJobCategories?.length > 0) {
+      confirmedFields.preferredJobCategories = extractedFields.preferredJobCategories;
+    }
     onConfirm(confirmedFields);
   };
 
@@ -141,7 +147,8 @@ export function VoiceProfileReview({ extractedFields, recordedLanguage, onConfir
             <p>Interested in: {extractedFields.preferredJobCategories.join(", ")}</p>
           )}
           <p className="voice-review-heard-note">
-            These aren't saved automatically - add them from your Skills section on your profile after finishing here.
+            Recognized skills/interests will be added to your profile automatically. Anything not recognized will
+            show up after saving so you can add it manually from your Skills section.
           </p>
         </div>
       )}

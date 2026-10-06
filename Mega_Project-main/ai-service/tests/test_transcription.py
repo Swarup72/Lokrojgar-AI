@@ -2,93 +2,110 @@ import asyncio
 from types import SimpleNamespace
 
 import pytest
-from sarvamai.core.api_error import ApiError
 
-from app.sarvam.errors import AiServiceUnavailableError, SarvamProviderError
-from app.voice.transcription import _resolve_language_code, transcribe_audio
+from app.sarvam.errors import AiServiceUnavailableError
+from app.voice.mlx_whisper_stt import MLXWhisperSTT
+from app.voice.sarvam_stt import SarvamSTT
+from app.voice.transcription import get_stt_provider, transcribe_audio
+from app.voice.whisper_stt import WhisperSTT
 
-
-class _FakeSpeechToText:
-    def __init__(self, response=None, error=None):
-        self._response = response
-        self._error = error
-        self.calls = []
-
-    async def transcribe(self, **kwargs):
-        self.calls.append(kwargs)
-        if self._error is not None:
-            raise self._error
-        return self._response
+# --- get_stt_provider() - provider selection --------------------------------
 
 
-class _FakeClient:
-    def __init__(self, speech_to_text):
-        self.speech_to_text = speech_to_text
+def test_defaults_to_mlx_whisper_when_unset(monkeypatch):
+    monkeypatch.delenv("STT_PROVIDER", raising=False)
+    assert isinstance(get_stt_provider(), MLXWhisperSTT)
 
 
-def _patch_client(monkeypatch, client):
-    monkeypatch.setattr("app.voice.transcription.get_sarvam_client", lambda: client)
+def test_selects_mlx_whisper_explicitly(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "mlx_whisper")
+    assert isinstance(get_stt_provider(), MLXWhisperSTT)
 
 
-# --- _resolve_language_code() ----------------------------------------------
+def test_selects_whisper_explicitly(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "whisper")
+    assert isinstance(get_stt_provider(), WhisperSTT)
 
 
-def test_resolve_language_code_maps_known_language():
-    assert _resolve_language_code("mr") == "mr-IN"
-    assert _resolve_language_code("hi") == "hi-IN"
-    assert _resolve_language_code("en") == "en-IN"
+def test_selects_sarvam_explicitly(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "sarvam")
+    assert isinstance(get_stt_provider(), SarvamSTT)
 
 
-def test_resolve_language_code_defaults_to_unknown_for_auto():
-    assert _resolve_language_code("auto") == "unknown"
+def test_provider_selection_is_case_insensitive(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "SARVAM")
+    assert isinstance(get_stt_provider(), SarvamSTT)
+
+    monkeypatch.setenv("STT_PROVIDER", "Whisper")
+    assert isinstance(get_stt_provider(), WhisperSTT)
 
 
-def test_resolve_language_code_defaults_to_unknown_for_empty():
-    assert _resolve_language_code("") == "unknown"
+def test_provider_selection_tolerates_surrounding_whitespace(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "  sarvam  ")
+    assert isinstance(get_stt_provider(), SarvamSTT)
 
 
-def test_resolve_language_code_defaults_to_unknown_for_unrecognized():
-    assert _resolve_language_code("fr") == "unknown"
-
-
-# --- transcribe_audio() ----------------------------------------------------
-
-
-def test_transcribe_audio_success(monkeypatch):
-    response = SimpleNamespace(transcript="मी एक प्लंबर आहे", language_probability=0.92)
-    stt = _FakeSpeechToText(response=response)
-    _patch_client(monkeypatch, _FakeClient(stt))
-
-    transcript, confidence = asyncio.run(
-        transcribe_audio(audio_bytes=b"fake-audio", filename="a.wav", content_type="audio/wav", language="mr")
-    )
-
-    assert transcript == "मी एक प्लंबर आहे"
-    assert confidence == 0.92
-    assert stt.calls[0]["language_code"] == "mr-IN"
-    assert stt.calls[0]["file"] == ("a.wav", b"fake-audio", "audio/wav")
-
-
-def test_transcribe_audio_raises_when_no_client(monkeypatch):
-    _patch_client(monkeypatch, None)
+def test_unknown_provider_raises_ai_service_unavailable(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "some-provider-that-does-not-exist")
 
     with pytest.raises(AiServiceUnavailableError):
-        asyncio.run(transcribe_audio(audio_bytes=b"x", filename="a.wav", content_type="audio/wav", language="mr"))
+        get_stt_provider()
 
 
-def test_transcribe_audio_raises_on_empty_transcript(monkeypatch):
-    response = SimpleNamespace(transcript="", language_probability=None)
-    _patch_client(monkeypatch, _FakeClient(_FakeSpeechToText(response=response)))
+# --- transcribe_audio() - dispatch behavior ---------------------------------
+
+
+def test_transcribe_audio_delegates_to_the_selected_provider(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "whisper")
+    captured = {}
+
+    async def fake_transcribe(self, audio_bytes, filename, content_type, language):
+        captured["called_with"] = (audio_bytes, filename, content_type, language)
+        return "delegated transcript", 0.5
+
+    monkeypatch.setattr(WhisperSTT, "transcribe", fake_transcribe)
+
+    result = asyncio.run(
+        transcribe_audio(audio_bytes=b"abc", filename="f.wav", content_type="audio/wav", language="hi")
+    )
+
+    assert result == ("delegated transcript", 0.5)
+    assert captured["called_with"] == (b"abc", "f.wav", "audio/wav", "hi")
+
+
+def test_transcribe_audio_with_sarvam_provider_still_works_through_the_abstraction(monkeypatch):
+    """
+    Confirms SarvamSTT remains fully reachable and functional through the
+    new provider-agnostic transcribe_audio() dispatcher - Sarvam is being
+    kept temporarily available, not silently broken by this migration.
+    """
+
+    monkeypatch.setenv("STT_PROVIDER", "sarvam")
+
+    class _FakeSpeechToText:
+        async def transcribe(self, **kwargs):
+            return SimpleNamespace(transcript="सर्वम transcript", language_probability=0.8)
+
+    class _FakeClient:
+        speech_to_text = _FakeSpeechToText()
+
+    monkeypatch.setattr("app.voice.sarvam_stt.get_sarvam_client", lambda: _FakeClient())
+
+    transcript, confidence = asyncio.run(
+        transcribe_audio(audio_bytes=b"abc", filename="f.wav", content_type="audio/wav", language="mr")
+    )
+
+    assert transcript == "सर्वम transcript"
+    assert confidence == 0.8
+
+
+def test_transcribe_audio_propagates_provider_exceptions_unchanged(monkeypatch):
+    monkeypatch.setenv("STT_PROVIDER", "whisper")
+
+    async def fake_transcribe(self, **kwargs):
+        raise ValueError("bad audio")
+
+    monkeypatch.setattr(WhisperSTT, "transcribe", fake_transcribe)
 
     with pytest.raises(ValueError):
-        asyncio.run(transcribe_audio(audio_bytes=b"x", filename="a.wav", content_type="audio/wav", language="mr"))
-
-
-def test_transcribe_audio_wraps_api_error_as_provider_error(monkeypatch):
-    error = ApiError(status_code=422, body="unsupported audio format")
-    _patch_client(monkeypatch, _FakeClient(_FakeSpeechToText(error=error)))
-
-    with pytest.raises(SarvamProviderError) as exc_info:
-        asyncio.run(transcribe_audio(audio_bytes=b"x", filename="a.wav", content_type="audio/wav", language="mr"))
-
-    assert exc_info.value.status_code == 422
+        asyncio.run(transcribe_audio(audio_bytes=b"abc", filename="f.wav", content_type="audio/wav", language="en"))

@@ -3,6 +3,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from app.api.recommendations import router as recommendations_router
+from app.api.skills import router as skills_router
 from app.api.translation import router as translation_router
 from app.api.voice import router as voice_router
 
@@ -32,3 +33,4 @@ async def value_error_handler(request: Request, exc: ValueError) -> JSONResponse
 app.include_router(recommendations_router)
 app.include_router(voice_router)
 app.include_router(translation_router)
+app.include_router(skills_router)

@@ -1,0 +1,4449 @@
+{
+  "config": {
+    "extraction_provider": "local_llm",
+    "local_llm_model": "mlx-community/Qwen3-4B-Instruct-2507-4bit"
+  },
+  "summary": {
+    "fullName": {
+      "correct": 65,
+      "total": 65,
+      "accuracy": 1.0
+    },
+    "experienceYears": {
+      "correct": 66,
+      "total": 66,
+      "accuracy": 1.0
+    },
+    "expectedPay": {
+      "correct": 60,
+      "total": 66,
+      "accuracy": 0.9090909090909091
+    },
+    "city": {
+      "correct": 66,
+      "total": 66,
+      "accuracy": 1.0
+    },
+    "skills": {
+      "correct": 54,
+      "total": 59,
+      "accuracy": 0.9152542372881356
+    }
+  },
+  "failures_by_field": {
+    "fullName": {},
+    "experienceYears": {},
+    "expectedPay": {
+      "missing": 6
+    },
+    "city": {},
+    "skills": {
+      "missing": 5
+    }
+  },
+  "determinism": [
+    {
+      "id": "U01-mr-name-exp-pay-city",
+      "identical_on_rerun": true
+    },
+    {
+      "id": "P02-satashe-roj-sentence",
+      "identical_on_rerun": true
+    },
+    {
+      "id": "G02-mr-plumbing-only",
+      "identical_on_rerun": true
+    }
+  ],
+  "rows": [
+    {
+      "id": "U01-mr-name-exp-pay-city",
+      "language": "mr",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "pay",
+        "city",
+        "grounding"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला चार वर्षांचा अनुभव आहे. मला सातशे रुपये रोज पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "No trade is named, so skills must be null. This is the transcript the diagnosis found returns pay=7000.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 17.4,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": "मी कोल्हापूरमध्ये राहतो आणि चार वर्षांचा अनुभव आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "U02-mr-carpenter",
+      "language": "mr",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "pay",
+        "city",
+        "skills"
+      ],
+      "transcript": "माझं नाव सुनीता जाधव आहे. मी पाच वर्षांपासून सुतारकाम करते. माझा दर आठशे रुपये रोज आहे. मी पुण्यात राहते.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.5,
+      "raw_profile": {
+        "fullName": "सुनीता जाधव",
+        "experienceYears": 5.0,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": "पुणे",
+        "bio": "मी पाच वर्षांपासून सुतारकाम करते.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "सुनीता जाधव"
+          ],
+          "actual": "सुनीता जाधव",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 5,
+          "actual": 5.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "पुणे",
+            "पुण्यात",
+            "पुण्यामध्ये",
+            "Pune",
+            "पुना"
+          ],
+          "actual": "पुणे",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "carpentry",
+              "carpenter",
+              "सुतारकाम",
+              "सुतार",
+              "बढ़ई",
+              "लकूडकाम"
+            ]
+          ],
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        }
+      }
+    },
+    {
+      "id": "U03-mr-electrician-nopay",
+      "language": "mr",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "city",
+        "skills",
+        "grounding"
+      ],
+      "transcript": "माझं नाव सर्वेश महाडिक आहे. मी दहा वर्षांचा इलेक्ट्रिशियनचा अनुभव ठेवतो. मी नागपूरमध्ये काम शोधतो आहे.",
+      "notes": "No pay stated - expectedPay must stay null.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.7,
+      "raw_profile": {
+        "fullName": "सर्वेश महाडिक",
+        "experienceYears": 10.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": "नागपूर",
+        "bio": "मी दहा वर्षांचा इलेक्ट्रिशियनचा अनुभव ठेवतो आणि नागपूरमध्ये काम शोधतो.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "सर्वेश महाडिक"
+          ],
+          "actual": "सर्वेश महाडिक",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 10,
+          "actual": 10.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "नागपूर",
+            "नागपुर",
+            "नागपूरमध्ये",
+            "Nagpur"
+          ],
+          "actual": "नागपूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "electrician",
+              "electrical",
+              "electrical work",
+              "electrical wiring",
+              "wiring",
+              "इलेक्ट्रिशियन",
+              "इलेक्ट्रिकल",
+              "वायरिंग"
+            ]
+          ],
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        }
+      }
+    },
+    {
+      "id": "U04-mr-devanagari-digits-pay",
+      "language": "mr",
+      "tags": [
+        "utterance",
+        "name",
+        "pay",
+        "skills",
+        "grounding"
+      ],
+      "transcript": "माझं नाव अनिल पाटील आहे. मी प्लंबर आहे आणि मला ७०० रुपये रोज पाहिजे.",
+      "notes": "Devanagari digits for pay; no experience and no city stated.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.7,
+      "raw_profile": {
+        "fullName": "अनिल पाटील",
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": "मी प्लंबर आहे आणि रोज ७०० रुपये मिळावेत बाबतीत आवडतो.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "अनिल पाटील"
+          ],
+          "actual": "अनिल पाटील",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "plumbing",
+              "plumber",
+              "प्लंबिंग",
+              "प्लंबर",
+              "प्लांबर",
+              "नळ काम",
+              "नलसाजी"
+            ]
+          ],
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        }
+      }
+    },
+    {
+      "id": "U05-hi-name-exp-pay-city",
+      "language": "hi",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "pay",
+        "city",
+        "skills"
+      ],
+      "transcript": "मेरा नाम राहुल शर्मा है। मुझे पाँच साल का प्लंबिंग का अनुभव है। मैं मुंबई में रहता हूँ और मुझे पंद्रह हजार रुपये चाहिए।",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.1,
+      "raw_profile": {
+        "fullName": "राहुल शर्मा",
+        "experienceYears": 5.0,
+        "expectedPay": 15000.0,
+        "skills": [
+          "plumbing"
+        ],
+        "city": "मुंबई",
+        "bio": "मैंने पाँच साल का प्लंबिंग का अनुभव है।",
+        "availability": null,
+        "languages": [
+          "hi"
+        ],
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "राहुल शर्मा"
+          ],
+          "actual": "राहुल शर्मा",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 5,
+          "actual": 5.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "मुंबई",
+            "मुंबईमध्ये",
+            "मुंबई में",
+            "Mumbai"
+          ],
+          "actual": "मुंबई",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "plumbing",
+              "plumber",
+              "प्लंबिंग",
+              "प्लंबर",
+              "प्लांबर",
+              "नळ काम",
+              "नलसाजी"
+            ]
+          ],
+          "actual": [
+            "plumbing"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "U06-hi-painter-saat-sau",
+      "language": "hi",
+      "tags": [
+        "utterance",
+        "name",
+        "pay",
+        "skills",
+        "grounding"
+      ],
+      "transcript": "मेरा नाम अमित कुमार है। मैं पेंटर हूँ। मुझे सात सौ रुपये रोज चाहिए।",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.1,
+      "raw_profile": {
+        "fullName": "अमित कुमार",
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": [
+          "पेंटिंग"
+        ],
+        "city": null,
+        "bio": "मैं एक पेंटर हूं और रोज 700 रुपये की उम्मीद है।",
+        "availability": null,
+        "languages": [
+          "hi"
+        ],
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "अमित कुमार"
+          ],
+          "actual": "अमित कुमार",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "painting",
+              "painter",
+              "पेंटिंग",
+              "पेंटर",
+              "रंगकाम"
+            ]
+          ],
+          "actual": [
+            "पेंटिंग"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "U07-en-full",
+      "language": "en",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "pay",
+        "city",
+        "skills"
+      ],
+      "transcript": "My name is Rahul Sharma. I have 4 years experience as a plumber. I want 700 rupees per day. I live in Pune.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.7,
+      "raw_profile": {
+        "fullName": "Rahul Sharma",
+        "experienceYears": 4.0,
+        "expectedPay": 700.0,
+        "skills": [
+          "plumbing"
+        ],
+        "city": "Pune",
+        "bio": "I am a plumber with 4 years of experience.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "Rahul Sharma"
+          ],
+          "actual": "Rahul Sharma",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "पुणे",
+            "पुण्यात",
+            "पुण्यामध्ये",
+            "Pune",
+            "पुना"
+          ],
+          "actual": "Pune",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "plumbing",
+              "plumber",
+              "प्लंबिंग",
+              "प्लंबर",
+              "प्लांबर",
+              "नळ काम",
+              "नलसाजी"
+            ]
+          ],
+          "actual": [
+            "plumbing"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "U08-en-carpenter-nopay",
+      "language": "en",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "city",
+        "skills",
+        "grounding"
+      ],
+      "transcript": "My name is Sameer Pal. I am a carpenter in Mumbai with 10 years of experience.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.5,
+      "raw_profile": {
+        "fullName": "Sameer Pal",
+        "experienceYears": 10.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": "Mumbai",
+        "bio": "I am a carpenter with 10 years of experience in Mumbai.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "Sameer Pal"
+          ],
+          "actual": "Sameer Pal",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 10,
+          "actual": 10.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "मुंबई",
+            "मुंबईमध्ये",
+            "मुंबई में",
+            "Mumbai"
+          ],
+          "actual": "Mumbai",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "carpentry",
+              "carpenter",
+              "सुतारकाम",
+              "सुतार",
+              "बढ़ई",
+              "लकूडकाम"
+            ]
+          ],
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        }
+      }
+    },
+    {
+      "id": "U09-codemix-mr-en",
+      "language": "code_mixed",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "pay",
+        "city",
+        "skills",
+        "code_mixed"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मी 4 years experience असलेला plumber आहे. मला 700 rupees daily पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 8.0,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": 700.0,
+        "skills": [
+          "plumbing"
+        ],
+        "city": "कोल्हापूर",
+        "bio": "मी 4 वर्षांच्या अनुभवास असलेला plumber आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "plumbing",
+              "plumber",
+              "प्लंबिंग",
+              "प्लंबर",
+              "प्लांबर",
+              "नळ काम",
+              "नलसाजी"
+            ]
+          ],
+          "actual": [
+            "plumbing"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "U10-codemix-painter-rate",
+      "language": "code_mixed",
+      "tags": [
+        "utterance",
+        "pay",
+        "city",
+        "skills",
+        "code_mixed",
+        "grounding"
+      ],
+      "transcript": "मी Pune मध्ये काम शोधत आहे. मी painter आहे आणि माझा rate 800 rupees per day आहे.",
+      "notes": "No name and no experience stated - both must stay null.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.1,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 800.0,
+        "skills": [
+          "painting"
+        ],
+        "city": "Pune",
+        "bio": "मी Pune मध्ये काम शोधत आहे आणि painting करतो.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "पुणे",
+            "पुण्यात",
+            "पुण्यामध्ये",
+            "Pune",
+            "पुना"
+          ],
+          "actual": "Pune",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "painting",
+              "painter",
+              "पेंटिंग",
+              "पेंटर",
+              "रंगकाम"
+            ]
+          ],
+          "actual": [
+            "painting"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "U11-codemix-hi-electrician",
+      "language": "code_mixed",
+      "tags": [
+        "utterance",
+        "name",
+        "experience",
+        "pay",
+        "city",
+        "skills",
+        "code_mixed"
+      ],
+      "transcript": "मेरा नाम अमित कुमार है, मुझे 5 years experience है electrician के तौर पर, मैं Nagpur में रहता हूँ और मुझे 15,000 rupees salary चाहिए।",
+      "notes": "Mirrors the shape of a real stored transcript that extracted correctly on 2026-09-30.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 8.6,
+      "raw_profile": {
+        "fullName": "अमित कुमार",
+        "experienceYears": 5.0,
+        "expectedPay": 15000.0,
+        "skills": [
+          "electrical wiring"
+        ],
+        "city": "Nagpur",
+        "bio": "मैं एक 5 साल के अनुभव वाला एलेक्ट्रीशियन हूँ जो नागपुर में रहता हूँ।",
+        "availability": null,
+        "languages": [
+          "hi"
+        ],
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "अमित कुमार"
+          ],
+          "actual": "अमित कुमार",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 5,
+          "actual": 5.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "नागपूर",
+            "नागपुर",
+            "नागपूरमध्ये",
+            "Nagpur"
+          ],
+          "actual": "Nagpur",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "electrician",
+              "electrical",
+              "electrical work",
+              "electrical wiring",
+              "wiring",
+              "इलेक्ट्रिशियन",
+              "इलेक्ट्रिकल",
+              "वायरिंग"
+            ]
+          ],
+          "actual": [
+            "electrical wiring"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "G01-en-plumber-only",
+      "language": "en",
+      "tags": [
+        "grounding",
+        "skills"
+      ],
+      "transcript": "I am a plumber and I am looking for work.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.6,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": [
+          "plumbing"
+        ],
+        "city": null,
+        "bio": "I am a plumber looking for work.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "plumbing",
+              "plumber",
+              "प्लंबिंग",
+              "प्लंबर",
+              "प्लांबर",
+              "नळ काम",
+              "नलसाजी"
+            ]
+          ],
+          "actual": [
+            "plumbing"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "G02-mr-plumbing-only",
+      "language": "mr",
+      "tags": [
+        "grounding",
+        "skills",
+        "experience"
+      ],
+      "transcript": "मी प्लंबिंगचं काम करतो.",
+      "notes": "The 'no experience number' case required by the evaluation spec.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.0,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": [
+          "plumbing"
+        ],
+        "city": null,
+        "bio": "मी प्लंबिंगचं काम करतो.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "plumbing",
+              "plumber",
+              "प्लंबिंग",
+              "प्लंबर",
+              "प्लांबर",
+              "नळ काम",
+              "नलसाजी"
+            ]
+          ],
+          "actual": [
+            "plumbing"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "G03-mr-city-only",
+      "language": "mr",
+      "tags": [
+        "grounding",
+        "city"
+      ],
+      "transcript": "मला पुण्यात काम पाहिजे.",
+      "notes": "'पुण्यात' is the inflected spoken form; any Pune surface form is accepted.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.5,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": "पुणे",
+        "bio": null,
+        "availability": "available",
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "पुणे",
+            "पुण्यात",
+            "पुण्यामध्ये",
+            "Pune",
+            "पुना"
+          ],
+          "actual": "पुणे",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "G04-mr-trade-only",
+      "language": "mr",
+      "tags": [
+        "grounding",
+        "skills"
+      ],
+      "transcript": "मी सुतार आहे.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.7,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "carpentry",
+              "carpenter",
+              "सुतारकाम",
+              "सुतार",
+              "बढ़ई",
+              "लकूडकाम"
+            ]
+          ],
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        }
+      }
+    },
+    {
+      "id": "P01-satashe-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "सातशे रुपये",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: सातशे रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.0,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P01-satashe-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला सातशे रुपये पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: सातशे रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P02-satashe-roj-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "सातशे रुपये रोज",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: सातशे रुपये रोज",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P02-satashe-roj-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला सातशे रुपये रोज पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: सातशे रुपये रोज",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.4,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P03-saat-sau-bare",
+      "language": "hi",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "सात सौ रुपये",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: सात सौ रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.5,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P03-saat-sau-sentence",
+      "language": "hi",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मुझे सात सौ रुपये चाहिए।",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: सात सौ रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.2,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P04-devanagari-700-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "७०० रुपये",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: ७०० रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P04-devanagari-700-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला ७०० रुपये पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: ७०० रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P05-ascii-700-mr-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "700 रुपये",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: 700 रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.8,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P05-ascii-700-mr-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला 700 रुपये पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: 700 रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 4.8,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P06-700-rupees-en-bare",
+      "language": "en",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "700 rupees",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: 700 rupees",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.4,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P06-700-rupees-en-sentence",
+      "language": "en",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "I want 700 rupees.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: 700 rupees",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 4.6,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P07-aathshe-roj-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "आठशे रुपये रोज",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: आठशे रुपये रोज",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.2,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P07-aathshe-roj-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला आठशे रुपये रोज पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: आठशे रुपये रोज",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.5,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P08-pandhra-hajar-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "पंधरा हजार रुपये",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: पंधरा हजार रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.7,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P08-pandhra-hajar-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला पंधरा हजार रुपये पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: पंधरा हजार रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.0,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P09-15000-comma-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "15,000 रुपये",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: 15,000 रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.2,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P09-15000-comma-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला 15,000 रुपये पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: 15,000 रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P10-devanagari-15000-bare",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_bare"
+      ],
+      "transcript": "१५,००० रुपये",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. Pay phrase under test: १५,००० रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "P10-devanagari-15000-sentence",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_sentence"
+      ],
+      "transcript": "मला १५,००० रुपये पाहिजे.",
+      "notes": "Same pay phrase inside a minimal natural sentence. Pay phrase under test: १५,००० रुपये",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 4.2,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "E01-chaar-varsh-bare",
+      "language": "mr",
+      "tags": [
+        "experience",
+        "experience_bare"
+      ],
+      "transcript": "चार वर्षांचा अनुभव",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. skills not scored: 'चार वर्षांचा अनुभव' names no trade but mentions work.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.7,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 4.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        }
+      }
+    },
+    {
+      "id": "E02-devanagari-4-bare",
+      "language": "mr",
+      "tags": [
+        "experience",
+        "experience_bare"
+      ],
+      "transcript": "४ वर्षांचा अनुभव",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. skills not scored: '४ वर्षांचा अनुभव' names no trade but mentions work.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.0,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 4.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        }
+      }
+    },
+    {
+      "id": "E03-4-years-en-bare",
+      "language": "en",
+      "tags": [
+        "experience",
+        "experience_bare"
+      ],
+      "transcript": "4 years experience",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. skills not scored: '4 years experience' names no trade but mentions work.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.0,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 4.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        }
+      }
+    },
+    {
+      "id": "E04-paach-varshanpasun-bare",
+      "language": "mr",
+      "tags": [
+        "experience",
+        "experience_bare"
+      ],
+      "transcript": "पाच वर्षांपासून काम करतो",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. skills not scored: 'पाच वर्षांपासून काम करतो' names no trade but mentions work.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.0,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 5.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 5,
+          "actual": 5.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        }
+      }
+    },
+    {
+      "id": "E05-5-years-codemix-bare",
+      "language": "code_mixed",
+      "tags": [
+        "experience",
+        "experience_bare"
+      ],
+      "transcript": "5 years experience आहे",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. skills not scored: '5 years experience आहे' names no trade but mentions work.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 5.9,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 5.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 5,
+          "actual": 5.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        }
+      }
+    },
+    {
+      "id": "E06-daha-varsh-bare",
+      "language": "mr",
+      "tags": [
+        "experience",
+        "experience_bare"
+      ],
+      "transcript": "दहा वर्षांचा अनुभव",
+      "notes": "Bare phrase exactly as listed in the evaluation spec. skills not scored: 'दहा वर्षांचा अनुभव' names no trade but mentions work.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.4,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 10.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 10,
+          "actual": 10.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        }
+      }
+    },
+    {
+      "id": "C01-exp-plus-pay",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मला चार वर्षांचा अनुभव आहे. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "U01 minus the name and city sentences.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.7,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 4.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C02-name-plus-pay",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "U01 minus the experience and city sentences.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.5,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C03-pay-plus-city",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मला सातशे रुपये रोज पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "U01 minus the name and experience sentences.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.6,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C04-u01-with-ascii-digits",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला चार वर्षांचा अनुभव आहे. मला 700 रुपये रोज पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "U01 with the pay written as digits instead of the number word सातशे.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 9.4,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": "मी कोल्हापूरमध्ये राहतो आणि चार वर्षांचा अनुभव आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C05-u01-pay-last",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला चार वर्षांचा अनुभव आहे. मी कोल्हापूरमध्ये राहतो. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "U01 with the pay sentence moved to the end - tests sentence position.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 9.6,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": "मी कोल्हापूरमध्ये राहतो आणि चार वर्षांचा अनुभव आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C06-u01-aathshe",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला चार वर्षांचा अनुभव आहे. मला आठशे रुपये रोज पाहिजे. मी कोल्हापूरमध्ये राहतो.",
+      "notes": "U01 with आठशे (800) instead of सातशे - tests whether the word itself matters.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 9.6,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": 4.0,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": "मी कोल्हापूरमध्ये राहतो आणि चार वर्षांचा अनुभव आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C07-city-then-pay",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मी कोल्हापूरमध्ये राहतो. मला सातशे रुपये रोज पाहिजे.",
+      "notes": "Same two sentences as C03 but in the opposite order - isolates 'something precedes the pay sentence'.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.8,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": "कोल्हापूर",
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": [
+            "कोल्हापूर",
+            "कोल्हापुर",
+            "कोल्हापूरमध्ये",
+            "Kolhapur"
+          ],
+          "actual": "कोल्हापूर",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C08-pay-then-exp",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "मला सातशे रुपये रोज पाहिजे. मला चार वर्षांचा अनुभव आहे.",
+      "notes": "Same two sentences as C01 but in the opposite order.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": 4.0,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": 4,
+          "actual": 4.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C09-name-then-pay-no-roj",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला सातशे रुपये पाहिजे.",
+      "notes": "C02 without रोज - checks whether the daily-rate word is part of the trigger.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.5,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": null,
+          "scored": true,
+          "correct": false,
+          "classification": "missing"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C10-name-then-pandhra-hajar",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context",
+        "pay_context_extra"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला पंधरा हजार रुपये पाहिजे.",
+      "notes": "Same frame as C09 with a different Marathi number word - tests whether the trigger is number words generally or सातशे specifically.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.7,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C11-name-then-saat-sau",
+      "language": "hi",
+      "tags": [
+        "pay",
+        "pay_context",
+        "pay_context_extra"
+      ],
+      "transcript": "मेरा नाम समीर पाल है। मुझे सात सौ रुपये चाहिए।",
+      "notes": "Same frame as C09 but the Hindi wording for 700 - tests whether the value 700 or the word सातशे is the trigger.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.6,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "N01-en-three-part",
+      "language": "en",
+      "tags": [
+        "name",
+        "name_probe"
+      ],
+      "transcript": "My name is Swarup Samir Pal.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.6,
+      "raw_profile": {
+        "fullName": "Swarup Samir Pal",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "Swarup Samir Pal"
+          ],
+          "actual": "Swarup Samir Pal",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "N02-mr-three-part",
+      "language": "mr",
+      "tags": [
+        "name",
+        "name_probe"
+      ],
+      "transcript": "माझं नाव स्वरूप समीर पाल आहे.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.8,
+      "raw_profile": {
+        "fullName": "स्वरूप समीर पाल",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "स्वरूप समीर पाल"
+          ],
+          "actual": "स्वरूप समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "N03-hi-three-part",
+      "language": "hi",
+      "tags": [
+        "name",
+        "name_probe"
+      ],
+      "transcript": "मेरा नाम स्वरूप समीर पाल है।",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.6,
+      "raw_profile": {
+        "fullName": "स्वरूप समीर पाल",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "स्वरूप समीर पाल"
+          ],
+          "actual": "स्वरूप समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "N04-codemix-latin-name",
+      "language": "code_mixed",
+      "tags": [
+        "name",
+        "name_probe",
+        "code_mixed"
+      ],
+      "transcript": "माझं नाव Swarup Samir Pal आहे.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.5,
+      "raw_profile": {
+        "fullName": "Swarup Samir Pal",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "Swarup Samir Pal"
+          ],
+          "actual": "Swarup Samir Pal",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "N05-mr-four-part",
+      "language": "mr",
+      "tags": [
+        "name",
+        "name_probe"
+      ],
+      "transcript": "माझं नाव स्वरूप समीर पाल पाटील आहे.",
+      "notes": "Four-part name - must not be truncated to the last two words.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.4,
+      "raw_profile": {
+        "fullName": "स्वरूप समीर पाल पाटील",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "स्वरूप समीर पाल पाटील"
+          ],
+          "actual": "स्वरूप समीर पाल पाटील",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "N06-mr-name-and-pay",
+      "language": "mr",
+      "tags": [
+        "name",
+        "pay",
+        "name_probe"
+      ],
+      "transcript": "माझं नाव स्वरूप समीर पाल आहे. मला दहा हजार रुपये रोज पाहिजे.",
+      "notes": "The Step-4 reference case: full name plus a Marathi number word.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 7.2,
+      "raw_profile": {
+        "fullName": "स्वरूप समीर पाल",
+        "experienceYears": null,
+        "expectedPay": 10000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "स्वरूप समीर पाल"
+          ],
+          "actual": "स्वरूप समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 10000,
+          "actual": 10000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W01-mr-daha-hajar",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_word"
+      ],
+      "transcript": "मला दहा हजार रुपये पाहिजे.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.4,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 10000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 10000,
+          "actual": 10000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W02-mr-daha-hajar-roj",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_word"
+      ],
+      "transcript": "मला दहा हजार रुपये रोज पाहिजे.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.4,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 10000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 10000,
+          "actual": 10000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W03-mr-aathshe",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_word"
+      ],
+      "transcript": "मला आठशे रुपये पाहिजे.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.3,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W04-hi-aath-sau",
+      "language": "hi",
+      "tags": [
+        "pay",
+        "pay_word"
+      ],
+      "transcript": "मुझे आठ सौ रुपये चाहिए।",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.2,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W05-en-eight-hundred",
+      "language": "en",
+      "tags": [
+        "pay",
+        "pay_word"
+      ],
+      "transcript": "I want eight hundred rupees.",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.2,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 800.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 800,
+          "actual": 800.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W06-hi-pandrah-hajar",
+      "language": "hi",
+      "tags": [
+        "pay",
+        "pay_word"
+      ],
+      "transcript": "मुझे पंद्रह हजार रुपये चाहिए।",
+      "notes": "",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 6.4,
+      "raw_profile": {
+        "fullName": null,
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W07-no-pay-stated",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_word",
+        "grounding"
+      ],
+      "transcript": "माझं नाव स्वरूप समीर पाल आहे. मी इलेक्ट्रिशियन आहे.",
+      "notes": "No pay stated - expectedPay must stay null, never estimated from the trade.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 8.0,
+      "raw_profile": {
+        "fullName": "स्वरूप समीर पाल",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": [
+          "electrical wiring"
+        ],
+        "city": null,
+        "bio": "मी इलेक्ट्रिशियन आहे.",
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "स्वरूप समीर पाल"
+          ],
+          "actual": "स्वरूप समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": [
+            [
+              "electrician",
+              "electrical",
+              "electrical work",
+              "electrical wiring",
+              "wiring",
+              "इलेक्ट्रिशियन",
+              "इलेक्ट्रिकल",
+              "वायरिंग"
+            ]
+          ],
+          "actual": [
+            "electrical wiring"
+          ],
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "W08-real-garbled-session",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_word",
+        "grounding",
+        "real_transcript"
+      ],
+      "transcript": "माजा नावस बरूप समीर पाल आहे मी गेले धावर्ष जलो इलेक्टरिशिंची काम करते हैं माजा पी हा आच्छे रूपे एट हंडेट रूपीज आहे",
+      "notes": "The exact Whisper output from the reported session. Speech-to-text destroyed both numbers, so no pay or experience can honestly be recovered - both must be null rather than guessed. fullName is not scored: 'स्वरूप' was garbled into 'नावस बरूप' before extraction ever ran, so there is no correct answer to assert.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 9.8,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": null,
+        "skills": [
+          "इलेक्ट्रिशिंची"
+        ],
+        "city": null,
+        "bio": "मी गेले धावर्ष इलेक्ट्रिशिंची काम करतो आहे",
+        "availability": null,
+        "languages": [
+          "mr"
+        ],
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": null,
+          "actual": "समीर पाल",
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": [
+            "इलेक्ट्रिशिंची"
+          ],
+          "scored": false,
+          "correct": true,
+          "classification": "__SKIP__"
+        }
+      }
+    }
+  ]
+}

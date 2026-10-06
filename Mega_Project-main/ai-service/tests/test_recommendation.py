@@ -513,3 +513,84 @@ def test_existing_pipeline_result_unchanged():
     recommendation = recommend_jobs_for_worker(worker, worker_skills, [job])
 
     assert recommendation.matches[0].ranking == direct_ranking
+
+
+# ================= H-4: job eligibility for Job -> Workers =================
+# recommend_workers_for_job must apply the SAME job eligibility rule that
+# recommend_jobs_for_worker already applies to its candidate jobs
+# (candidates.py) - status "open", or "partially_assigned" while
+# filled_workers < required_workers.
+
+
+def _job_with(status, required_workers=1, filled_workers=0):
+    return _build_job(status=status).model_copy(
+        update={"required_workers": required_workers, "filled_workers": filled_workers}
+    )
+
+
+def _fail_if_scored(monkeypatch):
+    def _explode(*args, **kwargs):
+        raise AssertionError("an ineligible job must not have any worker scored")
+
+    monkeypatch.setattr("app.recommendation.recommend.score_worker_job_pair", _explode)
+
+
+@pytest.mark.parametrize("status", ["draft", "assigned", "completed", "cancelled", "expired"])
+def test_job_to_workers_ineligible_status_returns_no_matches_without_scoring(monkeypatch, status):
+    _fail_if_scored(monkeypatch)
+    job = _job_with(status)
+
+    result = recommend_workers_for_job(job, [_build_worker()], [])
+
+    assert result.matches == []
+    assert result.anchor_id == "JOB001"
+    assert result.direction == "job_to_workers"
+
+
+def test_job_to_workers_full_partially_assigned_job_returns_no_matches_without_scoring(monkeypatch):
+    _fail_if_scored(monkeypatch)
+    job = _job_with("partially_assigned", required_workers=2, filled_workers=2)
+
+    assert recommend_workers_for_job(job, [_build_worker()], []).matches == []
+
+
+def test_job_to_workers_open_and_partially_assigned_with_room_still_recommend():
+    worker = _build_worker()
+    for job in (_job_with("open"), _job_with("partially_assigned", required_workers=3, filled_workers=1)):
+        result = recommend_workers_for_job(job, [worker], [])
+        assert len(result.matches) == 1
+        assert result.matches[0].worker_id == "WORKER001"
+
+
+def test_job_to_workers_eligibility_matches_worker_to_jobs_for_every_status():
+    worker = _build_worker()
+    cases = [
+        _job_with("draft"),
+        _job_with("open"),
+        _job_with("partially_assigned", required_workers=2, filled_workers=1),
+        _job_with("partially_assigned", required_workers=2, filled_workers=2),
+        _job_with("assigned", required_workers=1, filled_workers=1),
+        _job_with("completed"),
+        _job_with("cancelled"),
+        _job_with("expired"),
+    ]
+    for job in cases:
+        worker_side = len(recommend_jobs_for_worker(worker, [], [job]).matches) > 0
+        job_side = len(recommend_workers_for_job(job, [worker], []).matches) > 0
+        assert worker_side == job_side, f"directions disagree for status={job.status} filled={job.filled_workers}"
+
+
+def test_job_to_workers_eligible_job_scores_are_unchanged_by_the_gate():
+    worker = _build_worker(rating_avg=4, experience_years=5, preferred_categories=["CAT001"])
+    worker_skills = [_build_worker_skill("WORKER001", "S001")]
+    job = _build_job(skill_ids=["S001"], category_id="CAT001", experience_required=2)
+
+    direct_ranking = score_worker_job_pair(worker, worker_skills, job)
+    recommendation = recommend_workers_for_job(job, [worker], worker_skills)
+
+    assert recommendation.matches[0].ranking == direct_ranking
+
+
+def test_job_to_workers_invalid_top_k_still_raises_before_eligibility_check():
+    with pytest.raises(ValueError):
+        recommend_workers_for_job(_job_with("cancelled"), [_build_worker()], [], top_k=0)

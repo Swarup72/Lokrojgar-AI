@@ -57,6 +57,22 @@
   text-decoration: underline;
 }
 
+/* Matches .applicants-rated-note / .applicants-rate-hint on the employer
+   side, so the two rating flows read identically. */
+.application-rated-note {
+  color: var(--color-success-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.application-rate-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-faint);
+  font-size: var(--text-xs);
+}
+
 @media (max-width: 600px) {
   .application-card {
     flex-direction: column;

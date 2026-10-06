@@ -6,9 +6,9 @@ import { MatchFactorsList } from "../recommendations/MatchFactorsList";
 import "./WorkerCard.css";
 
 /**
- * @param {{worker: object, matchScore?: number|null, matchFactors?: object, actions?: React.ReactNode}} props
+ * @param {{worker: object, matchScore?: number|null, matchFactors?: object, explanation?: object, actions?: React.ReactNode}} props
  */
-export function WorkerCard({ worker, matchScore, matchFactors, actions }) {
+export function WorkerCard({ worker, matchScore, matchFactors, explanation, actions }) {
   return (
     <div className="worker-card">
       <div className="worker-card-icon">
@@ -35,7 +35,7 @@ export function WorkerCard({ worker, matchScore, matchFactors, actions }) {
           <RatingStars value={worker.ratingAvg || 0} count={worker.ratingCount || 0} />
           <StatusPill status={worker.availability} />
         </div>
-        {matchFactors && <MatchFactorsList matchFactors={matchFactors} />}
+        {matchFactors && <MatchFactorsList matchFactors={matchFactors} explanation={explanation} />}
         {actions && <div className="worker-card-actions">{actions}</div>}
       </div>
     </div>

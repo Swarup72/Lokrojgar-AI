@@ -2,7 +2,6 @@ import asyncio
 import logging
 from typing import Dict, Literal, Tuple
 
-from sarvamai.core.api_error import ApiError as SarvamApiError
 
 from app.sarvam.client import (
     LANGUAGE_CODE_MAP,
@@ -10,7 +9,7 @@ from app.sarvam.client import (
     get_sarvam_client,
     with_sarvam_retry,
 )
-from app.sarvam.errors import AiServiceUnavailableError, SarvamProviderError
+from app.sarvam.errors import AiServiceUnavailableError, SarvamApiError, SarvamProviderError
 
 logger = logging.getLogger(__name__)
 

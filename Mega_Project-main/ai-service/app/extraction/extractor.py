@@ -1,65 +1,95 @@
-import json
 import logging
+import os
 
-from pydantic import ValidationError
-from sarvamai.core.api_error import ApiError as SarvamApiError
-
+from app.extraction.interface import ExtractionProvider
+from app.extraction.local_llm_extractor import LocalLLMExtractor
 from app.extraction.models import ExtractedProfile
-from app.extraction.prompts import EXTRACTION_SYSTEM_PROMPT
-from app.extraction.schema import EXTRACTED_PROFILE_JSON_SCHEMA
-from app.sarvam.client import SARVAM_EXTRACTION_MODEL, get_sarvam_client, with_sarvam_retry
-from app.sarvam.errors import AiServiceUnavailableError, SarvamProviderError
+from app.extraction.number_grounding import is_grounded
+from app.extraction.sarvam_extractor import SarvamExtractor
+from app.sarvam.errors import AiServiceUnavailableError
 
 logger = logging.getLogger(__name__)
+
+# local_llm (mlx-lm, Apple Silicon only) is the production default for the
+# local voice pipeline, matching the STT migration's mlx_whisper default -
+# sarvam remains available as a fallback/compatibility provider.
+DEFAULT_EXTRACTION_PROVIDER = "local_llm"
+
+_PROVIDERS = {
+    "local_llm": LocalLLMExtractor,
+    "sarvam": SarvamExtractor,
+}
+
+
+def get_extraction_provider() -> ExtractionProvider:
+    """
+    Reads EXTRACTION_PROVIDER fresh on every call, mirroring
+    app/voice/transcription.py's get_stt_provider() exactly - same
+    fresh-env-read pattern, same hard-fail-on-typo behavior (an unknown
+    provider name raises AiServiceUnavailableError rather than silently
+    falling back to the default).
+    """
+
+    provider_name = os.environ.get("EXTRACTION_PROVIDER", DEFAULT_EXTRACTION_PROVIDER).strip().lower()
+    provider_class = _PROVIDERS.get(provider_name)
+    if provider_class is None:
+        raise AiServiceUnavailableError(
+            f"Unknown EXTRACTION_PROVIDER={provider_name!r} - expected one of {sorted(_PROVIDERS)}."
+        )
+    return provider_class()
 
 
 async def extract_profile_from_transcript(transcript: str) -> ExtractedProfile:
     """
-    Extract structured worker-profile fields from a transcript via Sarvam's
-    chat completions endpoint, using strict JSON-schema structured output.
-
-    No score/field is invented: the JSON Schema requires every field but
-    allows null, and the follow-up Pydantic validation is defensive
-    re-validation of an external API's response, never trusted blindly.
+    Provider-agnostic entry point used by app/api/voice.py. Signature and
+    return contract (an ExtractedProfile) are unchanged from before this
+    migration - only which provider actually runs is new, controlled
+    entirely by EXTRACTION_PROVIDER. The API route and Node do not know or
+    care whether Sarvam or a local LLM produced the profile.
     """
 
-    client = get_sarvam_client()
-    if client is None:
-        raise AiServiceUnavailableError("Sarvam AI is not configured (SARVAM_API_KEY missing).")
+    provider = get_extraction_provider()
+    profile = await provider.extract(transcript)
+    return _drop_ungrounded_numbers(profile, transcript)
 
-    try:
-        response = await with_sarvam_retry(
-            lambda: client.chat.completions(
-                model=SARVAM_EXTRACTION_MODEL,
-                messages=[
-                    {"role": "system", "content": EXTRACTION_SYSTEM_PROMPT},
-                    {"role": "user", "content": transcript},
-                ],
-                response_format={
-                    "type": "json_schema",
-                    "json_schema": {
-                        "name": "worker_profile_extraction",
-                        "schema": EXTRACTED_PROFILE_JSON_SCHEMA,
-                        "strict": True,
-                    },
-                },
-                temperature=0,
+
+# Numeric fields only. Names, cities and skills are deliberately NOT checked
+# this way: they are free text that the model legitimately re-spells or
+# normalizes, so a containment test would discard correct values.
+_GROUNDED_NUMERIC_FIELDS = ("experience_years", "expected_pay")
+
+
+def _drop_ungrounded_numbers(
+    profile: ExtractedProfile, transcript: str
+) -> ExtractedProfile:
+    """
+    Replace any numeric field the transcript does not actually state with
+    None.
+
+    On a clean transcript the model converts Marathi/Hindi/English number
+    words correctly, so this changes nothing. It matters when speech-to-text
+    garbles the audio: a real session transcribed as "...आच्छे रूपे एट हंडेट
+    रूपीज..." (eight hundred, said twice) returned expectedPay = 10000, a
+    number absent from the transcript, which was then shown to the worker as
+    their own rate. An empty field the worker fills in is recoverable; a
+    confident wrong number silently saved to their profile is not.
+
+    This only ever clears a value - it never invents, rounds or repairs one,
+    so the "pay must be explicitly stated" rule still holds.
+    """
+
+    replacements = {}
+    for field in _GROUNDED_NUMERIC_FIELDS:
+        value = getattr(profile, field)
+        if value is not None and not is_grounded(value, transcript):
+            logger.warning(
+                "Dropping %s=%s: no such number appears in the transcript "
+                "(likely a garbled speech-to-text result).",
+                field,
+                value,
             )
-        )
-    except SarvamApiError as error:
-        raise SarvamProviderError(str(error), status_code=error.status_code) from error
+            replacements[field] = None
 
-    raw_content = response.choices[0].message.content if response.choices else None
-    if not raw_content:
-        raise ValueError("Sarvam chat completion returned no content.")
-
-    try:
-        parsed = json.loads(raw_content)
-    except json.JSONDecodeError as error:
-        raise ValueError("Sarvam returned malformed JSON for profile extraction.") from error
-
-    try:
-        return ExtractedProfile(**parsed)
-    except ValidationError as error:
-        logger.error("Voice profile extraction failed schema validation: %s", error)
-        raise ValueError("Extracted profile failed validation.") from error
+    if not replacements:
+        return profile
+    return profile.model_copy(update=replacements)

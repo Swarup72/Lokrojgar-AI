@@ -288,7 +288,7 @@ function fakeApplicationDoc(id, workerUserId) {
  * already "accepted". Job.findById is set to throw, proving the old
  * read-then-save path for the counter is never used.
  */
-function mockAcceptScenario(t, { applications, employerProfileId = EMPLOYER_PROFILE_ID }) {
+function mockAcceptScenario(t, { applications, employerProfileId = EMPLOYER_PROFILE_ID, requiredWorkers = 5 }) {
   const storedStatus = new Map(applications.map((a) => [a._id, a.status]));
 
   const employerFindOneMock = mock.method(EmployerProfile, "findOne", async () => ({ _id: employerProfileId }));
@@ -301,10 +301,21 @@ function mockAcceptScenario(t, { applications, employerProfileId = EMPLOYER_PROF
     storedStatus.set(filter._id, "accepted");
     return { _id: filter._id, status: "accepted" };
   });
-  const jobUpdateMock = mock.method(Job, "findByIdAndUpdate", async (id) => ({
-    _id: id,
-    title: { en: "Test Job" },
-  }));
+  // Capacity now lives in the update FILTER (reserveWorkerSlot /
+  // releaseWorkerSlot), so this stand-in models a real job document:
+  // a reservation only succeeds while filledWorkers < requiredWorkers.
+  const jobState = { _id: "JOB001", filledWorkers: 0, requiredWorkers, title: { en: "Test Job" } };
+  const jobUpdateMock = mock.method(Job, "findOneAndUpdate", async (filter) => {
+    const isRelease = Boolean(filter.status && filter.status.$in);
+    if (isRelease) {
+      if (jobState.filledWorkers <= 0) return null;
+      jobState.filledWorkers -= 1;
+      return { ...jobState };
+    }
+    if (jobState.filledWorkers >= jobState.requiredWorkers) return null; // full
+    jobState.filledWorkers += 1;
+    return { ...jobState };
+  });
   const jobFindByIdMock = mock.method(Job, "findById", async () => {
     throw new Error("Job.findById (read-then-save counter path) must not be used on acceptance");
   });
@@ -321,7 +332,7 @@ function mockAcceptScenario(t, { applications, employerProfileId = EMPLOYER_PROF
     deviceTokenFindMock.mock.restore();
   });
 
-  return { storedStatus, appTransitionMock, jobUpdateMock, jobFindByIdMock, notificationCreateMock };
+  return { storedStatus, appTransitionMock, jobUpdateMock, jobFindByIdMock, notificationCreateMock, jobState };
 }
 
 async function callAccept(applicationId, status = "accepted") {
@@ -334,7 +345,7 @@ async function callAccept(applicationId, status = "accepted") {
 
 test("H-3: normal acceptance - application becomes accepted, counter incremented exactly once, notification still sent", async (t) => {
   const appA = fakeApplicationDoc("APP_A", "WORKER_USER_A");
-  const { storedStatus, jobUpdateMock, notificationCreateMock } = mockAcceptScenario(t, { applications: [appA] });
+  const { storedStatus, jobState, notificationCreateMock } = mockAcceptScenario(t, { applications: [appA] });
 
   const { error, res } = await callAccept("APP_A");
 
@@ -342,7 +353,7 @@ test("H-3: normal acceptance - application becomes accepted, counter incremented
   assert.strictEqual(res.statusCode, 200);
   assert.strictEqual(res.body.data.status, "accepted");
   assert.strictEqual(storedStatus.get("APP_A"), "accepted");
-  assert.strictEqual(jobUpdateMock.mock.callCount(), 1);
+  assert.strictEqual(jobState.filledWorkers, 1, "exactly one slot consumed");
   assert.strictEqual(notificationCreateMock.mock.callCount(), 1);
   // "APPLICATION_ACCEPTED" here was the invalid value the controller used to
   // send; it is not in the Notification schema enum, so the notification was
@@ -354,7 +365,7 @@ test("H-3: normal acceptance - application becomes accepted, counter incremented
 test("H-3: two independent applications for the same job each increment the counter once (2 total)", async (t) => {
   const appA = fakeApplicationDoc("APP_A", "WORKER_USER_A");
   const appB = fakeApplicationDoc("APP_B", "WORKER_USER_B");
-  const { storedStatus, jobUpdateMock } = mockAcceptScenario(t, { applications: [appA, appB] });
+  const { storedStatus, jobState } = mockAcceptScenario(t, { applications: [appA, appB] });
 
   const [resultA, resultB] = await Promise.all([callAccept("APP_A"), callAccept("APP_B")]);
 
@@ -362,7 +373,7 @@ test("H-3: two independent applications for the same job each increment the coun
   assert.strictEqual(resultB.error, null);
   assert.strictEqual(storedStatus.get("APP_A"), "accepted");
   assert.strictEqual(storedStatus.get("APP_B"), "accepted");
-  assert.strictEqual(jobUpdateMock.mock.callCount(), 2);
+  assert.strictEqual(jobState.filledWorkers, 2, "two distinct applications consume two slots");
 });
 
 test("H-3: the counter update is a single atomic pipeline update, and the status transition is conditional", async (t) => {
@@ -376,10 +387,13 @@ test("H-3: the counter update is a single atomic pipeline update, and the status
   assert.deepStrictEqual(transitionFilter, { _id: "APP_A", status: { $ne: "accepted" } });
   assert.deepStrictEqual(transitionUpdate, { $set: { status: "accepted" } });
 
-  // Counter: one findByIdAndUpdate whose pipeline increments by exactly 1
-  // and derives status from the NEW count, in the same atomic update.
-  const [jobId, pipeline, options] = jobUpdateMock.mock.calls[0].arguments;
-  assert.strictEqual(jobId, "JOB001");
+  // Counter: one conditional findOneAndUpdate whose pipeline increments by
+  // exactly 1 and derives status from the NEW count, in the same atomic
+  // update. The capacity test must live in the FILTER so MongoDB evaluates
+  // it against the live document, not against a previously-read copy.
+  const [filter, pipeline, options] = jobUpdateMock.mock.calls[0].arguments;
+  assert.strictEqual(filter._id, "JOB001");
+  assert.deepStrictEqual(filter.$expr, { $lt: [{ $ifNull: ["$filledWorkers", 0] }, "$requiredWorkers"] });
   assert.ok(Array.isArray(pipeline), "must be an update pipeline, not a JS-computed $set");
   assert.deepStrictEqual(pipeline[0], {
     $set: { filledWorkers: { $add: [{ $ifNull: ["$filledWorkers", 0] }, 1] } },
@@ -395,7 +409,7 @@ test("H-3: the counter update is a single atomic pipeline update, and the status
 
 test("H-3: accepting the same application twice (and concurrently) increments the counter only once", async (t) => {
   const appA = fakeApplicationDoc("APP_A", "WORKER_USER_A");
-  const { jobUpdateMock } = mockAcceptScenario(t, { applications: [appA] });
+  const { jobState } = mockAcceptScenario(t, { applications: [appA] });
 
   const results = await Promise.all([callAccept("APP_A"), callAccept("APP_A"), callAccept("APP_A")]);
 
@@ -405,7 +419,9 @@ test("H-3: accepting the same application twice (and concurrently) increments th
     assert.strictEqual(res.statusCode, 200);
     assert.strictEqual(res.body.data.status, "accepted");
   }
-  assert.strictEqual(jobUpdateMock.mock.callCount(), 1, "only the request that actually transitioned may increment");
+  // A reservation taken by a request that then lost the application
+  // transition is handed back, so the NET effect is exactly one slot.
+  assert.strictEqual(jobState.filledWorkers, 1, "only one slot may be consumed in total");
 });
 
 test("H-3: authorization unchanged - an employer who does not own the job gets 403 and nothing is written", async (t) => {
@@ -424,9 +440,9 @@ test("H-3: authorization unchanged - an employer who does not own the job gets 4
   assert.strictEqual(storedStatus.get("APP_A"), "applied");
 });
 
-test("H-3: rejection behavior unchanged - saves the status, never touches the counter or sends the acceptance notification", async (t) => {
+test("H-3: rejection behavior - saves the status, never touches the counter, sends the rejection notification", async (t) => {
   const appA = fakeApplicationDoc("APP_A", "WORKER_USER_A");
-  const { appTransitionMock, jobUpdateMock, notificationCreateMock } = mockAcceptScenario(t, {
+  const { appTransitionMock, jobState, notificationCreateMock } = mockAcceptScenario(t, {
     applications: [appA],
   });
 
@@ -434,8 +450,14 @@ test("H-3: rejection behavior unchanged - saves the status, never touches the co
 
   assert.strictEqual(error, null);
   assert.strictEqual(res.body.data.status, "rejected");
-  assert.strictEqual(appA.saveCalls, 1);
-  assert.strictEqual(appTransitionMock.mock.callCount(), 0);
-  assert.strictEqual(jobUpdateMock.mock.callCount(), 0);
-  assert.strictEqual(notificationCreateMock.mock.callCount(), 0);
+  // Rejection is now a conditional update guarded on status != accepted, so
+  // it can never overwrite a concurrent acceptance (which would strand a
+  // filled slot with no accepted application).
+  assert.strictEqual(appTransitionMock.mock.callCount(), 1);
+  const [rejectFilter, rejectUpdate] = appTransitionMock.mock.calls[0].arguments;
+  assert.deepStrictEqual(rejectFilter, { _id: "APP_A", status: { $ne: "accepted" } });
+  assert.deepStrictEqual(rejectUpdate, { $set: { status: "rejected" } });
+  assert.strictEqual(jobState.filledWorkers, 0, "rejection never consumes capacity");
+  assert.strictEqual(notificationCreateMock.mock.callCount(), 1);
+  assert.strictEqual(notificationCreateMock.mock.calls[0].arguments[0].type, "application_update");
 });

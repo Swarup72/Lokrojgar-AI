@@ -1,4 +1,4 @@
-import client from "./client";
+import client, { AI_REQUEST_TIMEOUT_MS } from "./client";
 
 /**
  * Public. NOTE: intentionally no "search" keyword param - the backend
@@ -38,7 +38,20 @@ export function getEmployerMine() {
  * @param {{title:{mr?:string,hi?:string,en?:string}, description?:{mr?:string,hi?:string,en?:string}, originalLanguage:string, categoryId:string, skillIds?:string[], city?:string, address?:string, coordinates:[number,number], payType:string, payAmount:number, requiredWorkers:number, startDate:string, experienceRequired?:number, preferredLanguages?:string[], shiftType?:string, startTime?:string, endTime?:string}} payload
  */
 export function create(payload) {
-  return client.post("/jobs", payload).then((res) => res.data.data);
+  // Long timeout: creation waits on two AI-service translations. Timing out
+  // in the browser while the server still saves the job would invite a
+  // duplicate post from the user.
+  return client.post("/jobs", payload, { timeout: AI_REQUEST_TIMEOUT_MS }).then((res) => res.data.data);
+}
+
+export function getById(jobId) {
+  return client.get(`/jobs/${jobId}`).then((res) => res.data.data);
+}
+
+export function update(jobId, payload) {
+  return client
+    .patch(`/jobs/${jobId}`, payload, { timeout: AI_REQUEST_TIMEOUT_MS })
+    .then((res) => res.data.data);
 }
 
 export function cancel(jobId) {
@@ -47,4 +60,16 @@ export function cancel(jobId) {
 
 export function close(jobId) {
   return client.post(`/jobs/${jobId}/close`).then((res) => res.data.data);
+}
+
+export function reopen(jobId, payload = {}) {
+  return client.post(`/jobs/${jobId}/reopen`, payload).then((res) => res.data.data);
+}
+
+export function remove(jobId) {
+  return client.delete(`/jobs/${jobId}`).then((res) => res.data.data);
+}
+
+export function updateStatus(jobId, status) {
+  return client.patch(`/jobs/${jobId}/status`, { status }).then((res) => res.data.data);
 }

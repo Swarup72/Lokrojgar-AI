@@ -31,6 +31,7 @@ export function VoiceProfilePage() {
   const [audioSource, setAudioSource] = useState(null); // Blob | File
   const [voiceProfile, setVoiceProfile] = useState(null);
   const [confirmedProfile, setConfirmedProfile] = useState(null);
+  const [skillResolution, setSkillResolution] = useState(null);
   const [error, setError] = useState(null);
   const [saving, setSaving] = useState(false);
 
@@ -52,9 +53,17 @@ export function VoiceProfilePage() {
     setSaving(true);
     setError(null);
     try {
-      const updatedProfile = await voiceProfileApi.confirm(voiceProfile._id, confirmedFields);
+      // The confirm response shape is { workerProfile, voiceSkillResolution }
+      // (not the bare WorkerProfile it used to be) since the backend now
+      // resolves voice-extracted skills/preferredJobCategories against the
+      // real catalog instead of silently ignoring them.
+      const { workerProfile, voiceSkillResolution } = await voiceProfileApi.confirm(
+        voiceProfile._id,
+        confirmedFields
+      );
       await refreshBootstrap();
-      setConfirmedProfile(updatedProfile);
+      setConfirmedProfile(workerProfile);
+      setSkillResolution(voiceSkillResolution);
       setStep("success");
     } catch (err) {
       setError(normalizeError(err));
@@ -90,7 +99,12 @@ export function VoiceProfilePage() {
 
         {step === "language" && (
           <div className="voice-language-step">
-            <p className="voice-step-label">Choose your language</p>
+            {/* This selects the SPOKEN language forwarded to Whisper
+                (voiceProfileApi.extract -> backend -> STT), not the app's UI
+                language. The old "Choose your language" read as a UI setting,
+                so a worker with a Marathi interface would record in English
+                and have it decoded as Marathi. */}
+            <p className="voice-step-label">Which language will you speak?</p>
             <div className="voice-language-options">
               {APP_LANGUAGES.map((lang) => (
                 <button
@@ -156,7 +170,9 @@ export function VoiceProfilePage() {
           />
         )}
 
-        {step === "success" && <VoiceProfileSuccess workerProfile={confirmedProfile} />}
+        {step === "success" && (
+          <VoiceProfileSuccess workerProfile={confirmedProfile} skillResolution={skillResolution} />
+        )}
       </Card>
 
       {step !== "success" && (

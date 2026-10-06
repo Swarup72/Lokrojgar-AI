@@ -25,6 +25,7 @@ export function ApplicantsPage() {
   const [job, setJob] = useState(location.state?.job || null);
   const [ratedApplicationIds, setRatedApplicationIds] = useState(new Set());
   const [ratingApplicationId, setRatingApplicationId] = useState(null);
+  const [submittingRating, setSubmittingRating] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [closingJob, setClosingJob] = useState(false);
 
@@ -66,6 +67,7 @@ export function ApplicantsPage() {
   };
 
   const handleRate = async (application, payload) => {
+    setSubmittingRating(true);
     try {
       await ratingsApi.submit({ jobId: job._id, toUserId: application.workerId.userId._id, ...payload });
       setRatedApplicationIds((prev) => new Set(prev).add(application._id));
@@ -82,6 +84,8 @@ export function ApplicantsPage() {
       } else {
         setActionError(normalized);
       }
+    } finally {
+      setSubmittingRating(false);
     }
   };
 
@@ -137,7 +141,7 @@ export function ApplicantsPage() {
         );
       }
       if (ratingApplicationId === application._id) {
-        return <RatingForm onSubmit={(payload) => handleRate(application, payload)} submitting={false} />;
+        return <RatingForm onSubmit={(payload) => handleRate(application, payload)} submitting={submittingRating} />;
       }
       return (
         <button type="button" className="btn btn-secondary" onClick={() => setRatingApplicationId(application._id)}>

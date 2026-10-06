@@ -36,3 +36,7 @@ export function setStatus(applicationId, status) {
 export function complete(applicationId) {
   return client.patch(`/applications/${applicationId}/complete`).then((res) => res.data.data);
 }
+
+export function getById(applicationId) {
+  return client.get(`/applications/${applicationId}`).then((res) => res.data.data);
+}

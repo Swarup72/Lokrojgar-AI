@@ -76,6 +76,20 @@ def test_job_to_workers_success():
     assert len(body["matches"]) == 1
 
 
+def test_workers_for_job_ineligible_job_returns_empty_matches_same_contract():
+    # H-4: same 200 response shape as an eligible job - just no matches.
+    response = client.post(
+        "/recommendations/workers-for-job",
+        json={"job": _job_payload(status="cancelled"), "workers": [_worker_payload()], "worker_skills": []},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["direction"] == "job_to_workers"
+    assert body["anchor_id"] == "JOB001"
+    assert body["matches"] == []
+
+
 def test_invalid_request_returns_422():
     # "worker" is a required field of the request body - omitting it
     # entirely must fail Pydantic validation, not be silently accepted.

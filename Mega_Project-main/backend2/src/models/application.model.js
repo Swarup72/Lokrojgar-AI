@@ -29,6 +29,12 @@ const applicationSchema = new mongoose.Schema(
       min: 0,
     },
 
+    coverNote: {
+      type: String,
+      trim: true,
+      default: "",
+    },
+
     appliedAt: {
       type: Date,
       default: Date.now,

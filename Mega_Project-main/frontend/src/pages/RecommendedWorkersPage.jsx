@@ -59,7 +59,13 @@ export function RecommendedWorkersPage() {
       {!loading && !error && matches?.length > 0 && (
         <div className="recommended-workers-list">
           {matches.map((match) => (
-            <WorkerCard key={match.worker._id} worker={match.worker} matchScore={match.matchScore} matchFactors={match.matchFactors} />
+            <WorkerCard
+              key={match.worker._id}
+              worker={match.worker}
+              matchScore={match.matchScore}
+              matchFactors={match.matchFactors}
+              explanation={match.explanation}
+            />
           ))}
         </div>
       )}

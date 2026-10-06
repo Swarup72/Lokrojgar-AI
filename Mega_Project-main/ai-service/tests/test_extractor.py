@@ -3,65 +3,76 @@ import json
 from types import SimpleNamespace
 
 import pytest
-from sarvamai.core.api_error import ApiError
 
-from app.extraction.extractor import extract_profile_from_transcript
-from app.sarvam.errors import AiServiceUnavailableError, SarvamProviderError
+from app.extraction.extractor import extract_profile_from_transcript, get_extraction_provider
+from app.extraction.local_llm_extractor import LocalLLMExtractor
+from app.extraction.models import ExtractedProfile
+from app.extraction.sarvam_extractor import SarvamExtractor
+from app.sarvam.errors import AiServiceUnavailableError
 
-
-def _chat_response(content: str):
-    return SimpleNamespace(choices=[SimpleNamespace(message=SimpleNamespace(content=content))])
-
-
-class _FakeChat:
-    def __init__(self, response=None, error=None):
-        self._response = response
-        self._error = error
-        self.calls = []
-
-    async def completions(self, **kwargs):
-        self.calls.append(kwargs)
-        if self._error is not None:
-            raise self._error
-        return self._response
+# --- get_extraction_provider() - provider selection -------------------------
 
 
-class _FakeClient:
-    def __init__(self, chat):
-        self.chat = chat
+def test_defaults_to_local_llm_when_unset(monkeypatch):
+    monkeypatch.delenv("EXTRACTION_PROVIDER", raising=False)
+    assert isinstance(get_extraction_provider(), LocalLLMExtractor)
 
 
-def _patch_client(monkeypatch, client):
-    monkeypatch.setattr("app.extraction.extractor.get_sarvam_client", lambda: client)
+def test_selects_local_llm_explicitly(monkeypatch):
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "local_llm")
+    assert isinstance(get_extraction_provider(), LocalLLMExtractor)
 
 
-def test_extract_profile_success(monkeypatch):
+def test_selects_sarvam_explicitly(monkeypatch):
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "sarvam")
+    assert isinstance(get_extraction_provider(), SarvamExtractor)
+
+
+def test_provider_selection_is_case_insensitive(monkeypatch):
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "SARVAM")
+    assert isinstance(get_extraction_provider(), SarvamExtractor)
+
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "Local_LLM")
+    assert isinstance(get_extraction_provider(), LocalLLMExtractor)
+
+
+def test_unknown_provider_raises_ai_service_unavailable(monkeypatch):
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "some-provider-that-does-not-exist")
+
+    with pytest.raises(AiServiceUnavailableError):
+        get_extraction_provider()
+
+
+# --- extract_profile_from_transcript() - dispatch behavior -------------------
+
+
+def test_extract_profile_delegates_to_the_selected_provider(monkeypatch):
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "local_llm")
+    captured = {}
+
+    async def fake_extract(self, transcript):
+        captured["transcript"] = transcript
+        return ExtractedProfile(fullName="Delegated Name")
+
+    monkeypatch.setattr(LocalLLMExtractor, "extract", fake_extract)
+
+    profile = asyncio.run(extract_profile_from_transcript("some transcript"))
+
+    assert profile.full_name == "Delegated Name"
+    assert captured["transcript"] == "some transcript"
+
+
+def test_extract_profile_with_sarvam_provider_still_works_through_the_abstraction(monkeypatch):
+    """
+    Confirms SarvamExtractor remains fully reachable and functional through
+    the provider-agnostic extract_profile_from_transcript() dispatcher -
+    Sarvam is being kept available, not silently broken by this migration.
+    """
+
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "sarvam")
+
     payload = {
-        "fullName": "Ramesh Patil",
-        "experienceYears": 5,
-        "expectedPay": 800,
-        "skills": ["plumbing"],
-        "city": "Pune",
-        "bio": "Experienced plumber",
-        "availability": "available",
-        "languages": ["mr", "hi"],
-        "preferredJobCategories": None,
-    }
-    chat = _FakeChat(response=_chat_response(json.dumps(payload)))
-    _patch_client(monkeypatch, _FakeClient(chat))
-
-    profile = asyncio.run(extract_profile_from_transcript("मी प्लंबर आहे, ५ वर्ष अनुभव"))
-
-    assert profile.full_name == "Ramesh Patil"
-    assert profile.experience_years == 5
-    assert profile.skills == ["plumbing"]
-    assert profile.availability == "available"
-    assert chat.calls[0]["response_format"]["json_schema"]["strict"] is True
-
-
-def test_extract_profile_all_null_fields_valid(monkeypatch):
-    payload = {
-        "fullName": None,
+        "fullName": "Sarvam Path",
         "experienceYears": None,
         "expectedPay": None,
         "skills": None,
@@ -71,60 +82,31 @@ def test_extract_profile_all_null_fields_valid(monkeypatch):
         "languages": None,
         "preferredJobCategories": None,
     }
-    _patch_client(monkeypatch, _FakeClient(_FakeChat(response=_chat_response(json.dumps(payload)))))
+    response = SimpleNamespace(
+        choices=[SimpleNamespace(message=SimpleNamespace(content=json.dumps(payload)))]
+    )
 
-    profile = asyncio.run(extract_profile_from_transcript("..."))
+    class _FakeSpeechChat:
+        async def completions(self, **kwargs):
+            return response
 
-    assert profile.full_name is None
-    assert profile.skills is None
+    class _FakeClient:
+        chat = _FakeSpeechChat()
 
+    monkeypatch.setattr("app.extraction.sarvam_extractor.get_sarvam_client", lambda: _FakeClient())
 
-def test_extract_profile_raises_when_no_client(monkeypatch):
-    _patch_client(monkeypatch, None)
+    profile = asyncio.run(extract_profile_from_transcript("transcript"))
 
-    with pytest.raises(AiServiceUnavailableError):
-        asyncio.run(extract_profile_from_transcript("transcript"))
-
-
-def test_extract_profile_raises_on_empty_content(monkeypatch):
-    _patch_client(monkeypatch, _FakeClient(_FakeChat(response=_chat_response(""))))
-
-    with pytest.raises(ValueError):
-        asyncio.run(extract_profile_from_transcript("transcript"))
+    assert profile.full_name == "Sarvam Path"
 
 
-def test_extract_profile_raises_on_malformed_json(monkeypatch):
-    _patch_client(monkeypatch, _FakeClient(_FakeChat(response=_chat_response("not json"))))
+def test_extract_profile_propagates_provider_exceptions_unchanged(monkeypatch):
+    monkeypatch.setenv("EXTRACTION_PROVIDER", "local_llm")
 
-    with pytest.raises(ValueError):
-        asyncio.run(extract_profile_from_transcript("transcript"))
+    async def fake_extract(self, transcript):
+        raise ValueError("bad output")
 
-
-def test_extract_profile_raises_on_schema_validation_failure(monkeypatch):
-    # experienceYears must be >= 0 - a negative value must fail Pydantic
-    # validation even though it round-tripped as valid JSON.
-    payload = {
-        "fullName": "X",
-        "experienceYears": -5,
-        "expectedPay": None,
-        "skills": None,
-        "city": None,
-        "bio": None,
-        "availability": None,
-        "languages": None,
-        "preferredJobCategories": None,
-    }
-    _patch_client(monkeypatch, _FakeClient(_FakeChat(response=_chat_response(json.dumps(payload)))))
+    monkeypatch.setattr(LocalLLMExtractor, "extract", fake_extract)
 
     with pytest.raises(ValueError):
         asyncio.run(extract_profile_from_transcript("transcript"))
-
-
-def test_extract_profile_wraps_api_error_as_provider_error(monkeypatch):
-    error = ApiError(status_code=401, body="invalid key")
-    _patch_client(monkeypatch, _FakeClient(_FakeChat(error=error)))
-
-    with pytest.raises(SarvamProviderError) as exc_info:
-        asyncio.run(extract_profile_from_transcript("transcript"))
-
-    assert exc_info.value.status_code == 401

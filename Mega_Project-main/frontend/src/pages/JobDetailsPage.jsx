@@ -1,47 +1,116 @@
-import { useState } from "react";
-import { useLocation, useNavigate, Link } from "react-router-dom";
-import { MapPin, Wallet, Briefcase, Clock, Languages, CalendarDays, ArrowLeft } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { useLocation, useNavigate, useParams, Link } from "react-router-dom";
+import {
+  MapPin,
+  Wallet,
+  Briefcase,
+  Clock,
+  Languages,
+  CalendarDays,
+  ArrowLeft,
+  Users,
+} from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import { pickLocalizedText } from "../utils/localizedText";
 import { USER_ROLES } from "../utils/enums";
+import * as jobsApi from "../api/jobs";
 import * as applicationsApi from "../api/applications";
 import { normalizeError } from "../api/client";
 import { Card } from "../components/common/Card";
 import { Button } from "../components/common/Button";
+import { StatusPill } from "../components/common/StatusPill";
+import { Spinner } from "../components/common/Spinner";
 import { ErrorBanner } from "../components/common/ErrorBanner";
 import { EmptyState } from "../components/common/EmptyState";
+import { JobStatusActions } from "../components/jobs/JobStatusActions";
 import "./JobDetailsPage.css";
 
 export function JobDetailsPage() {
+  const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, employerProfile } = useAuth();
   const { language } = useLanguage();
-  const job = location.state?.job;
+
+  const [job, setJob] = useState(location.state?.job || null);
+  const [loading, setLoading] = useState(!location.state?.job);
+  const [fetchError, setFetchError] = useState(null);
 
   const [coverNote, setCoverNote] = useState("");
   const [applying, setApplying] = useState(false);
   const [applyError, setApplyError] = useState(null);
   const [applied, setApplied] = useState(false);
 
+  const fetchJob = useCallback(() => {
+    if (!id) return;
+    setLoading(true);
+    setFetchError(null);
+    jobsApi
+      .getById(id)
+      .then((data) => {
+        setJob(data);
+      })
+      .catch((err) => {
+        setFetchError(normalizeError(err));
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [id]);
+
+  useEffect(() => {
+    if (!job && id) {
+      fetchJob();
+    }
+  }, [id, job, fetchJob]);
+
+  if (loading) {
+    return (
+      <div className="container" style={{ padding: "60px 0" }}>
+        <Spinner label="Loading job details..." />
+      </div>
+    );
+  }
+
+  if (fetchError && !job) {
+    return (
+      <div className="container" style={{ padding: "40px 0", maxWidth: 720 }}>
+        <ErrorBanner error={fetchError} onRetry={fetchJob} />
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => navigate(-1)}
+          style={{ marginTop: 16 }}
+        >
+          <ArrowLeft size={16} aria-hidden="true" /> Go Back
+        </button>
+      </div>
+    );
+  }
+
   if (!job) {
     return (
       <div className="container" style={{ padding: "60px 0" }}>
         <EmptyState
           icon={Briefcase}
-          title="Open this job from the jobs list"
-          description="Job details aren't available on a direct link yet - please browse from the jobs list."
-          action={<Link to="/jobs">Go to Find Jobs</Link>}
+          title="Job not found"
+          description="The job you're looking for does not exist or has been removed."
+          action={<Link to="/jobs">Browse Find Jobs</Link>}
         />
       </div>
     );
   }
 
   const title = job.titleText || pickLocalizedText(job.title, language, job.originalLanguage);
-  const description = job.descriptionText || pickLocalizedText(job.description, language, job.originalLanguage);
+  const description =
+    job.descriptionText || pickLocalizedText(job.description, language, job.originalLanguage);
   const employerName = typeof job.employerId === "object" ? job.employerId?.businessName : null;
   const isWorker = user?.roles?.includes(USER_ROLES.WORKER);
+  const isOwner =
+    job.isOwner ||
+    (employerProfile &&
+      String(employerProfile._id) === String(job.employerId?._id || job.employerId));
   const isOpen = job.status === "open";
 
   const handleApply = async (event) => {
@@ -58,19 +127,92 @@ export function JobDetailsPage() {
     }
   };
 
+  const handleEmployerAction = (action) => {
+    if (action === "delete") {
+      navigate("/employer-dashboard", { state: { message: "Job deleted successfully." } });
+    } else {
+      fetchJob();
+    }
+  };
+
   return (
     <div className="container job-details-page">
       <button type="button" className="job-details-back" onClick={() => navigate(-1)}>
         <ArrowLeft size={16} aria-hidden="true" /> Back
       </button>
 
+      {location.state?.message && (
+        <div
+          style={{
+            background: "var(--color-success-bg, #ecfdf5)",
+            color: "var(--color-success-text, #065f46)",
+            padding: "12px 16px",
+            borderRadius: "var(--radius-md)",
+            marginBottom: 20,
+            fontSize: "var(--text-sm)",
+            fontWeight: 500,
+          }}
+        >
+          {location.state.message}
+        </div>
+      )}
+
+      {isOwner && (
+        <Card className="job-employer-bar" style={{ marginBottom: 20, padding: 20 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 12,
+              marginBottom: 16,
+            }}
+          >
+            <div>
+              <span
+                style={{
+                  fontSize: "var(--text-xs)",
+                  color: "var(--color-muted)",
+                  textTransform: "uppercase",
+                  fontWeight: 600,
+                  display: "block",
+                  marginBottom: 4,
+                }}
+              >
+                Employer Management
+              </span>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <StatusPill status={job.status} />
+                <span style={{ fontSize: "var(--text-sm)", color: "var(--color-text-2)" }}>
+                  <Users size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />
+                  {job.filledWorkers || 0} of {job.requiredWorkers || 1} workers hired
+                </span>
+              </div>
+            </div>
+          </div>
+          <JobStatusActions job={job} onActionCompleted={handleEmployerAction} />
+        </Card>
+      )}
+
       <Card className="job-details-card">
         <div className="job-details-header">
           <div className="job-details-icon">
             <Briefcase size={28} aria-hidden="true" />
           </div>
-          <div>
-            <h1>{title || "Untitled job"}</h1>
+          <div style={{ flex: 1 }}>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <h1>{title || "Untitled job"}</h1>
+              <StatusPill status={job.status} />
+            </div>
             {employerName && <p className="job-details-employer">{employerName}</p>}
           </div>
         </div>
@@ -79,7 +221,10 @@ export function JobDetailsPage() {
           {job.city && (
             <div className="job-details-info">
               <MapPin size={17} aria-hidden="true" />
-              <span>{job.city}</span>
+              <span>
+                {job.city}
+                {job.address ? ` (${job.address})` : ""}
+              </span>
             </div>
           )}
           <div className="job-details-info">
@@ -88,16 +233,29 @@ export function JobDetailsPage() {
               ₹{job.payAmount} / {job.payType}
             </span>
           </div>
+          <div className="job-details-info">
+            <Users size={17} aria-hidden="true" />
+            <span>
+              {job.requiredWorkers} needed ({job.filledWorkers || 0} hired)
+            </span>
+          </div>
           {typeof job.experienceRequired === "number" && (
             <div className="job-details-info">
               <Briefcase size={17} aria-hidden="true" />
-              <span>{job.experienceRequired}+ years experience</span>
+              <span>
+                {job.experienceRequired === 0
+                  ? "No experience required"
+                  : `${job.experienceRequired}+ years experience`}
+              </span>
             </div>
           )}
           {job.shiftType && (
             <div className="job-details-info">
               <Clock size={17} aria-hidden="true" />
-              <span>{job.shiftType} shift</span>
+              <span>
+                {job.shiftType} shift
+                {job.startTime && job.endTime ? ` (${job.startTime} - ${job.endTime})` : ""}
+              </span>
             </div>
           )}
           {job.preferredLanguages?.length > 0 && (
@@ -112,6 +270,14 @@ export function JobDetailsPage() {
               <span>Starts {new Date(job.startDate).toLocaleDateString()}</span>
             </div>
           )}
+          {job.applicationDeadline && (
+            <div className="job-details-info">
+              <CalendarDays size={17} aria-hidden="true" />
+              <span>
+                Deadline {new Date(job.applicationDeadline).toLocaleDateString()}
+              </span>
+            </div>
+          )}
         </div>
 
         {description && (
@@ -121,54 +287,58 @@ export function JobDetailsPage() {
           </div>
         )}
 
-        {Array.isArray(job.skillIds) && job.skillIds.length > 0 && typeof job.skillIds[0] === "object" && (
-          <div className="job-details-skills">
-            {job.skillIds.map((skill) => (
-              <span className="job-details-skill-tag" key={skill._id}>
-                {pickLocalizedText(skill.nameMultilingual || skill.name, language) ||
-                  (typeof skill.name === "string" ? skill.name : "")}
-              </span>
-            ))}
+        {Array.isArray(job.skillIds) &&
+          job.skillIds.length > 0 &&
+          typeof job.skillIds[0] === "object" && (
+            <div className="job-details-skills">
+              {job.skillIds.map((skill) => (
+                <span className="job-details-skill-tag" key={skill._id}>
+                  {pickLocalizedText(skill.nameMultilingual || skill.name, language) ||
+                    (typeof skill.name === "string" ? skill.name : "")}
+                </span>
+              ))}
+            </div>
+          )}
+
+        {!isOwner && (
+          <div className="job-details-apply">
+            {!isAuthenticated && (
+              <p className="job-details-apply-hint">
+                <Link to="/login">Log in</Link> as a worker to apply for this job.
+              </p>
+            )}
+
+            {isAuthenticated && !isWorker && (
+              <p className="job-details-apply-hint">Only worker accounts can apply for jobs.</p>
+            )}
+
+            {isAuthenticated && isWorker && !isOpen && (
+              <p className="job-details-apply-hint">This job is no longer accepting new applications.</p>
+            )}
+
+            {isAuthenticated && isWorker && isOpen && !applied && (
+              <form onSubmit={handleApply}>
+                {applyError && <ErrorBanner error={applyError} />}
+                <label className="job-details-cover-note">
+                  <span>
+                    Cover note <em>(optional)</em>
+                  </span>
+                  <textarea
+                    rows={3}
+                    value={coverNote}
+                    onChange={(event) => setCoverNote(event.target.value)}
+                    placeholder="Tell the employer why you're a good fit..."
+                  />
+                </label>
+                <Button type="submit" size="lg" disabled={applying}>
+                  {applying ? "Applying..." : "Apply for this job"}
+                </Button>
+              </form>
+            )}
+
+            {applied && <p className="job-details-applied">You've applied for this job.</p>}
           </div>
         )}
-
-        <div className="job-details-apply">
-          {!isAuthenticated && (
-            <p className="job-details-apply-hint">
-              <Link to="/login">Log in</Link> as a worker to apply for this job.
-            </p>
-          )}
-
-          {isAuthenticated && !isWorker && (
-            <p className="job-details-apply-hint">Only worker accounts can apply for jobs.</p>
-          )}
-
-          {isAuthenticated && isWorker && !isOpen && (
-            <p className="job-details-apply-hint">This job is no longer accepting new applications.</p>
-          )}
-
-          {isAuthenticated && isWorker && isOpen && !applied && (
-            <form onSubmit={handleApply}>
-              {applyError && <ErrorBanner error={applyError} />}
-              <label className="job-details-cover-note">
-                <span>
-                  Cover note <em>(optional)</em>
-                </span>
-                <textarea
-                  rows={3}
-                  value={coverNote}
-                  onChange={(event) => setCoverNote(event.target.value)}
-                  placeholder="Tell the employer why you're a good fit..."
-                />
-              </label>
-              <Button type="submit" size="lg" disabled={applying}>
-                {applying ? "Applying..." : "Apply for this job"}
-              </Button>
-            </form>
-          )}
-
-          {applied && <p className="job-details-applied">You've applied for this job.</p>}
-        </div>
       </Card>
     </div>
   );

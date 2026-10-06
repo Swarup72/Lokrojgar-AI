@@ -21,3 +21,11 @@
 .match-factors-list li.unavailable {
   color: var(--color-faint);
 }
+
+.match-factors-summary {
+  margin: 6px 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+

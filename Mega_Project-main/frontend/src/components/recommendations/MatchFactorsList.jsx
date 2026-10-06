@@ -21,20 +21,41 @@ const LABELS = {
  * match is bad.
  * @param {{matchFactors: Record<string, number|null>}} props
  */
-export function MatchFactorsList({ matchFactors }) {
+export function MatchFactorsList({ matchFactors, explanation }) {
   if (!matchFactors) return null;
 
   return (
-    <ul className="match-factors-list">
-      {MATCH_FACTOR_ORDER.map((factor) => {
-        const available = matchFactors[factor] !== null && matchFactors[factor] !== undefined;
-        return (
-          <li key={factor} className={available ? "available" : "unavailable"}>
-            {available ? <Check size={13} aria-hidden="true" /> : <Minus size={13} aria-hidden="true" />}
-            <span>{LABELS[factor]}</span>
-          </li>
-        );
-      })}
-    </ul>
+    <div className="match-factors-container">
+      <ul className="match-factors-list">
+        {MATCH_FACTOR_ORDER.map((factor) => {
+          const factorVal = matchFactors[factor];
+          const available = factorVal !== null && factorVal !== undefined;
+          const factorExp = explanation?.factors?.find((f) => f.factor === factor);
+          const tooltip =
+            factorExp?.summary ||
+            (available
+              ? `${LABELS[factor]}: ${Math.round(factorVal)}%`
+              : `${LABELS[factor]}: Not available`);
+
+          return (
+            <li
+              key={factor}
+              className={available ? "available" : "unavailable"}
+              title={tooltip}
+            >
+              {available ? <Check size={13} aria-hidden="true" /> : <Minus size={13} aria-hidden="true" />}
+              <span>
+                {LABELS[factor]}
+                {available && typeof factorVal === "number" ? ` (${Math.round(factorVal)}%)` : ""}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      {explanation?.summary && (
+        <p className="match-factors-summary">{explanation.summary}</p>
+      )}
+    </div>
   );
 }
+

@@ -13,6 +13,22 @@ export const uploadAudioAndExtract = asyncHandler(async (req, res) => {
   const { language } = req.body;
   if (!req.file) throw new ApiError(400, "Audio file is required");
 
+  // A zero-byte upload is bad input, not a server fault. MediaRecorder
+  // produces an empty Blob when a recording is stopped before any audio
+  // chunk arrives (a very short tap on Record), and AudioUploader already
+  // rejects empty *files* client-side - but nothing guarded an empty
+  // *recording*. Without this it reached Whisper, failed there, and
+  // surfaced as a 500 "Failed to process voice recording", which the UI
+  // shows as a generic error with nothing the worker can act on.
+  // The temp file is removed here because the try/finally that normally
+  // cleans it up is further down.
+  // Strictly === 0: an absent size means "unknown", which is not the same
+  // as "empty" and must not be rejected.
+  if (req.file.size === 0) {
+    if (fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+    throw new ApiError(400, "The recording is empty. Please record again and speak for a few seconds.");
+  }
+
   const workerProfile = await WorkerProfile.findOne({ userId: req.user._id });
   if (!workerProfile) throw new ApiError(404, "Worker profile not found");
 

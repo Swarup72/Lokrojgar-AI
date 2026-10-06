@@ -2,6 +2,11 @@ import { useState } from "react";
 import { Star } from "lucide-react";
 import "./RatingForm.css";
 
+// Mirrors MAX_REVIEW_LENGTH in backend2/src/validators/rating.validator.js.
+// Enforced here too so an over-long review is impossible to submit rather
+// than bouncing back as a 400 after the user has written it.
+export const MAX_REVIEW_LENGTH = 1000;
+
 /** @param {{onSubmit: (payload:{score:number, review?:string}) => Promise<void>, submitting: boolean}} props */
 export function RatingForm({ onSubmit, submitting }) {
   const [score, setScore] = useState(0);
@@ -11,6 +16,8 @@ export function RatingForm({ onSubmit, submitting }) {
   const handleSubmit = (event) => {
     event.preventDefault();
     if (score === 0) return;
+    // score comes only from the five buttons, so it is always a whole
+    // 1-5 star - the backend rejects anything else (fractional included).
     onSubmit({ score, review: review || undefined });
   };
 
@@ -32,6 +39,7 @@ export function RatingForm({ onSubmit, submitting }) {
       </div>
       <textarea
         rows={2}
+        maxLength={MAX_REVIEW_LENGTH}
         placeholder="Leave a comment (optional)"
         value={review}
         onChange={(event) => setReview(event.target.value)}

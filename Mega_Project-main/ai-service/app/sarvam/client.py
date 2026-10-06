@@ -4,12 +4,12 @@ import os
 from typing import Awaitable, Callable, Optional, TypeVar
 
 import httpx
-from sarvamai import AsyncSarvamAI
-from sarvamai.core.api_error import ApiError as SarvamApiError
+
+from app.sarvam.errors import AiServiceUnavailableError, SarvamApiError
 
 logger = logging.getLogger(__name__)
 
-_cached_client: Optional[AsyncSarvamAI] = None
+_cached_client: Optional[object] = None
 _cached_api_key: Optional[str] = None
 
 # docs.sarvam.ai/api/getting-started/models/saaras: "saaras:v3 (default,
@@ -34,7 +34,7 @@ _RETRYABLE_STATUS_CODES = {429, 500, 502, 503, 504}
 T = TypeVar("T")
 
 
-def get_sarvam_client() -> Optional[AsyncSarvamAI]:
+def get_sarvam_client() -> Optional[object]:
     """
     Returns the shared async Sarvam client, or None when no API key is
     configured. Reads SARVAM_API_KEY fresh on every call (rather than
@@ -59,6 +59,16 @@ def get_sarvam_client() -> Optional[AsyncSarvamAI]:
 
     if _cached_client is not None and _cached_api_key == api_key:
         return _cached_client
+
+    # Imported here, not at module scope, so FastAPI can start on a machine
+    # without the optional sarvamai SDK. A missing SDK surfaces as the same
+    # clean "unavailable" error an unset SARVAM_API_KEY produces.
+    try:
+        from sarvamai import AsyncSarvamAI
+    except ModuleNotFoundError as error:
+        raise AiServiceUnavailableError(
+            "Sarvam is configured (SARVAM_API_KEY is set) but the 'sarvamai' package is not installed."
+        ) from error
 
     _cached_client = AsyncSarvamAI(api_subscription_key=api_key)
     _cached_api_key = api_key

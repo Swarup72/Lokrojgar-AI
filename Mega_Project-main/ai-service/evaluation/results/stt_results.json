@@ -1,0 +1,145 @@
+{
+  "config": {
+    "stt_provider": "mlx_whisper",
+    "mlx_whisper_model": "mlx-community/whisper-large-v3-turbo"
+  },
+  "human_clip_accuracy": {
+    "fullName": {
+      "preserved": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "experienceYears": {
+      "preserved": 2,
+      "total": 2,
+      "rate": 1.0
+    },
+    "expectedPay": {
+      "preserved": 1,
+      "total": 3,
+      "rate": 0.3333333333333333
+    },
+    "city": {
+      "preserved": 0,
+      "total": 0,
+      "rate": null
+    },
+    "skills": {
+      "preserved": 2,
+      "total": 2,
+      "rate": 1.0
+    }
+  },
+  "human_clip_count": 5,
+  "non_human_clip_count": 2,
+  "rows": [
+    {
+      "id": "SYN-mr-en-codemix",
+      "source": "tts",
+      "language": "mr",
+      "status": "ok",
+      "error": null,
+      "intended_script": "माझं नाव सुनीता जाधव आहे. मला five years experience आहे electrician म्हणून. मी सध्या Pune मध्ये राहते आणि मला ten thousand rupees expected salary आहे.",
+      "transcript": "माजन नाव सुनीता जाधव आहे, मला 5 years experience आहे, एलेक्ट्रेशन महिनून, मीतर सध्या पुने मधे राहते आने मला 10,000 रुपीज एक्सपेक्टिब सालरी आहे.",
+      "confidence": null,
+      "preserved": {
+        "fullName": true,
+        "experienceYears": true,
+        "expectedPay": true,
+        "city": false
+      },
+      "notes": "Recovered from the earlier STT experiment. NOT accuracy evidence - synthesized speech."
+    },
+    {
+      "id": "SYN-hi-en-codemix",
+      "source": "tts",
+      "language": "hi",
+      "status": "ok",
+      "error": null,
+      "intended_script": "मेरा नाम राहुल शर्मा है। मुझे five years experience है plumber के तौर पर। मैं Mumbai में रहता हूं और मुझे fifteen thousand rupees salary चाहिए।",
+      "transcript": "मेरा नाम राहुल शर्मा है, मुझे 5 येर्ज एक्सपेरियन्स है प्लंबर के तौर पर, मैं मुंबई में रहता हूँ और मुझे 15,000 रुपीज सालरी चाहिए.",
+      "confidence": null,
+      "preserved": {
+        "fullName": true,
+        "experienceYears": true,
+        "expectedPay": true,
+        "city": true
+      },
+      "notes": "Recovered from the earlier STT experiment. NOT accuracy evidence - synthesized speech."
+    },
+    {
+      "id": "HUM-01-name-experience",
+      "source": "human",
+      "language": "mr",
+      "status": "ok",
+      "error": null,
+      "intended_script": "माझं नाव स्वरूप समीर पाल आहे. मला पाच वर्षांचा अनुभव आहे.",
+      "transcript": "माजव नाव, स्वरुप समीर पाला है, मला पाच और शता अनुभवा है.",
+      "confidence": null,
+      "preserved": {
+        "fullName": true,
+        "experienceYears": true
+      },
+      "notes": "Does the complete three-part name survive STT? This is the exact failure reported from the browser session."
+    },
+    {
+      "id": "HUM-02-pay-800",
+      "source": "human",
+      "language": "mr",
+      "status": "ok",
+      "error": null,
+      "intended_script": "मला आठशे रुपये रोज पाहिजे.",
+      "transcript": "मला अठशे रुपय रोज पहिजेत।",
+      "confidence": null,
+      "preserved": {
+        "expectedPay": false
+      },
+      "notes": "Marathi hundreds word. In the reported session आठशे was transcribed as आच्छे."
+    },
+    {
+      "id": "HUM-03-pay-10000",
+      "source": "human",
+      "language": "mr",
+      "status": "ok",
+      "error": null,
+      "intended_script": "मला दहा हजार रुपये रोज पाहिजे.",
+      "transcript": "मला, दहा हजार रुपये रोज पाइजेत.",
+      "confidence": null,
+      "preserved": {
+        "expectedPay": true
+      },
+      "notes": "Marathi thousands word."
+    },
+    {
+      "id": "HUM-04-skill-electrician",
+      "source": "human",
+      "language": "mr",
+      "status": "ok",
+      "error": null,
+      "intended_script": "मी इलेक्ट्रिशियनचं काम करतो.",
+      "transcript": "मी इलेक्ट्रिशियन्स काम करतो।",
+      "confidence": null,
+      "preserved": {
+        "skills": true
+      },
+      "notes": "Trade word only. In the reported session it became इलेक्टरिशिंची."
+    },
+    {
+      "id": "HUM-05-full-profile",
+      "source": "human",
+      "language": "mr",
+      "status": "ok",
+      "error": null,
+      "intended_script": "माझं नाव स्वरूप समीर पाल आहे. मला पाच वर्षांचा अनुभव आहे. मी इलेक्ट्रिशियनचं काम करतो आणि मला आठशे रुपये रोज पाहिजे.",
+      "transcript": "माचर नाव, स्वरुप समीर पाला हे, मला पाच वर्षाचा अनुभवा हे, मी इलेक्ट्रिशियन्च काम करतो, आनि मला आठशी रुपय रोज पहीजेत.",
+      "confidence": null,
+      "preserved": {
+        "fullName": true,
+        "experienceYears": true,
+        "expectedPay": false,
+        "skills": true
+      },
+      "notes": "Full realistic utterance - the closest match to how a worker actually speaks."
+    }
+  ]
+}

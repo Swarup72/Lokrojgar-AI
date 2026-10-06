@@ -517,3 +517,73 @@ test("confirmAndApplyToProfile: a worker with no extracted skills triggers no Wo
   assert.strictEqual(workerSkillUpsertMock.mock.callCount(), 0);
   assert.deepStrictEqual(res.body.data.voiceSkillResolution.skills, { resolved: [], unresolved: [] });
 });
+
+
+// =============================================================================
+// An empty recording is bad input, not a server fault.
+//
+// MediaRecorder yields a zero-byte Blob when a recording is stopped before
+// any audio chunk arrives (a quick tap on Record). AudioUploader already
+// rejects empty *files* client-side, but nothing guarded an empty
+// *recording*: it reached Whisper, failed there, and surfaced as a 500
+// "Failed to process voice recording" - a generic error the worker cannot
+// act on. It must be a 400 that says what to do instead.
+// =============================================================================
+
+test("uploadAudioAndExtract: a zero-byte recording is rejected with 400, before any AI call", async (t) => {
+  const tempFilePath = new URL("./fixtures/empty-recording-test.webm", import.meta.url).pathname;
+  fs.writeFileSync(tempFilePath, Buffer.alloc(0));
+
+  const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => ({ _id: "WORKER001" }));
+  const restoreFetch = mockFetchOnce(async () => {
+    throw new Error("the AI service must not be called for an empty recording");
+  });
+  t.after(() => {
+    workerFindOneMock.mock.restore();
+    restoreFetch();
+    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+  });
+
+  const { req, res, next, done } = fakeReqRes({
+    user: { _id: "USER001" },
+    body: { language: "mr" },
+    file: { path: tempFilePath, size: 0, originalname: "blob", mimetype: "audio/webm" },
+  });
+  uploadAudioAndExtract(req, res, next);
+  const { error } = await done;
+
+  assert.ok(error, "an empty recording must be rejected");
+  assert.strictEqual(error.statusCode, 400, "bad input is a 400, never a 500");
+  assert.match(error.message, /recording is empty/i);
+  assert.match(error.message, /record again/i, "the message must tell the worker what to do");
+  assert.strictEqual(fs.existsSync(tempFilePath), false, "the temp file must still be cleaned up");
+});
+
+test("uploadAudioAndExtract: a non-empty recording is still processed normally", async (t) => {
+  const tempFilePath = new URL("./fixtures/nonempty-recording-test.webm", import.meta.url).pathname;
+  fs.writeFileSync(tempFilePath, Buffer.from([1, 2, 3, 4]));
+
+  const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => ({ _id: "WORKER001" }));
+  const voiceUpsertMock = mock.method(VoiceProfile, "findOneAndUpdate", async (_f, update) => ({ _id: "VP1", ...update }));
+  const restoreFetch = mockFetchOnce(async () => ({
+    ok: true,
+    json: async () => ({ transcript: "ok", extracted_profile: VALID_EXTRACTION, confidence: 0.9 }),
+  }));
+  t.after(() => {
+    workerFindOneMock.mock.restore();
+    voiceUpsertMock.mock.restore();
+    restoreFetch();
+    if (fs.existsSync(tempFilePath)) fs.unlinkSync(tempFilePath);
+  });
+
+  const { req, res, next, done } = fakeReqRes({
+    user: { _id: "USER001" },
+    body: { language: "mr" },
+    file: { path: tempFilePath, size: 4, originalname: "blob", mimetype: "audio/webm" },
+  });
+  uploadAudioAndExtract(req, res, next);
+  const { error } = await done;
+
+  assert.strictEqual(error, null, "a real recording must not be blocked by the empty-file guard");
+  assert.strictEqual(res.statusCode, 200);
+});

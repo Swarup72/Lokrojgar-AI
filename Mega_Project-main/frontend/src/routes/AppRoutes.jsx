@@ -12,6 +12,7 @@ import { ProfilePage } from "../pages/ProfilePage";
 import { VoiceProfilePage } from "../pages/VoiceProfilePage";
 import { EmployerDashboardPage } from "../pages/EmployerDashboardPage";
 import { PostJobPage } from "../pages/PostJobPage";
+import { EditJobPage } from "../pages/EditJobPage";
 import { ApplicationsPage } from "../pages/ApplicationsPage";
 import { ApplicantsPage } from "../pages/ApplicantsPage";
 import { RecommendedWorkersPage } from "../pages/RecommendedWorkersPage";
@@ -73,6 +74,14 @@ export function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={[USER_ROLES.EMPLOYER]}>
               <PostJobPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/jobs/:id/edit"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.EMPLOYER]}>
+              <EditJobPage />
             </ProtectedRoute>
           }
         />

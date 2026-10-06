@@ -45,6 +45,28 @@ const WORKER_PROFILE_C_ID = "WORKERPROFILE_C"; // exists, but NOT accepted on th
 const WORKER_USER_C = "WORKER_USER_C";
 const UNRELATED_USER = "UNRELATED_USER";
 
+
+/**
+ * Emulates the atomic aggregate pipeline the controller now sends, and pins
+ * its shape while doing so. Every expression in a single $set stage reads the
+ * PRE-update document, which is exactly what makes concurrent ratings safe -
+ * so this mock applies the formula against the values held before the call.
+ */
+function applyRatingPipeline(profile, pipeline) {
+  assert.ok(Array.isArray(pipeline), "the aggregate update must be an update pipeline, not a JS-computed $set");
+  assert.strictEqual(pipeline.length, 1, "ratingAvg and ratingCount must update in ONE atomic stage");
+  const set = pipeline[0].$set;
+  assert.ok(set.ratingAvg && set.ratingCount, "both ratingAvg and ratingCount must be set atomically");
+  // The submitted score is the literal added to (ratingAvg * ratingCount).
+  const score = set.ratingAvg.$round[0].$divide[0].$add[1];
+  const oldCount = profile.ratingCount || 0;
+  const oldAvg = profile.ratingAvg || 0;
+  const newCount = oldCount + 1;
+  profile.ratingCount = newCount;
+  profile.ratingAvg = Math.round(((oldAvg * oldCount + score) / newCount) * 100) / 100;
+  return profile;
+}
+
 function completedJob(overrides = {}) {
   return { _id: JOB_ID, status: "completed", employerId: EMPLOYER_PROFILE_ID, ...overrides };
 }
@@ -98,18 +120,37 @@ function mockStandardScenario(t, { rating = null, ratingFindOneImpl = null, rati
   const employerProfileFindOneMock = mock.method(EmployerProfile, "findOne", async ({ userId }) =>
     userId === EMPLOYER_USER ? employerProfile : null
   );
+  // The aggregate is now a single atomic findOneAndUpdate, not findOne + save().
+  const workerProfileUpdateMock = mock.method(WorkerProfile, "findOneAndUpdate", async ({ userId }, pipeline) => {
+    if (userId === WORKER_USER_A) return applyRatingPipeline(workerProfileA, pipeline);
+    if (userId === WORKER_USER_B) return applyRatingPipeline(workerProfileB, pipeline);
+    return null;
+  });
+  const employerProfileUpdateMock = mock.method(EmployerProfile, "findOneAndUpdate", async ({ userId }, pipeline) =>
+    userId === EMPLOYER_USER ? applyRatingPipeline(employerProfile, pipeline) : null
+  );
 
   t.after(() => {
     jobFindByIdMock.mock.restore();
     employerFindByIdMock.mock.restore();
     applicationFindMock.mock.restore();
     ratingFindOneMock.mock.restore();
+    workerProfileUpdateMock.mock.restore();
+    employerProfileUpdateMock.mock.restore();
     ratingCreateMock.mock.restore();
     workerProfileFindOneMock.mock.restore();
     employerProfileFindOneMock.mock.restore();
   });
 
-  return { employerProfile, workerProfileA, workerProfileB, ratingCreateMock, ratingFindOneMock };
+  return {
+    employerProfile,
+    workerProfileA,
+    workerProfileB,
+    ratingCreateMock,
+    ratingFindOneMock,
+    workerProfileUpdateMock,
+    employerProfileUpdateMock,
+  };
 }
 
 function failIfRatingCreateCalled(t) {
@@ -176,13 +217,27 @@ test("submitRating: accepted worker rates the employer, succeeds and updates emp
   const workerProfileFindOneMock = mock.method(WorkerProfile, "findOne", async ({ userId }) =>
     userId === WORKER_USER_A ? workerProfileA : null
   );
-  const applicationFindOneMock = mock.method(Application, "findOne", async ({ workerId, status }) =>
-    workerId === WORKER_PROFILE_A_ID && status === "accepted" ? acceptedApplication(JOB_ID, workerProfileA) : null
-  );
+  // The worker direction must accept a COMPLETED application too - marking
+  // the work finished must not make the job unrateable.
+  const applicationFindOneMock = mock.method(Application, "findOne", async ({ workerId, status }) => {
+    assert.deepStrictEqual(
+      status,
+      { $in: ["accepted", "completed"] },
+      "the worker direction must query both rateable application statuses"
+    );
+    return workerId === WORKER_PROFILE_A_ID ? acceptedApplication(JOB_ID, workerProfileA) : null;
+  });
   const ratingFindOneMock = mock.method(Rating, "findOne", async () => null);
   const ratingCreateMock = mock.method(Rating, "create", async (doc) => ({ _id: "RATING002", ...doc }));
   const employerProfileFindOneMock = mock.method(EmployerProfile, "findOne", async ({ userId }) =>
     userId === EMPLOYER_USER ? employerProfile : null
+  );
+  // The aggregate is now a single atomic findOneAndUpdate, not findOne + save().
+  const workerProfileUpdateMock = mock.method(WorkerProfile, "findOneAndUpdate", async ({ userId }, pipeline) =>
+    userId === WORKER_USER_A ? applyRatingPipeline(workerProfileA, pipeline) : null
+  );
+  const employerProfileUpdateMock = mock.method(EmployerProfile, "findOneAndUpdate", async ({ userId }, pipeline) =>
+    userId === EMPLOYER_USER ? applyRatingPipeline(employerProfile, pipeline) : null
   );
   t.after(() => {
     jobFindByIdMock.mock.restore();
@@ -192,6 +247,8 @@ test("submitRating: accepted worker rates the employer, succeeds and updates emp
     ratingFindOneMock.mock.restore();
     ratingCreateMock.mock.restore();
     employerProfileFindOneMock.mock.restore();
+    workerProfileUpdateMock.mock.restore();
+    employerProfileUpdateMock.mock.restore();
   });
 
   const { req, res, next, done } = fakeReqRes({
@@ -416,18 +473,16 @@ function duplicateKeyError() {
   return error;
 }
 
-function spyOnSave(profile) {
-  let saveCalls = 0;
-  const originalSave = profile.save;
-  profile.save = async function () {
-    saveCalls += 1;
-    return originalSave.call(this);
-  };
-  return () => saveCalls;
+/**
+ * The aggregate is no longer a save() on a read document - "did not mutate
+ * the profile" now means the atomic update was never issued.
+ */
+function spyOnAggregateUpdate(scenario) {
+  return () => scenario.workerProfileUpdateMock.mock.callCount() + scenario.employerProfileUpdateMock.mock.callCount();
 }
 
 test("H-2: concurrent duplicate - pre-check sees nothing, Rating.create() hits E11000 -> 409, and the losing request does NOT mutate the profile", async (t) => {
-  const { workerProfileA, ratingCreateMock } = mockStandardScenario(t, {
+  const scenario = mockStandardScenario(t, {
     // Simulates the race: the winning concurrent request hasn't committed
     // yet when this one's pre-check runs, so it sees no existing rating.
     rating: null,
@@ -435,7 +490,8 @@ test("H-2: concurrent duplicate - pre-check sees nothing, Rating.create() hits E
       throw duplicateKeyError();
     },
   });
-  const getSaveCalls = spyOnSave(workerProfileA);
+  const { workerProfileA, ratingCreateMock } = scenario;
+  const getAggregateUpdates = spyOnAggregateUpdate(scenario);
 
   const { req, res, next, done } = fakeReqRes({
     user: { _id: EMPLOYER_USER },
@@ -448,7 +504,7 @@ test("H-2: concurrent duplicate - pre-check sees nothing, Rating.create() hits E
   assert.ok(error, "the losing request must receive a handled error");
   assert.strictEqual(error.statusCode, 409, "must be the conflict convention, not an unhandled 500");
   assert.strictEqual(ratingCreateMock.mock.callCount(), 1, "create was attempted and lost at the DB level");
-  assert.strictEqual(getSaveCalls(), 0, "the losing request must never save the target profile");
+  assert.strictEqual(getAggregateUpdates(), 0, "the losing request must never issue the aggregate update");
   assert.strictEqual(workerProfileA.ratingCount, 0, "ratingCount must not be incremented by the losing request");
   assert.strictEqual(workerProfileA.ratingAvg, 0, "ratingAvg must not be changed by the losing request");
 });
@@ -456,12 +512,13 @@ test("H-2: concurrent duplicate - pre-check sees nothing, Rating.create() hits E
 test("H-2: a non-duplicate DB error from Rating.create() is NOT converted to 409, propagates unchanged, and does not mutate the profile", async (t) => {
   const unrelatedError = new Error("connection reset");
   unrelatedError.name = "MongoNetworkError";
-  const { workerProfileA } = mockStandardScenario(t, {
+  const scenario = mockStandardScenario(t, {
     ratingCreateImpl: async () => {
       throw unrelatedError;
     },
   });
-  const getSaveCalls = spyOnSave(workerProfileA);
+  const { workerProfileA } = scenario;
+  const getAggregateUpdates = spyOnAggregateUpdate(scenario);
 
   const { req, res, next, done } = fakeReqRes({
     user: { _id: EMPLOYER_USER },
@@ -473,7 +530,7 @@ test("H-2: a non-duplicate DB error from Rating.create() is NOT converted to 409
 
   assert.strictEqual(error, unrelatedError, "the original error must propagate by reference, unchanged");
   assert.notStrictEqual(error.statusCode, 409);
-  assert.strictEqual(getSaveCalls(), 0);
+  assert.strictEqual(getAggregateUpdates(), 0);
   assert.strictEqual(workerProfileA.ratingCount, 0);
 });
 

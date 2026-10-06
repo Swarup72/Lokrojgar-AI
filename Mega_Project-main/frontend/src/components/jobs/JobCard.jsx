@@ -19,7 +19,7 @@ import "./JobCard.css";
  * and an Apply button, reusing this same card rather than duplicating its
  * markup in a separate "recommended job card" component.
  */
-export function JobCard({ job, categoriesById, matchScore, matchFactors, onApply, applyDisabled, applyLabel }) {
+export function JobCard({ job, categoriesById, matchScore, matchFactors, explanation, onApply, applyDisabled, applyLabel }) {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
 
@@ -67,7 +67,7 @@ export function JobCard({ job, categoriesById, matchScore, matchFactors, onApply
             </span>
           )}
         </div>
-        {matchFactors && <MatchFactorsList matchFactors={matchFactors} />}
+        {matchFactors && <MatchFactorsList matchFactors={matchFactors} explanation={explanation} />}
         {onApply && (
           <button
             type="button"

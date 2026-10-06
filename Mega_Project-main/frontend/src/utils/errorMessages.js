@@ -23,6 +23,7 @@ const VOICE_MESSAGES = {
 };
 
 const NETWORK_MESSAGE = "Unable to connect to the server. Please check your internet connection.";
+const TIMEOUT_MESSAGE = "The request took too long. Please try again.";
 const UNKNOWN_MESSAGE = "Something went wrong. Please try again.";
 
 /**
@@ -30,6 +31,9 @@ const UNKNOWN_MESSAGE = "Something went wrong. Please try again.";
  * @param {"voice"|"default"} [context]
  */
 export function mapErrorToFriendlyMessage(normalizedError, context = "default") {
+  if (normalizedError?.isTimeout) {
+    return TIMEOUT_MESSAGE;
+  }
   if (!normalizedError || normalizedError.isNetworkError || normalizedError.status === null) {
     return NETWORK_MESSAGE;
   }

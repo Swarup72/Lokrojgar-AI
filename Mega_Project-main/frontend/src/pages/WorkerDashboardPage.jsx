@@ -107,6 +107,7 @@ export function WorkerDashboardPage() {
                 job={match.job}
                 matchScore={match.matchScore}
                 matchFactors={match.matchFactors}
+                explanation={match.explanation}
                 onApply={() => handleApply(match.job._id)}
                 applyDisabled={appliedJobIds.has(match.job._id) || match.job.status !== "open"}
                 applyLabel={appliedJobIds.has(match.job._id) ? "Applied" : "Apply"}

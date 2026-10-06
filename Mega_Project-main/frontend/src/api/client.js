@@ -5,7 +5,24 @@ const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api
 
 export const AUTH_EXPIRED_EVENT = "lokrozgar:auth-expired";
 
-const client = axios.create({ baseURL: BASE_URL });
+// Every request gets a finite timeout so a hung backend can't leave a page
+// loading forever. Ordinary requests use REQUEST_TIMEOUT_MS. The few
+// requests that make the backend wait on the AI service (voice extraction,
+// voice confirm, job creation) pass AI_REQUEST_TIMEOUT_MS instead: it is
+// deliberately longer than the backend's own AI-service timeouts (up to
+// 300s per local-model call, and confirm can make two such calls in a row),
+// so the backend's clean error response arrives first and the browser never
+// gives up on a request the server is still completing. Both overridable
+// via Vite env. There is no automatic retry after a timeout.
+const readTimeoutMs = (value, fallback) => {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+};
+
+export const REQUEST_TIMEOUT_MS = readTimeoutMs(import.meta.env.VITE_API_TIMEOUT_MS, 30_000);
+export const AI_REQUEST_TIMEOUT_MS = readTimeoutMs(import.meta.env.VITE_AI_REQUEST_TIMEOUT_MS, 660_000);
+
+const client = axios.create({ baseURL: BASE_URL, timeout: REQUEST_TIMEOUT_MS });
 
 // Paths that must never trigger the 401-refresh dance themselves (refreshing
 // in response to a failed refresh, or a failed login, would loop forever).
@@ -35,12 +52,18 @@ export function normalizeError(error) {
     return error;
   }
   if (!error.response) {
-    return { status: null, message: error.message || "Network error", isNetworkError: true };
+    // Axios reports its own client-side timeout as ECONNABORTED (or
+    // ETIMEDOUT with transitional.clarifyTimeoutError). Still no HTTP
+    // status - the server never answered - but flagged so the UI can say
+    // "took too long" instead of "check your internet connection".
+    const isTimeout = error.code === "ECONNABORTED" || error.code === "ETIMEDOUT";
+    return { status: null, message: error.message || "Network error", isNetworkError: true, isTimeout };
   }
   return {
     status: error.response.status,
     message: error.response.data?.message || error.message || "Unknown error",
     isNetworkError: false,
+    isTimeout: false,
   };
 }
 
@@ -52,7 +75,13 @@ async function performTokenRefresh() {
   if (!refreshToken) {
     throw new Error("No refresh token available");
   }
-  const response = await axios.post(`${BASE_URL}/auth/refresh-token`, { refreshToken });
+  // Needs its own timeout: a hung refresh would otherwise also stall every
+  // request queued behind the single-flight refreshPromise below.
+  const response = await axios.post(
+    `${BASE_URL}/auth/refresh-token`,
+    { refreshToken },
+    { timeout: REQUEST_TIMEOUT_MS }
+  );
   return response.data.data; // {accessToken, refreshToken}
 }
 

@@ -227,3 +227,90 @@ test("addRole: still rejects admin and does not mutate the user's roles", async 
   assert.strictEqual(error.statusCode, 400);
   assert.deepStrictEqual(existingUser.roles, ["worker"], "roles array must not be mutated");
 });
+
+// =============================================================================
+// A role is meaningless without its profile.
+//
+// register() only created a WorkerProfile/EmployerProfile when the matching
+// name was supplied, and both models declare that name as required - so
+// registering a role without it produced a User with NO profile. Every later
+// action for that role then failed with "profile not found" (404), which the
+// UI renders as "We couldn't find what you were looking for." Two real
+// employer accounts in the dev database were left in exactly this state and
+// could not post a job at all.
+//
+// The validator now rejects the request outright, so the half-formed account
+// is unreachable rather than merely discouraged.
+// =============================================================================
+
+for (const missing of [undefined, "", "   "]) {
+  test(`register: worker role with fullName=${JSON.stringify(missing)} is rejected before User.create()`, async () => {
+    const { controllerRan, error } = await runRegisterThroughMiddlewareChain({
+      phone: "9876543210",
+      password: "secret123",
+      roles: ["worker"],
+      ...(missing === undefined ? {} : { fullName: missing }),
+    });
+
+    assert.ok(error, "the request must be rejected");
+    assert.strictEqual(error.statusCode, 400);
+    assert.match(error.message, /full name is required/i);
+    assert.strictEqual(controllerRan, false, "no User may be created without its profile");
+  });
+
+  test(`register: employer role with businessName=${JSON.stringify(missing)} is rejected before User.create()`, async () => {
+    const { controllerRan, error } = await runRegisterThroughMiddlewareChain({
+      phone: "9876543211",
+      password: "secret123",
+      roles: ["employer"],
+      ...(missing === undefined ? {} : { businessName: missing }),
+    });
+
+    assert.ok(error);
+    assert.strictEqual(error.statusCode, 400);
+    assert.match(error.message, /business name is required/i);
+    assert.strictEqual(controllerRan, false);
+  });
+}
+
+test("register: a user taking BOTH roles must supply both names", async () => {
+  const onlyWorkerName = await runRegisterThroughMiddlewareChain({
+    phone: "9876543212",
+    password: "secret123",
+    roles: ["worker", "employer"],
+    fullName: "Both Roles",
+  });
+  assert.strictEqual(onlyWorkerName.error.statusCode, 400);
+  assert.match(onlyWorkerName.error.message, /business name is required/i);
+  assert.strictEqual(onlyWorkerName.controllerRan, false);
+});
+
+test("register: a valid worker still registers and reaches the controller", async (t) => {
+  const userCreateMock = mock.method(User, "create", async (doc) => ({
+    _id: "USER_OK",
+    ...doc,
+    generateAccessToken: () => "access",
+    generateRefreshToken: () => "refresh",
+    save: async () => {},
+  }));
+  const workerCreateMock = mock.method(WorkerProfile, "create", async (doc) => ({ _id: "WP_OK", ...doc }));
+  const userFindOneMock = mock.method(User, "findOne", async () => null);
+  const sessionCreateMock = mock.method(Session, "create", async () => ({ _id: "S1" }));
+  t.after(() => {
+    userCreateMock.mock.restore();
+    workerCreateMock.mock.restore();
+    userFindOneMock.mock.restore();
+    sessionCreateMock.mock.restore();
+  });
+
+  const { controllerRan } = await runRegisterThroughMiddlewareChain({
+    phone: "9876543213",
+    password: "secret123",
+    roles: ["worker"],
+    fullName: "Valid Worker",
+  });
+
+  assert.strictEqual(controllerRan, true, "a complete registration must still go through");
+  // The profile is created in the same request - the invariant this fix protects.
+  assert.strictEqual(workerCreateMock.mock.callCount(), 1, "the WorkerProfile must be created");
+});

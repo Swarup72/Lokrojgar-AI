@@ -1,0 +1,171 @@
+{
+  "config": {
+    "extraction_provider": "local_llm",
+    "local_llm_model": "mlx-community/Qwen3-4B-Instruct-2507-4bit"
+  },
+  "summary": {
+    "fullName": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "experienceYears": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "expectedPay": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "city": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    },
+    "skills": {
+      "correct": 2,
+      "total": 2,
+      "accuracy": 1.0
+    }
+  },
+  "failures_by_field": {
+    "fullName": {},
+    "experienceYears": {},
+    "expectedPay": {},
+    "city": {},
+    "skills": {}
+  },
+  "determinism": [],
+  "rows": [
+    {
+      "id": "C10-name-then-pandhra-hajar",
+      "language": "mr",
+      "tags": [
+        "pay",
+        "pay_context",
+        "pay_context_extra"
+      ],
+      "transcript": "माझं नाव समीर पाल आहे. मला पंधरा हजार रुपये पाहिजे.",
+      "notes": "Same frame as C09 with a different Marathi number word - tests whether the trigger is number words generally or सातशे specifically.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 11.9,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": 15000.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 15000,
+          "actual": 15000.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    },
+    {
+      "id": "C11-name-then-saat-sau",
+      "language": "hi",
+      "tags": [
+        "pay",
+        "pay_context",
+        "pay_context_extra"
+      ],
+      "transcript": "मेरा नाम समीर पाल है। मुझे सात सौ रुपये चाहिए।",
+      "notes": "Same frame as C09 but the Hindi wording for 700 - tests whether the value 700 or the word सातशे is the trigger.",
+      "ok": true,
+      "error": null,
+      "elapsed_s": 4.9,
+      "raw_profile": {
+        "fullName": "समीर पाल",
+        "experienceYears": null,
+        "expectedPay": 700.0,
+        "skills": null,
+        "city": null,
+        "bio": null,
+        "availability": null,
+        "languages": null,
+        "preferredJobCategories": null
+      },
+      "fields": {
+        "fullName": {
+          "expected": [
+            "समीर पाल"
+          ],
+          "actual": "समीर पाल",
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "experienceYears": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "expectedPay": {
+          "expected": 700,
+          "actual": 700.0,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "city": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        },
+        "skills": {
+          "expected": null,
+          "actual": null,
+          "scored": true,
+          "correct": true,
+          "classification": "correct"
+        }
+      }
+    }
+  ]
+}

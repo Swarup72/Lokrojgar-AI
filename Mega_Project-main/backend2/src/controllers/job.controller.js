@@ -522,11 +522,23 @@ export const getRecommendedJobs = asyncHandler(async (req, res) => {
   // matchScore/matchFactors come straight from the AI service's ranking -
   // Node does not compute or adjust them. Preserve whatever order the AI
   // service already returned (already sorted by overall_score).
-  const scoredJobs = aiResult.matches.map((match) => ({
-    job: jobsById.get(match.job_id),
-    matchScore: match.ranking.overall_score,
-    matchFactors: match.ranking.match_factors,
-  }));
+  // Drop any match whose job_id is not one Node actually sent. It cannot
+  // happen with the current AI service (it only ever scores the candidates
+  // it was given), but if it ever did, the entry would reach React with no
+  // `job` at all and crash the dashboard on match.job._id. Scores and order
+  // are untouched - an unresolvable entry is simply not shown.
+  const scoredJobs = aiResult.matches
+    .filter((match) => {
+      if (jobsById.has(match.job_id)) return true;
+      logger.warn("AI returned a job_id that was not in the candidate set; dropping it", match.job_id);
+      return false;
+    })
+    .map((match) => ({
+      job: jobsById.get(match.job_id),
+      matchScore: match.ranking.overall_score,
+      matchFactors: match.ranking.match_factors,
+      explanation: match.explanation,
+    }));
 
   return res.status(200).json(new ApiResponse(200, scoredJobs, "Recommended jobs retrieved"));
 });
@@ -580,11 +592,20 @@ export const getRecommendedWorkers = asyncHandler(async (req, res) => {
     throw wrapAiServiceError(error);
   }
 
-  const scoredWorkers = aiResult.matches.map((match) => ({
-    worker: workersById.get(match.worker_id),
-    matchScore: match.ranking.overall_score,
-    matchFactors: match.ranking.match_factors,
-  }));
+  // Same guard as the worker->jobs direction: a worker_id Node never sent
+  // would reach React with no `worker` and crash the candidate list.
+  const scoredWorkers = aiResult.matches
+    .filter((match) => {
+      if (workersById.has(match.worker_id)) return true;
+      logger.warn("AI returned a worker_id that was not in the candidate set; dropping it", match.worker_id);
+      return false;
+    })
+    .map((match) => ({
+      worker: workersById.get(match.worker_id),
+      matchScore: match.ranking.overall_score,
+      matchFactors: match.ranking.match_factors,
+      explanation: match.explanation,
+    }));
 
   return res.status(200).json(new ApiResponse(200, scoredWorkers, "Recommended workers retrieved"));
 });
