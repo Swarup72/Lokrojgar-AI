@@ -110,7 +110,11 @@ test("public /jobs/search still works for ordinary statuses", async (t) => {
   const mocks = [
     mock.method(Job, "find", (filter) => {
       captured = filter;
-      return { populate: () => ({ sort: () => ({ skip: () => ({ limit: async () => [] }) }) }) };
+      return {
+        populate: () => ({
+          populate: () => ({ sort: () => ({ skip: () => ({ limit: async () => [] }) }) }),
+        }),
+      };
     }),
     mock.method(Job, "countDocuments", async () => 0),
   ];

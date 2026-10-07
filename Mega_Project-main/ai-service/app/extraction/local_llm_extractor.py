@@ -9,6 +9,8 @@ from app.extraction.local_llm_runtime import LocalLLMRuntime
 from app.extraction.models import ExtractedProfile
 from app.extraction.prompts import EXTRACTION_SYSTEM_PROMPT
 
+from app.runtime.inference_gate import run_exclusive
+
 logger = logging.getLogger(__name__)
 
 # Sarvam's extractor gets its JSON shape enforced server-side via
@@ -75,8 +77,15 @@ class LocalLLMExtractor(ExtractionProvider):
         if not transcript or not transcript.strip():
             raise ValueError("Transcript is empty.")
 
-        raw_output = await asyncio.to_thread(
-            LocalLLMRuntime.generate, LOCAL_LLM_SYSTEM_PROMPT, transcript, 512
+        # Same shared gate as Whisper: on this machine both models contend for
+        # one GPU and the same unified memory, so a per-model gate would still
+        # let one of each run together. The prompt, token budget and model are
+        # untouched.
+        raw_output = await run_exclusive(
+            "qwen.extract_profile",
+            lambda: asyncio.to_thread(
+                LocalLLMRuntime.generate, LOCAL_LLM_SYSTEM_PROMPT, transcript, 512
+            ),
         )
 
         json_text = _extract_json_object(raw_output)

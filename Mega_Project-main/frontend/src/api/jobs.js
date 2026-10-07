@@ -73,3 +73,16 @@ export function remove(jobId) {
 export function updateStatus(jobId, status) {
   return client.patch(`/jobs/${jobId}/status`, { status }).then((res) => res.data.data);
 }
+
+/**
+ * Worker only, and only once their application or job request for this job has
+ * been ACCEPTED - otherwise 403 with a message explaining when it unlocks.
+ *
+ * Before acceptance a worker already has the employer's display name and the
+ * job's own location from the ordinary job read; this adds the phone number and
+ * the employer's own location. Returns
+ * `{employerName, businessName, businessType, phone, city, village, employerLocation, isVerified}`.
+ */
+export function getEmployerContact(jobId) {
+  return client.get(`/jobs/${jobId}/employer-contact`).then((res) => res.data.data);
+}

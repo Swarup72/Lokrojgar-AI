@@ -26,6 +26,11 @@ const messageSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: null,
+      // Bounded at the schema level as well as in the validator: a message is
+      // a chat line, not a document, and nothing should be able to store an
+      // unbounded string here. `trim` means a whitespace-only message arrives
+      // as "" and is rejected by the controller as empty.
+      maxlength: 2000,
     },
 
     audioUrl: {

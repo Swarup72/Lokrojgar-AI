@@ -15,6 +15,7 @@ import {
   getRecommendedJobsForWorker,
   getRecommendedWorkersForJob,
 } from "../services/aiService.client.js";
+import { employerDisplayName } from "../utils/displayName.js";
 
 // Mongoose populate() replaces a ref field with the referenced document.
 // The AI service needs the raw ObjectId string instead (Job.category_id /
@@ -106,7 +107,13 @@ export const getJobById = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Invalid job ID");
   }
 
-  const job = await Job.findById(jobId).populate("categoryId skillIds employerId");
+  // employerId.userId.fullName is pulled in so an employer who hires under
+  // their own name (no businessName) still has a name to display. ONLY the
+  // name is selected: phone/contact stays behind the gated
+  // GET /jobs/:jobId/employer-contact endpoint.
+  const job = await Job.findById(jobId)
+    .populate("categoryId skillIds")
+    .populate({ path: "employerId", populate: { path: "userId", select: "fullName" } });
   if (!job) throw new ApiError(404, "Job not found");
 
   let isOwner = false;
@@ -443,7 +450,8 @@ export const searchAndFilterJobs = asyncHandler(async (req, res) => {
 
   const [rawJobs, totalDocs] = await Promise.all([
     Job.find(queryFilter)
-      .populate("categoryId skillIds employerId")
+      .populate("categoryId skillIds")
+      .populate({ path: "employerId", populate: { path: "userId", select: "fullName" } })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
@@ -498,7 +506,8 @@ export const getRecommendedJobs = asyncHandler(async (req, res) => {
   // eligibility call; Node just needs to make sure those candidates are
   // actually in the pool it sends.
   const candidateJobs = await Job.find({ status: { $in: RECOMMENDABLE_JOB_STATUSES } })
-    .populate("categoryId skillIds employerId")
+    .populate("categoryId skillIds")
+    .populate({ path: "employerId", populate: { path: "userId", select: "fullName" } })
     .limit(50);
 
   if (candidateJobs.length === 0) {
@@ -608,4 +617,81 @@ export const getRecommendedWorkers = asyncHandler(async (req, res) => {
     }));
 
   return res.status(200).json(new ApiResponse(200, scoredWorkers, "Recommended workers retrieved"));
+});
+
+/**
+ * GET /jobs/:jobId/employer-contact   (authenticated worker)
+ *
+ * The employer's contact details for one job, released only once a hiring
+ * relationship exists.
+ *
+ * PRIVACY BOUNDARY (deliberate, and the reason this is a separate endpoint):
+ *
+ *   BEFORE a request/application is accepted, a worker already sees, from the
+ *   ordinary public job read: the employer's display name, the job's city and
+ *   address, and the job's coordinates - enough to judge and navigate to the
+ *   work. No phone number.
+ *
+ *   AFTER acceptance (status "accepted" or "completed"), they additionally see
+ *   the employer's phone number and the employer's own city/location, because
+ *   they now need to reach the person they are working for.
+ *
+ * Only the fields a worker needs are selected. The employer's password hash,
+ * verification flags, fraud score and every other account field are never
+ * loaded, let alone returned.
+ */
+export const getJobEmployerContact = asyncHandler(async (req, res) => {
+  const { jobId } = req.params;
+  if (!isValidJobId(jobId)) {
+    throw new ApiError(400, "Invalid job ID");
+  }
+
+  const job = await Job.findById(jobId);
+  if (!job) throw new ApiError(404, "Job not found");
+
+  const workerProfile = await WorkerProfile.findOne({ userId: req.user._id });
+  if (!workerProfile) throw new ApiError(404, "Worker profile not found");
+
+  // The relationship is read from the database, never from the request. Both
+  // "accepted" and "completed" qualify: finishing the work must not withdraw
+  // the contact details of the person who still owes you for it.
+  const relationship = await Application.findOne({
+    jobId: job._id,
+    workerId: workerProfile._id,
+    status: { $in: ["accepted", "completed"] },
+  });
+
+  if (!relationship) {
+    throw new ApiError(
+      403,
+      "Contact details become available once your application or job request is accepted"
+    );
+  }
+
+  const employerProfile = await EmployerProfile.findById(job.employerId).populate(
+    "userId",
+    // The phone is the point of this endpoint; fullName is the display-name
+    // fallback for an employer with no business name. Nothing else.
+    "phone fullName"
+  );
+  if (!employerProfile) throw new ApiError(404, "Employer profile not found");
+
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      {
+        employerName: employerDisplayName(employerProfile, employerProfile.userId),
+        businessName: employerProfile.businessName || null,
+        businessType: employerProfile.businessType || null,
+        phone: employerProfile.userId?.phone || null,
+        city: employerProfile.city || null,
+        village: employerProfile.village || null,
+        // The EMPLOYER's own location, which is not necessarily the job site -
+        // the job's own coordinates stay on the job. Kept distinct on purpose.
+        employerLocation: employerProfile.location || null,
+        isVerified: Boolean(employerProfile.isVerified),
+      },
+      "Employer contact details retrieved"
+    )
+  );
 });

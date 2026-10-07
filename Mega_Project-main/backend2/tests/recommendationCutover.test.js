@@ -100,7 +100,9 @@ test("getRecommendedJobs calls the AI service (not the legacy matcher) and retur
   const skillFindMock = mock.method(WorkerSkill, "find", async () => []);
   const jobFindMock = mock.method(Job, "find", () => ({
     populate: () => ({
-      limit: async () => [job],
+      populate: () => ({
+        limit: async () => [job],
+      }),
     }),
   }));
 

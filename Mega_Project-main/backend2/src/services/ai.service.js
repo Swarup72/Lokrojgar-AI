@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import { forwardAudioForExtraction } from "./aiService.client.js";
+import { forwardAudioForExtraction, forwardAudioForFieldExtraction } from "./aiService.client.js";
 import logger from "../utils/logger.js";
 
 /**
@@ -79,5 +79,54 @@ export const processVoiceProfileAudio = async (audioFilePath, language = "mr") =
     transcript: response.transcript,
     extractedProfile: response.extracted_profile,
     confidence: response.confidence,
+  };
+};
+
+/**
+ * processVoiceFieldAudio(audioFilePath, language, field) -> one field's result.
+ *
+ * The guided flow's counterpart to processVoiceProfileAudio. Same file handling
+ * and same error classification - a service that is down is still an
+ * AiServiceUnavailableError, so the controller's 503 handling is unchanged.
+ *
+ * @param {string} audioFilePath - local path; must still exist on disk
+ * @param {string} language - "mr" | "hi" | "en"
+ * @param {string} field - fullName | expectedPay | experienceYears | city | skills
+ * @returns {Promise<{field:string, transcript:string, value:any, ok:boolean, reason:string, candidates:number[], confidence:number|null, usedLlm:boolean}>}
+ */
+export const processVoiceFieldAudio = async (audioFilePath, language = "mr", field) => {
+  logger.info("Guided voice step started", { language, field });
+
+  const audioBuffer = fs.readFileSync(audioFilePath);
+
+  let response;
+  try {
+    response = await forwardAudioForFieldExtraction({
+      audioBuffer,
+      filename: path.basename(audioFilePath),
+      contentType: resolveContentType(audioFilePath),
+      language,
+      field,
+    });
+  } catch (error) {
+    if (isServiceUnavailable(error)) {
+      if (error.isTimeout) logger.warn("Guided voice step timed out", error.message);
+      throw new AiServiceUnavailableError("Voice processing service is currently unavailable.");
+    }
+    logger.error("Guided voice step failed", error);
+    throw error;
+  }
+
+  logger.info("Guided voice step completed", { field, ok: response.ok });
+
+  return {
+    field: response.field,
+    transcript: response.transcript,
+    value: response.value ?? null,
+    ok: Boolean(response.ok),
+    reason: response.reason || "",
+    candidates: response.candidates || [],
+    confidence: response.confidence ?? null,
+    usedLlm: Boolean(response.used_llm),
   };
 };

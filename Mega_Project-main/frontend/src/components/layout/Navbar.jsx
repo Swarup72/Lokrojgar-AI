@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Search, User, FileText, PlusCircle, LogOut } from "lucide-react";
+import { LayoutDashboard, Search, User, FileText, PlusCircle, LogOut, Inbox, MessageSquare } from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useLanguage } from "../../hooks/useLanguage";
 import { LanguageSwitcher } from "../common/LanguageSwitcher";
@@ -48,7 +48,22 @@ export function Navbar() {
                 <FileText size={17} aria-hidden="true" />
                 <span>{t("nav.applications")}</span>
               </Link>
+              {/* Separate from applications because the worker is the one who
+                  has to answer here. */}
+              <Link to="/job-requests" className="navbar-link">
+                <Inbox size={17} aria-hidden="true" />
+                <span>{t("nav.jobRequests")}</span>
+              </Link>
             </>
+          )}
+
+          {/* Shown to any signed-in account: chat is authorized per
+              conversation, so a dual-role user needs one entry point. */}
+          {isAuthenticated && (
+            <Link to="/messages" className="navbar-link">
+              <MessageSquare size={17} aria-hidden="true" />
+              <span>{t("nav.messages")}</span>
+            </Link>
           )}
 
           {isEmployer && (

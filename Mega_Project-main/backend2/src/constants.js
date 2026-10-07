@@ -25,11 +25,27 @@ export const JOB_STATUS = {
 
 export const APPLICATION_STATUS = {
   APPLIED: "applied",
+  // An employer-initiated request awaiting the worker's answer. It is a
+  // status on the SAME Application document rather than a separate "job
+  // request" entity, so there is exactly one row - and one unique
+  // {jobId, workerId} index - per hiring relationship, whichever side
+  // started it.
+  INVITED: "invited",
   SHORTLISTED: "shortlisted",
   ACCEPTED: "accepted",
+  // The employer turned a worker down.
   REJECTED: "rejected",
+  // The WORKER turned an invitation down. Kept distinct from "rejected" so
+  // the two directions are never confused in the UI or in reporting.
+  DECLINED: "declined",
   COMPLETED: "completed",
   WITHDRAWN: "withdrawn",
+};
+
+/** Who created the Application row. */
+export const APPLICATION_INITIATORS = {
+  WORKER: "worker",
+  EMPLOYER: "employer",
 };
 
 export const PAYMENT_STATUS = {

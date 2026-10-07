@@ -1,0 +1,39 @@
+.map-link {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: var(--text-sm);
+}
+
+.map-link-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-muted);
+}
+
+.map-link a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.map-link a:hover {
+  text-decoration: underline;
+}
+
+.map-link-unavailable {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-faint);
+  font-size: var(--text-sm);
+}
+
+.map-link-unavailable em {
+  font-style: normal;
+}

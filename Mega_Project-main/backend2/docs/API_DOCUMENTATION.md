@@ -131,6 +131,43 @@ it.
 
 ---
 
-## 8. Saved Jobs (`/saved-jobs`), Offers (`/offers`), Shifts (`/shifts`), Payments (`/payments`), Ratings (`/ratings`), Disputes (`/disputes`), Chat (`/chat`), Notifications (`/notifications`), & Admin (`/admin`)
+## 8. Saved Jobs (`/saved-jobs`), Shifts (`/shifts`), Payments (`/payments`), Ratings (`/ratings`), Disputes (`/disputes`), Chat (`/chat`), Notifications (`/notifications`), & Admin (`/admin`)
 
 For full endpoint definitions, request/response payload examples, and Socket.io event lists, refer to the source codebase and schema files.
+
+### Employer-initiated hiring (formerly `/offers`)
+
+`/offers` no longer exists. An employer asking a specific worker to take a job
+is the SAME `Application` document a worker creates by applying, distinguished
+by `initiatedBy: "employer"` and `status: "invited"`:
+
+| Method | Path | Who |
+|---|---|---|
+| `POST` | `/applications/invite` | employer who owns the job |
+| `GET` | `/applications/invitations` | the invited worker |
+| `POST` | `/applications/:applicationId/respond` | the invited worker (`accepted` / `declined`) |
+
+This keeps ONE authoritative hiring path: the unique `{jobId, workerId}` index
+prevents a duplicate request and prevents a request coexisting with an
+application for the same pair, and accepting an invitation goes through the same
+atomic capacity reservation (`reserveWorkerSlot`) as an employer accepting an
+application. The removed `/offers` path did neither - it called an uncapped
+increment, and three workers accepting requests for a one-worker job drove
+`filledWorkers` to 3.
+
+### Chat (`/chat`)
+
+Chat is scoped to one job and one worker/employer pair, and opens only once
+their `Application` is `accepted` or `completed`:
+
+| Method | Path |
+|---|---|
+| `POST` | `/chat/conversations` |
+| `GET` | `/chat/conversations` |
+| `GET` | `/chat/conversations/:conversationId/messages?after=<ISO>` |
+| `POST` | `/chat/conversations/:conversationId/messages` |
+| `PATCH` | `/chat/conversations/:conversationId/read` |
+
+Every read and write re-checks participation and the hiring relationship, so a
+conversation id on its own grants nothing. Transport is plain HTTP; clients poll
+with `after` while a thread is open.

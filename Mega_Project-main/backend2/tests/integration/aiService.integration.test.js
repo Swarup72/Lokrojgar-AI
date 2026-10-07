@@ -10,7 +10,7 @@
  *
  * Run manually, with the AI service already running:
  *
- *   cd ai-service && .venv/bin/uvicorn app.main:app --port 8000 &
+ *   cd ai-service && .venv/bin/uvicorn app.main:app --port 8001 &
  *   cd backend2 && node --test tests/integration/aiService.integration.test.js
  *
  * The recommendation and translation tests talk to that shared instance.

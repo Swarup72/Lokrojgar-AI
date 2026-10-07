@@ -33,7 +33,7 @@ export function EmployerProfileForm({ profile, saving, onSave }) {
       <div className="form-field-row">
         <label className="form-field">
           <span>Business name</span>
-          <input type="text" value={businessName} onChange={(event) => setBusinessName(event.target.value)} required />
+          <input type="text" value={businessName} onChange={(event) => setBusinessName(event.target.value)} />
         </label>
         <label className="form-field">
           <span>Business type</span>
@@ -55,6 +55,9 @@ export function EmployerProfileForm({ profile, saving, onSave }) {
       <label className="form-field">
         <span>Location</span>
         <LocationField coordinates={coordinates} onChange={setCoordinates} />
+        {!coordinates && (
+          <small className="form-hint">Optional. Your jobs carry their own location, set when you post them.</small>
+        )}
       </label>
 
       <label className="form-field">

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { X, Plus } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
@@ -16,6 +16,39 @@ export function WorkerSkillsManager({ skills, catalogSkills, onAdd, onRemove }) 
 
   const alreadyAddedIds = new Set(skills.map((s) => (typeof s.skillId === "object" ? s.skillId._id : s.skillId)));
   const availableCatalogSkills = catalogSkills.filter((skill) => !alreadyAddedIds.has(skill._id));
+
+  const label = (skill) => pickLocalizedText(skill.nameMultilingual, language) || skill.name;
+
+  /**
+   * The catalog is one flat list where `parentSkillId` marks a sub-skill, so it
+   * is grouped here into <optgroup> per trade. Adding a sub-skill also records
+   * its trade server-side ("Wire Connection" implies "Electrician"), which is
+   * what lets a sub-skill improve matching without the ranking having to know
+   * about the hierarchy.
+   */
+  const grouped = useMemo(() => {
+    const trades = catalogSkills.filter((skill) => !skill.parentSkillId);
+    const tradesById = new Map(trades.map((trade) => [String(trade._id), trade]));
+    const available = new Set(availableCatalogSkills.map((skill) => String(skill._id)));
+
+    const groups = trades
+      .map((trade) => ({
+        trade,
+        tradeAvailable: available.has(String(trade._id)),
+        subSkills: catalogSkills.filter(
+          (skill) => String(skill.parentSkillId || "") === String(trade._id) && available.has(String(skill._id))
+        ),
+      }))
+      .filter((group) => group.tradeAvailable || group.subSkills.length > 0);
+
+    // A sub-skill whose trade is not in this (possibly category-filtered) list
+    // must still be selectable rather than silently disappearing.
+    const orphans = availableCatalogSkills.filter(
+      (skill) => skill.parentSkillId && !tradesById.has(String(skill.parentSkillId))
+    );
+
+    return { groups, orphans };
+  }, [catalogSkills, availableCatalogSkills, language]);
 
   const handleAdd = async (event) => {
     event.preventDefault();
@@ -51,11 +84,25 @@ export function WorkerSkillsManager({ skills, catalogSkills, onAdd, onRemove }) 
         <form className="worker-skills-add" onSubmit={handleAdd}>
           <select value={selectedSkillId} onChange={(event) => setSelectedSkillId(event.target.value)}>
             <option value="">Add a skill...</option>
-            {availableCatalogSkills.map((skill) => (
-              <option key={skill._id} value={skill._id}>
-                {pickLocalizedText(skill.nameMultilingual, language) || skill.name}
-              </option>
+            {grouped.groups.map(({ trade, tradeAvailable, subSkills }) => (
+              <optgroup key={trade._id} label={label(trade)}>
+                {tradeAvailable && <option value={trade._id}>{label(trade)} (whole trade)</option>}
+                {subSkills.map((sub) => (
+                  <option key={sub._id} value={sub._id}>
+                    {label(sub)}
+                  </option>
+                ))}
+              </optgroup>
             ))}
+            {grouped.orphans.length > 0 && (
+              <optgroup label="Other">
+                {grouped.orphans.map((skill) => (
+                  <option key={skill._id} value={skill._id}>
+                    {label(skill)}
+                  </option>
+                ))}
+              </optgroup>
+            )}
           </select>
           <select value={proficiency} onChange={(event) => setProficiency(event.target.value)}>
             {WORKER_SKILL_PROFICIENCY.map((level) => (

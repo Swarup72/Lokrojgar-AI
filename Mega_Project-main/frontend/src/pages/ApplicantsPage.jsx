@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
-import { ArrowLeft, Users, CheckCircle, XCircle, Star, Lock } from "lucide-react";
+import { ArrowLeft, Users, CheckCircle, XCircle, Star, Lock, MessageSquare } from "lucide-react";
 import { useAsync } from "../hooks/useAsync";
 import { useLanguage } from "../hooks/useLanguage";
 import * as applicationsApi from "../api/applications";
 import * as jobsApi from "../api/jobs";
 import * as ratingsApi from "../api/ratings";
+import * as chatApi from "../api/chat";
 import { normalizeError } from "../api/client";
 import { pickLocalizedText } from "../utils/localizedText";
 import { WorkerCard } from "../components/workers/WorkerCard";
@@ -28,6 +29,7 @@ export function ApplicantsPage() {
   const [submittingRating, setSubmittingRating] = useState(false);
   const [actionError, setActionError] = useState(null);
   const [closingJob, setClosingJob] = useState(false);
+  const [chatBusyId, setChatBusyId] = useState(null);
 
   useEffect(() => {
     if (!job) {
@@ -65,6 +67,38 @@ export function ApplicantsPage() {
       setClosingJob(false);
     }
   };
+
+  /**
+   * Opens the chat for this hire. The server authorizes it from the accepted
+   * application, so this only succeeds for a worker actually hired on this job.
+   */
+  const openChat = async (application) => {
+    setChatBusyId(application._id);
+    setActionError(null);
+    try {
+      const conversation = await chatApi.getOrCreateConversation({
+        jobId: job._id,
+        workerId: application.workerId._id,
+      });
+      navigate("/messages", { state: { conversationId: conversation._id } });
+    } catch (err) {
+      setActionError(normalizeError(err));
+    } finally {
+      setChatBusyId(null);
+    }
+  };
+
+  const chatButton = (application) => (
+    <button
+      type="button"
+      className="btn btn-secondary"
+      onClick={() => openChat(application)}
+      disabled={chatBusyId === application._id}
+    >
+      <MessageSquare size={15} aria-hidden="true" />{" "}
+      {chatBusyId === application._id ? "Opening..." : "Message"}
+    </button>
+  );
 
   const handleRate = async (application, payload) => {
     setSubmittingRating(true);
@@ -123,15 +157,33 @@ export function ApplicantsPage() {
 
     if (application.status === "accepted") {
       return (
-        <button type="button" className="btn btn-secondary" onClick={() => runAction(() => applicationsApi.complete(application._id))}>
-          Mark Complete
-        </button>
+        <>
+          {chatButton(application)}
+          <button type="button" className="btn btn-secondary" onClick={() => runAction(() => applicationsApi.complete(application._id))}>
+            Mark Complete
+          </button>
+        </>
       );
+    }
+
+    // An employer-initiated request the worker has not answered yet. There is
+    // deliberately no action here: only the worker can answer it.
+    if (application.status === "invited") {
+      return <span className="applicants-rate-hint">Job request sent — waiting for their answer</span>;
+    }
+
+    if (application.status === "declined") {
+      return <span className="applicants-rate-hint">This worker declined your job request</span>;
     }
 
     if (application.status === "completed") {
       if (alreadyRated) {
-        return <span className="applicants-rated-note">You've rated this worker.</span>;
+        return (
+          <>
+            {chatButton(application)}
+            <span className="applicants-rated-note">You've rated this worker.</span>
+          </>
+        );
       }
       if (job?.status !== "completed") {
         return (

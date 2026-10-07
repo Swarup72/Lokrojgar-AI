@@ -75,6 +75,16 @@ export function WorkerProfileForm({ profile, categories, saving, onSave }) {
       <label className="form-field">
         <span>Location</span>
         <LocationField coordinates={coordinates} onChange={setCoordinates} />
+        {/* Not required - a profile with no location is valid, and nothing
+            invents one. But distance is one of the six matching factors, so
+            without it that factor simply cannot be scored. Saying so is more
+            useful than silently ranking them against a guessed city. */}
+        {!coordinates && (
+          <small className="form-hint">
+            Optional, but jobs are matched partly on distance — set your location to be matched on how near
+            the work is.
+          </small>
+        )}
       </label>
 
       <div className="form-field-row">

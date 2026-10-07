@@ -186,18 +186,70 @@ export function JobForm({
       {skills.length > 0 && (
         <div className="form-field">
           <span>Skills needed</span>
-          <div className="form-chip-group">
-            {skills.map((skill) => (
-              <button
-                type="button"
-                key={skill._id}
-                className={`form-chip ${skillIds.includes(skill._id) ? "active" : ""}`}
-                onClick={() => toggleSkill(skill._id)}
-              >
-                {pickLocalizedText(skill.nameMultilingual, language) || skill.name}
-              </button>
-            ))}
-          </div>
+          {/* Grouped by trade, with the trade itself selectable alongside its
+              specific tasks. Picking the trade AND a task is what distinguishes
+              a strong match from a weak one: a worker who has both scores
+              higher than one who only has the trade. Both are ordinary skill
+              ids on the job, so the matching needs no special handling. */}
+          <p className="form-hint">
+            Pick the trade, and any specific tasks the job needs. Workers who have the exact tasks are matched
+            more strongly.
+          </p>
+          {skills
+            .filter((skill) => !skill.parentSkillId)
+            .map((trade) => {
+              const subSkills = skills.filter(
+                (skill) => String(skill.parentSkillId || "") === String(trade._id)
+              );
+              return (
+                <div className="form-skill-group" key={trade._id}>
+                  <div className="form-chip-group">
+                    <button
+                      type="button"
+                      className={`form-chip ${skillIds.includes(trade._id) ? "active" : ""}`}
+                      onClick={() => toggleSkill(trade._id)}
+                    >
+                      {pickLocalizedText(trade.nameMultilingual, language) || trade.name}
+                    </button>
+                    {subSkills.map((sub) => (
+                      <button
+                        type="button"
+                        key={sub._id}
+                        className={`form-chip form-chip-sub ${skillIds.includes(sub._id) ? "active" : ""}`}
+                        onClick={() => toggleSkill(sub._id)}
+                      >
+                        {pickLocalizedText(sub.nameMultilingual, language) || sub.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          {/* A sub-skill whose trade is not in this filtered list must still be
+              selectable rather than vanishing. */}
+          {skills.some(
+            (skill) =>
+              skill.parentSkillId && !skills.some((t) => !t.parentSkillId && String(t._id) === String(skill.parentSkillId))
+          ) && (
+            <div className="form-chip-group">
+              {skills
+                .filter(
+                  (skill) =>
+                    skill.parentSkillId &&
+                    !skills.some((t) => !t.parentSkillId && String(t._id) === String(skill.parentSkillId))
+                )
+                .map((skill) => (
+                  <button
+                    type="button"
+                    key={skill._id}
+                    className={`form-chip ${skillIds.includes(skill._id) ? "active" : ""}`}
+                    onClick={() => toggleSkill(skill._id)}
+                  >
+                    {pickLocalizedText(skill.nameMultilingual, language) || skill.name}
+                  </button>
+                ))}
+            </div>
+          )}
         </div>
       )}
 

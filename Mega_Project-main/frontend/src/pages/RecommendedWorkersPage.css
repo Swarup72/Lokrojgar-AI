@@ -37,3 +37,13 @@
   flex-direction: column;
   gap: 14px;
 }
+
+/* After a job request has been sent to this worker. */
+.recommended-workers-sent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-success-text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}

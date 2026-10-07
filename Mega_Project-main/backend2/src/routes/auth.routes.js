@@ -21,6 +21,7 @@ import {
   loginValidator,
   changePasswordValidator,
   resetPasswordValidator,
+  addRoleValidator,
 } from "../validators/auth.validator.js";
 import { otpRateLimiter, loginRateLimiter } from "../middlewares/rateLimiter.middleware.js";
 
@@ -36,6 +37,6 @@ router.post("/change-password", verifyJWT, validate(changePasswordValidator), ch
 router.post("/reset-password", validate(resetPasswordValidator), resetPassword);
 router.get("/sessions", verifyJWT, listSessions);
 router.post("/sessions/:sessionId/revoke", verifyJWT, revokeSession);
-router.post("/add-role", verifyJWT, addRole);
+router.post("/add-role", verifyJWT, validate(addRoleValidator), addRole);
 
 export default router;

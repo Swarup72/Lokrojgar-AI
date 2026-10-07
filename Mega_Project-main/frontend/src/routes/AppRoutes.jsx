@@ -14,6 +14,8 @@ import { EmployerDashboardPage } from "../pages/EmployerDashboardPage";
 import { PostJobPage } from "../pages/PostJobPage";
 import { EditJobPage } from "../pages/EditJobPage";
 import { ApplicationsPage } from "../pages/ApplicationsPage";
+import { JobRequestsPage } from "../pages/JobRequestsPage";
+import { ChatPage } from "../pages/ChatPage";
 import { ApplicantsPage } from "../pages/ApplicantsPage";
 import { RecommendedWorkersPage } from "../pages/RecommendedWorkersPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
@@ -57,6 +59,27 @@ export function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={[USER_ROLES.WORKER]}>
               <ApplicationsPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Employer-initiated job requests, answered by the worker. */}
+        <Route
+          path="/job-requests"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.WORKER]}>
+              <JobRequestsPage />
+            </ProtectedRoute>
+          }
+        />
+        {/* Any authenticated user: a dual-role account can be the worker in one
+            conversation and the employer in another, and the server authorizes
+            per conversation, not by role. */}
+        <Route
+          path="/messages"
+          element={
+            <ProtectedRoute>
+              <ChatPage />
             </ProtectedRoute>
           }
         />

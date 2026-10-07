@@ -163,3 +163,53 @@
     padding: 20px;
   }
 }
+
+/* Mode choice: one long recording, or one question at a time. */
+.voice-mode-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.voice-mode-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+
+.voice-mode-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.voice-mode-option:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.voice-mode-option strong {
+  font-size: var(--text-lg);
+  color: var(--color-ink);
+}
+
+.voice-mode-option span {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.voice-mode-option em {
+  color: var(--color-primary);
+  font-style: normal;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  margin-top: 4px;
+}

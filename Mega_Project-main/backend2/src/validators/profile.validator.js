@@ -12,7 +12,15 @@ export const workerProfileValidator = z.object({
       .optional(),
     city: z.string().optional(),
     village: z.string().optional(),
-    coordinates: z.array(z.number()).length(2, "Coordinates must be [longitude, latitude]"),
+    // Optional: a profile may legitimately have no location yet (registration no
+    // longer invents one). The controller only sets `location` when coordinates
+    // are supplied and never clears an existing one, so omitting them edits the
+    // rest of the profile and leaves the location untouched. A SUPPLIED pair is
+    // still validated in full - and the model re-checks the range.
+    coordinates: z
+      .array(z.number())
+      .length(2, "Coordinates must be [longitude, latitude]")
+      .optional(),
     expectedPay: z.number().min(0).optional(),
     languages: z.array(z.enum(["mr", "hi", "en"])).optional(),
     preferredJobCategories: z.array(z.string()).optional(),
@@ -23,8 +31,11 @@ export const workerProfileValidator = z.object({
 
 export const employerProfileValidator = z.object({
   body: z.object({
-    businessName: z.string().min(2, "Business name is required"),
-    businessType: z.string().min(2, "Business type is required"),
+    // Both optional: an employer may operate under their own personal name.
+    // An empty string is rejected rather than stored, so the display fallback
+    // in utils/displayName.js sees null and uses the account's name.
+    businessName: z.string().trim().min(2, "Business name must be at least 2 characters").optional(),
+    businessType: z.string().trim().min(2, "Business type must be at least 2 characters").optional(),
     bio: z
       .object({
         mr: z.string().optional(),
@@ -34,7 +45,15 @@ export const employerProfileValidator = z.object({
       .optional(),
     city: z.string().optional(),
     village: z.string().optional(),
-    coordinates: z.array(z.number()).length(2, "Coordinates must be [longitude, latitude]"),
+    // Optional: a profile may legitimately have no location yet (registration no
+    // longer invents one). The controller only sets `location` when coordinates
+    // are supplied and never clears an existing one, so omitting them edits the
+    // rest of the profile and leaves the location untouched. A SUPPLIED pair is
+    // still validated in full - and the model re-checks the range.
+    coordinates: z
+      .array(z.number())
+      .length(2, "Coordinates must be [longitude, latitude]")
+      .optional(),
   }),
 });
 

@@ -171,8 +171,12 @@ export const submitRating = asyncHandler(async (req, res) => {
 
 export const getUserRatings = asyncHandler(async (req, res) => {
   const { userId } = req.params;
+  // `avatar` only - NOT the phone number. GET /ratings/user/:userId is readable
+  // by any authenticated user, so populating `phone` published the phone number
+  // of everyone who had ever rated this person to anyone who looked at their
+  // reviews. Nothing displayed it; it was simply being shipped.
   const ratings = await Rating.find({ toUserId: userId })
-    .populate("fromUserId", "phone avatar")
+    .populate("fromUserId", "avatar")
     .sort({ createdAt: -1 });
 
   return res.status(200).json(new ApiResponse(200, ratings, "User ratings retrieved"));

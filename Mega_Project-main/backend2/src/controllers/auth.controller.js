@@ -2,6 +2,7 @@ import User from "../models/user.model.js";
 import Session from "../models/session.model.js";
 import WorkerProfile from "../models/workerProfile.model.js";
 import EmployerProfile from "../models/employerProfile.model.js";
+import { createProfilesForRoles } from "../utils/profileProvisioning.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -39,28 +40,19 @@ export const register = asyncHandler(async (req, res) => {
     phone,
     passwordHash: password,
     roles,
+    fullName,
     preferredLanguage: preferredLanguage || "en",
     isVerified: true,
     phoneVerifiedAt: new Date(),
   });
 
-  // Create initial profile depending on role
-  if (roles.includes("worker") && fullName) {
-    await WorkerProfile.create({
-      userId: user._id,
-      fullName,
-      location: { type: "Point", coordinates: [73.8567, 18.5204] }, // Default Pune coordinates
-    });
-  }
-
-  if (roles.includes("employer") && businessName) {
-    await EmployerProfile.create({
-      userId: user._id,
-      businessName,
-      businessType: businessType || "Individual",
-      location: { type: "Point", coordinates: [73.8567, 18.5204] },
-    });
-  }
+  // A declared role ALWAYS gets its profile. Previously the EmployerProfile
+  // was only created when a businessName was supplied, so an employer who
+  // gave no business name ended up with the role and no profile - and every
+  // employer endpoint answered 404 for them (one such account exists in the
+  // dev database). businessName is optional now, so it can no longer gate
+  // profile creation.
+  await createProfilesForRoles(user, roles, { fullName, businessName, businessType });
 
   const { accessToken, refreshToken } = await generateAccessAndRefreshTokens(user);
 
@@ -261,16 +253,49 @@ export const revokeSession = asyncHandler(async (req, res) => {
 });
 
 export const addRole = asyncHandler(async (req, res) => {
-  const { role } = req.body;
+  const { role, businessName, businessType, fullName } = req.body;
+  // "admin" is excluded for the same reason it is excluded from /register:
+  // this endpoint is reachable by any authenticated user, so it must never be
+  // able to grant privilege.
   if (!["worker", "employer"].includes(role)) {
     throw new ApiError(400, "Invalid role to add");
   }
 
-  const user = await User.findById(req.user._id);
-  if (!user.roles.includes(role)) {
-    user.roles.push(role);
-    await user.save();
-  }
+  // $addToSet is atomic and idempotent: two concurrent calls cannot produce a
+  // duplicated role, and adding a role the user already has is a no-op. The
+  // previous read-push-save could duplicate the entry under concurrency.
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $addToSet: { roles: role },
+      // Only fills a name that is missing - an existing one is never
+      // overwritten by this endpoint.
+      ...(fullName?.trim() && !req.user.fullName ? { $set: { fullName: fullName.trim() } } : {}),
+    },
+    { returnDocument: "after" }
+  ).select("-passwordHash");
 
-  return res.status(200).json(new ApiResponse(200, { roles: user.roles }, "Role added successfully"));
+  if (!user) throw new ApiError(404, "User not found");
+
+  // Adding the role without its profile left the account unusable for that
+  // role: roles became ["worker","employer"] but posting a job still answered
+  // 404 "Employer profile not found" (measured). The profile is part of
+  // activating the role, not a separate step the user has to discover.
+  const { workerProfile, employerProfile } = await createProfilesForRoles(user, [role], {
+    fullName,
+    businessName,
+    businessType,
+  });
+
+  // No new token is issued and none is needed: verifyJWT re-reads the User
+  // from the database on every request, so authorizeRoles() sees the new role
+  // immediately on the token the client already holds. The JWT's `roles`
+  // claim is never consulted for authorization.
+  return res.status(200).json(
+    new ApiResponse(
+      200,
+      { roles: user.roles, workerProfile, employerProfile },
+      "Role added successfully"
+    )
+  );
 });

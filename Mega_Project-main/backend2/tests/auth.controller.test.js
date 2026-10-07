@@ -147,6 +147,7 @@ test("register: worker registration still succeeds exactly as before", async (t)
   const userFindByIdMock = mock.method(User, "findById", () => ({
     select: async () => createdUser,
   }));
+  const workerProfileFindOneMock = mock.method(WorkerProfile, "findOne", async () => null);
   const workerProfileCreateMock = mock.method(WorkerProfile, "create", async () => ({}));
   const sessionCreateMock = mock.method(Session, "create", async () => ({}));
 
@@ -154,6 +155,7 @@ test("register: worker registration still succeeds exactly as before", async (t)
     userFindOneMock.mock.restore();
     userCreateMock.mock.restore();
     userFindByIdMock.mock.restore();
+    workerProfileFindOneMock.mock.restore();
     workerProfileCreateMock.mock.restore();
     sessionCreateMock.mock.restore();
   });
@@ -181,6 +183,7 @@ test("register: employer registration still succeeds exactly as before", async (
   const userFindByIdMock = mock.method(User, "findById", () => ({
     select: async () => createdUser,
   }));
+  const employerProfileFindOneMock = mock.method(EmployerProfile, "findOne", async () => null);
   const employerProfileCreateMock = mock.method(EmployerProfile, "create", async () => ({}));
   const sessionCreateMock = mock.method(Session, "create", async () => ({}));
 
@@ -188,6 +191,7 @@ test("register: employer registration still succeeds exactly as before", async (
     userFindOneMock.mock.restore();
     userCreateMock.mock.restore();
     userFindByIdMock.mock.restore();
+    employerProfileFindOneMock.mock.restore();
     employerProfileCreateMock.mock.restore();
     sessionCreateMock.mock.restore();
   });
@@ -196,6 +200,7 @@ test("register: employer registration still succeeds exactly as before", async (
     phone: "9000000005",
     password: "password123",
     roles: ["employer"],
+    fullName: "Test Employer",
     businessName: "Test Biz",
   });
 
@@ -231,58 +236,119 @@ test("addRole: still rejects admin and does not mutate the user's roles", async 
 // =============================================================================
 // A role is meaningless without its profile.
 //
-// register() only created a WorkerProfile/EmployerProfile when the matching
-// name was supplied, and both models declare that name as required - so
-// registering a role without it produced a User with NO profile. Every later
-// action for that role then failed with "profile not found" (404), which the
-// UI renders as "We couldn't find what you were looking for." Two real
-// employer accounts in the dev database were left in exactly this state and
-// could not post a job at all.
+// register() used to create a WorkerProfile/EmployerProfile only when the
+// matching name was supplied, so registering a role without it produced a User
+// with NO profile. Every later action for that role then failed with "profile
+// not found" (404). One employer account in the dev database was left in
+// exactly that state and could not post a job at all.
 //
-// The validator now rejects the request outright, so the half-formed account
-// is unreachable rather than merely discouraged.
+// The rule that fixed it has now CHANGED shape, because a business name is no
+// longer required to be an employer (an employer may hire under their own
+// personal name). So the invariant is no longer enforced by rejecting the
+// request - it is enforced by always creating the profile. These tests pin
+// that stronger guarantee: a declared role ALWAYS gets its profile.
 // =============================================================================
 
-for (const missing of [undefined, "", "   "]) {
-  test(`register: worker role with fullName=${JSON.stringify(missing)} is rejected before User.create()`, async () => {
-    const { controllerRan, error } = await runRegisterThroughMiddlewareChain({
-      phone: "9876543210",
-      password: "secret123",
-      roles: ["worker"],
-      ...(missing === undefined ? {} : { fullName: missing }),
+// The personal name is now required for EVERY account, not just workers: it is
+// the canonical User.fullName and the name an employer without a business name
+// is displayed as. There is no longer any way to register without a name.
+for (const missing of [undefined, "", "   ", "a"]) {
+  for (const roles of [["worker"], ["employer"], ["worker", "employer"]]) {
+    test(`register: roles=[${roles}] with fullName=${JSON.stringify(missing)} is rejected before User.create()`, async () => {
+      const { controllerRan, error } = await runRegisterThroughMiddlewareChain({
+        phone: "9876543210",
+        password: "secret123",
+        roles,
+        ...(missing === undefined ? {} : { fullName: missing }),
+      });
+
+      assert.ok(error, "the request must be rejected");
+      assert.strictEqual(error.statusCode, 400);
+      assert.match(error.message, /name/i);
+      assert.strictEqual(controllerRan, false, "no User may be created without a name");
     });
-
-    assert.ok(error, "the request must be rejected");
-    assert.strictEqual(error.statusCode, 400);
-    assert.match(error.message, /full name is required/i);
-    assert.strictEqual(controllerRan, false, "no User may be created without its profile");
-  });
-
-  test(`register: employer role with businessName=${JSON.stringify(missing)} is rejected before User.create()`, async () => {
-    const { controllerRan, error } = await runRegisterThroughMiddlewareChain({
-      phone: "9876543211",
-      password: "secret123",
-      roles: ["employer"],
-      ...(missing === undefined ? {} : { businessName: missing }),
-    });
-
-    assert.ok(error);
-    assert.strictEqual(error.statusCode, 400);
-    assert.match(error.message, /business name is required/i);
-    assert.strictEqual(controllerRan, false);
-  });
+  }
 }
 
-test("register: a user taking BOTH roles must supply both names", async () => {
-  const onlyWorkerName = await runRegisterThroughMiddlewareChain({
-    phone: "9876543212",
-    password: "secret123",
-    roles: ["worker", "employer"],
-    fullName: "Both Roles",
+test("register: an employer with NO businessName succeeds and still gets an EmployerProfile", async (t) => {
+  const createdUser = fakeUser({ roles: ["employer"], fullName: "Rahul Patil" });
+  const userFindOneMock = mock.method(User, "findOne", async () => null);
+  const userCreateMock = mock.method(User, "create", async (doc) => ({ ...createdUser, ...doc }));
+  const userFindByIdMock = mock.method(User, "findById", () => ({ select: async () => createdUser }));
+  const employerFindOneMock = mock.method(EmployerProfile, "findOne", async () => null);
+  let employerProfileDoc = null;
+  const employerCreateMock = mock.method(EmployerProfile, "create", async (doc) => {
+    employerProfileDoc = doc;
+    return doc;
   });
-  assert.strictEqual(onlyWorkerName.error.statusCode, 400);
-  assert.match(onlyWorkerName.error.message, /business name is required/i);
-  assert.strictEqual(onlyWorkerName.controllerRan, false);
+  const sessionCreateMock = mock.method(Session, "create", async () => ({}));
+  t.after(() => {
+    userFindOneMock.mock.restore();
+    userCreateMock.mock.restore();
+    userFindByIdMock.mock.restore();
+    employerFindOneMock.mock.restore();
+    employerCreateMock.mock.restore();
+    sessionCreateMock.mock.restore();
+  });
+
+  const { controllerRan, error, res } = await runRegisterThroughMiddlewareChain({
+    phone: "9000000006",
+    password: "password123",
+    roles: ["employer"],
+    fullName: "Rahul Patil",
+  });
+
+  assert.strictEqual(error, null, "a missing business name must no longer block registration");
+  assert.strictEqual(controllerRan, true);
+  assert.strictEqual(res.statusCode, 201);
+  assert.strictEqual(employerCreateMock.mock.callCount(), 1, "the EmployerProfile must still be created");
+  assert.strictEqual(
+    employerProfileDoc.businessName,
+    null,
+    "an absent business name is stored as null, never an invented placeholder"
+  );
+  assert.strictEqual(employerProfileDoc.businessType, null);
+  // The personal name is what identifies this employer, so it must reach the User.
+  assert.strictEqual(userCreateMock.mock.calls[0].arguments[0].fullName, "Rahul Patil");
+});
+
+test("register: a dual-role account needs ONE name and gets BOTH profiles", async (t) => {
+  const createdUser = fakeUser({ roles: ["worker", "employer"], fullName: "Samarth" });
+  const userFindOneMock = mock.method(User, "findOne", async () => null);
+  const userCreateMock = mock.method(User, "create", async (doc) => ({ ...createdUser, ...doc }));
+  const userFindByIdMock = mock.method(User, "findById", () => ({ select: async () => createdUser }));
+  const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => null);
+  const employerFindOneMock = mock.method(EmployerProfile, "findOne", async () => null);
+  const workerCreateMock = mock.method(WorkerProfile, "create", async (doc) => doc);
+  const employerCreateMock = mock.method(EmployerProfile, "create", async (doc) => doc);
+  const sessionCreateMock = mock.method(Session, "create", async () => ({}));
+  t.after(() => {
+    userFindOneMock.mock.restore();
+    userCreateMock.mock.restore();
+    userFindByIdMock.mock.restore();
+    workerFindOneMock.mock.restore();
+    employerFindOneMock.mock.restore();
+    workerCreateMock.mock.restore();
+    employerCreateMock.mock.restore();
+    sessionCreateMock.mock.restore();
+  });
+
+  const { controllerRan, error } = await runRegisterThroughMiddlewareChain({
+    phone: "9000000007",
+    password: "password123",
+    roles: ["worker", "employer"],
+    fullName: "Samarth",
+  });
+
+  assert.strictEqual(error, null);
+  assert.strictEqual(controllerRan, true);
+  assert.strictEqual(workerCreateMock.mock.callCount(), 1, "worker role must get a WorkerProfile");
+  assert.strictEqual(employerCreateMock.mock.callCount(), 1, "employer role must get an EmployerProfile");
+  assert.strictEqual(
+    workerCreateMock.mock.calls[0].arguments[0].fullName,
+    "Samarth",
+    "the one supplied name is used for the worker profile too"
+  );
 });
 
 test("register: a valid worker still registers and reaches the controller", async (t) => {
@@ -293,13 +359,19 @@ test("register: a valid worker still registers and reaches the controller", asyn
     generateRefreshToken: () => "refresh",
     save: async () => {},
   }));
+  // createProfilesForRoles() checks for an existing profile first (it is
+  // idempotent, so it can be shared with POST /auth/add-role).
+  const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => null);
   const workerCreateMock = mock.method(WorkerProfile, "create", async (doc) => ({ _id: "WP_OK", ...doc }));
   const userFindOneMock = mock.method(User, "findOne", async () => null);
+  const userFindByIdMock = mock.method(User, "findById", () => ({ select: async () => ({ _id: "USER_OK" }) }));
   const sessionCreateMock = mock.method(Session, "create", async () => ({ _id: "S1" }));
   t.after(() => {
     userCreateMock.mock.restore();
+    workerFindOneMock.mock.restore();
     workerCreateMock.mock.restore();
     userFindOneMock.mock.restore();
+    userFindByIdMock.mock.restore();
     sessionCreateMock.mock.restore();
   });
 

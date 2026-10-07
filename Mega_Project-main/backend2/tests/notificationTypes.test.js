@@ -12,13 +12,12 @@ import DeviceToken from "../src/models/deviceToken.model.js";
 import Application from "../src/models/application.model.js";
 import Job from "../src/models/job.model.js";
 import Payment from "../src/models/payment.model.js";
-import Offer from "../src/models/offer.model.js";
 import WorkerProfile from "../src/models/workerProfile.model.js";
 import WorkerSkill from "../src/models/workerSkill.model.js";
 import EmployerProfile from "../src/models/employerProfile.model.js";
 import { applyForJob, acceptOrRejectApplication } from "../src/controllers/application.controller.js";
 import { recordCashOrUPI, verifyRazorpayPaymentEndpoint } from "../src/controllers/payment.controller.js";
-import { sendOffer } from "../src/controllers/offer.controller.js";
+import { inviteWorker } from "../src/controllers/application.controller.js";
 
 // The Notification schema enum is the contract under test. Controllers used
 // to send SCREAMING_CASE values that are not in it; sendNotificationService
@@ -34,7 +33,6 @@ const WORKER_USER_ID = "507f1f77bcf86cd799439012";
 const PAYEE_USER_ID = "507f1f77bcf86cd799439013";
 const APPLICATION_ID = "507f1f77bcf86cd799439021";
 const PAYMENT_ID = "507f1f77bcf86cd799439022";
-const OFFER_ID = "507f1f77bcf86cd799439023";
 const JOB_ID = "507f1f77bcf86cd799439031";
 const WORKER_PROFILE_ID = "507f1f77bcf86cd799439041";
 const EMPLOYER_PROFILE_ID = "507f1f77bcf86cd799439042";
@@ -267,15 +265,40 @@ test("verifying a Razorpay payment persists a payment_update notification to the
   assert.strictEqual(notification.data.amount, 1500);
 });
 
-// --- 5. Job offer notifies the worker ---------------------------------------
+// --- 5. An employer's job request notifies the worker -----------------------
+//
+// This replaces the identical assertion that used to cover sendOffer(). The
+// /offers path is retired (it bypassed the capacity reservation and over-hired
+// jobs); employer-initiated hiring is now POST /applications/invite. The
+// notification contract is unchanged: the invited worker gets a job_alert
+// carrying the application id and the pay actually offered.
 
-test("sendOffer persists a job_alert notification to the worker", async (t) => {
+test("inviteWorker persists a job_alert notification to the invited worker", async (t) => {
   const capture = captureNotifications(t);
+  const originalFetch = global.fetch;
+  // Invitations carry a REAL AI match score rather than the hardcoded 100 the
+  // retired /offers path invented, so the scoring call has to be answered.
+  global.fetch = async () => ({
+    ok: true,
+    json: async () => ({
+      worker_id: WORKER_PROFILE_ID,
+      job_id: JOB_ID,
+      ranking: {
+        overall_score: 72,
+        match_factors: { skill: 80, location: 70, availability: 100, pay: null, rating: null, relevance: 50 },
+      },
+      explanation: {},
+    }),
+  });
   const mocks = [
     mock.method(EmployerProfile, "findOne", async () => ({ _id: EMPLOYER_PROFILE_ID })),
+    mock.method(EmployerProfile, "findById", async () => ({ _id: EMPLOYER_PROFILE_ID, userId: EMPLOYER_USER_ID })),
     mock.method(Job, "findOne", async () => ({
       _id: JOB_ID,
       employerId: EMPLOYER_PROFILE_ID,
+      status: "open",
+      requiredWorkers: 2,
+      filledWorkers: 0,
       title: { en: "Plumber needed" },
       payAmount: 800,
       payType: "daily",
@@ -284,23 +307,32 @@ test("sendOffer persists a job_alert notification to the worker", async (t) => {
       _id: WORKER_PROFILE_ID,
       userId: WORKER_USER_ID,
     })),
-    mock.method(Offer, "create", async (doc) => ({ _id: OFFER_ID, ...doc })),
+    mock.method(WorkerSkill, "find", async () => []),
+    mock.method(Application, "findOne", async () => null),
+    mock.method(Application, "create", async (doc) => ({ _id: APPLICATION_ID, ...doc })),
   ];
-  t.after(() => mocks.forEach((m) => m.mock.restore()));
+  t.after(() => {
+    mocks.forEach((m) => m.mock.restore());
+    global.fetch = originalFetch;
+  });
 
   const { req, res, next, done } = fakeReqRes({
     user: { _id: EMPLOYER_USER_ID },
     body: { jobId: JOB_ID, workerId: WORKER_PROFILE_ID, proposedPay: 850 },
   });
-  sendOffer(req, res, next);
+  inviteWorker(req, res, next);
   const { error } = await done;
 
   assert.strictEqual(error, null);
   assert.strictEqual(res.statusCode, 201);
   const notification = assertPersisted(capture, "job_alert");
   assert.strictEqual(notification.userId.toString(), WORKER_USER_ID);
-  assert.strictEqual(notification.refId.toString(), OFFER_ID);
+  assert.strictEqual(notification.refId.toString(), APPLICATION_ID);
   assert.strictEqual(notification.data.payAmount, 850);
+  // The match score must be the AI service's, not an invented constant.
+  assert.strictEqual(res.body.data.matchScore, 72);
+  assert.strictEqual(res.body.data.status, "invited");
+  assert.strictEqual(res.body.data.initiatedBy, "employer");
 });
 
 // --- Guard: no controller may reintroduce an invalid type -------------------

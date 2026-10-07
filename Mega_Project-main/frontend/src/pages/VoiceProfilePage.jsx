@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ArrowLeft, Mic, Upload, LoaderCircle } from "lucide-react";
+import { ArrowLeft, Mic, Upload, LoaderCircle, ListChecks } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import * as voiceProfileApi from "../api/voiceProfile";
@@ -12,6 +12,7 @@ import { VoiceRecorder } from "../components/voice/VoiceRecorder";
 import { AudioUploader } from "../components/voice/AudioUploader";
 import { VoiceProfileReview } from "../components/voice/VoiceProfileReview";
 import { VoiceProfileSuccess } from "../components/voice/VoiceProfileSuccess";
+import { GuidedVoiceWizard } from "../components/voice/GuidedVoiceWizard";
 import "./VoiceProfilePage.css";
 
 const EXAMPLE_TEXT = {
@@ -22,10 +23,14 @@ const EXAMPLE_TEXT = {
 
 export function VoiceProfilePage() {
   const { refreshBootstrap } = useAuth();
-  const { language: uiLanguage } = useLanguage();
+  const { language: uiLanguage, t } = useLanguage();
   const navigate = useNavigate();
 
-  const [step, setStep] = useState("language"); // language | input | processing | review | success
+  // "mode" is a new FIRST step. Picking "quick" drops into the original state
+  // machine below, untouched: language -> input -> processing -> review -> success.
+  // Picking "guided" hands off to GuidedVoiceWizard after the same language step.
+  const [mode, setMode] = useState(null); // null | quick | guided
+  const [step, setStep] = useState("mode"); // mode | language | input | processing | review | success
   const [recordingLanguage, setRecordingLanguage] = useState(uiLanguage);
   const [inputMode, setInputMode] = useState("record"); // record | upload
   const [audioSource, setAudioSource] = useState(null); // Blob | File
@@ -97,6 +102,42 @@ export function VoiceProfilePage() {
 
         {error && <ErrorBanner error={error} context="voice" />}
 
+        {step === "mode" && (
+          <div className="voice-mode-step">
+            <p className="voice-step-label">{t("voice.mode.title")}</p>
+            <div className="voice-mode-options">
+              {/* The existing single-recording flow, unchanged and still first:
+                  it is one wait instead of seven and was measured as accurate as
+                  the per-field flow on the real recordings. */}
+              <button type="button" className="voice-mode-option" onClick={() => { setMode("quick"); setStep("language"); }}>
+                <Mic size={22} aria-hidden="true" />
+                <strong>{t("voice.mode.quick.title")}</strong>
+                <span>{t("voice.mode.quick.desc")}</span>
+                <em>{t("voice.mode.quick.action")}</em>
+              </button>
+              <button type="button" className="voice-mode-option" onClick={() => { setMode("guided"); setStep("language"); }}>
+                <ListChecks size={22} aria-hidden="true" />
+                <strong>{t("voice.mode.guided.title")}</strong>
+                <span>{t("voice.mode.guided.desc")}</span>
+                <em>{t("voice.mode.guided.action")}</em>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {step === "guided" && (
+          <GuidedVoiceWizard
+            spokenLanguage={recordingLanguage}
+            onComplete={async (result) => {
+              setConfirmedProfile(result.workerProfile);
+              setSkillResolution(result.voiceSkillResolution);
+              await refreshBootstrap();
+              setStep("success");
+            }}
+            onExit={() => setStep("mode")}
+          />
+        )}
+
         {step === "language" && (
           <div className="voice-language-step">
             {/* This selects the SPOKEN language forwarded to Whisper
@@ -104,7 +145,7 @@ export function VoiceProfilePage() {
                 language. The old "Choose your language" read as a UI setting,
                 so a worker with a Marathi interface would record in English
                 and have it decoded as Marathi. */}
-            <p className="voice-step-label">Which language will you speak?</p>
+            <p className="voice-step-label">{t("voice.spokenLanguage")}</p>
             <div className="voice-language-options">
               {APP_LANGUAGES.map((lang) => (
                 <button
@@ -117,7 +158,11 @@ export function VoiceProfilePage() {
                 </button>
               ))}
             </div>
-            <button type="button" className="btn btn-primary btn-lg" onClick={() => setStep("input")}>
+            <button
+              type="button"
+              className="btn btn-primary btn-lg"
+              onClick={() => setStep(mode === "guided" ? "guided" : "input")}
+            >
               Continue
             </button>
           </div>

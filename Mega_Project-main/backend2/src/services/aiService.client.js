@@ -9,7 +9,12 @@
  * Uses Node's built-in fetch() - no axios, no new dependency.
  */
 
-const getBaseUrl = () => process.env.AI_SERVICE_URL || "http://localhost:8000";
+// Port 8001, because 8000 is the NODE backend's own port (see .env.example's
+// PORT=8000). The old default had an unconfigured deployment pointing this
+// service client back at the Node server, and it is why the AI integration test
+// needed AI_SERVICE_URL overridden by hand to pass. The runtime architecture is
+// unchanged - .env already used 8001; this makes the fallback agree with it.
+const getBaseUrl = () => process.env.AI_SERVICE_URL || "http://localhost:8001";
 const getApiKey = () => process.env.AI_SERVICE_API_KEY || "";
 
 // Every AI-service call gets a finite timeout, so a hung FastAPI process
@@ -195,6 +200,33 @@ export const forwardAudioForExtraction = ({ audioBuffer, filename, contentType, 
   formData.append("language", language);
 
   return postMultipartToAiService("/voice/extract", formData, getAiServiceInferenceTimeoutMs());
+};
+
+/**
+ * One guided step: transcribe a short recording and extract a SINGLE field from
+ * it, via FastAPI's /voice/extract-field.
+ *
+ * Shares the transcription path, the frozen Whisper configuration and the
+ * number-grounding guard with forwardAudioForExtraction above. The difference is
+ * what happens after transcription: only `field: "skills"` reaches the language
+ * model, so a whole guided session makes exactly one Qwen call. Every other field
+ * is parsed deterministically on the Python side.
+ *
+ * @param {object} params
+ * @param {Buffer} params.audioBuffer
+ * @param {string} params.filename
+ * @param {string} params.contentType
+ * @param {string} params.language - the language the worker SPOKE in
+ * @param {string} params.field - fullName | expectedPay | experienceYears | city | skills
+ * @returns {Promise<{field:string, transcript:string, value:any, ok:boolean, reason:string, candidates:number[], confidence:number|null, used_llm:boolean}>}
+ */
+export const forwardAudioForFieldExtraction = ({ audioBuffer, filename, contentType, language, field }) => {
+  const formData = new FormData();
+  formData.append("audio", new Blob([audioBuffer], { type: contentType }), filename);
+  formData.append("language", language);
+  formData.append("field", field);
+
+  return postMultipartToAiService("/voice/extract-field", formData, getAiServiceInferenceTimeoutMs());
 };
 
 /**

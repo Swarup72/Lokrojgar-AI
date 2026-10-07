@@ -2,12 +2,22 @@ import { Check, Minus } from "lucide-react";
 import { MATCH_FACTOR_ORDER } from "../../utils/enums";
 import "./MatchFactorsList.css";
 
+/**
+ * These label the six MATCH FACTORS - how well this pair fits on each axis,
+ * 0-100. They are NOT the person's star rating.
+ *
+ * "rating" is deliberately labelled "Reputation fit" rather than "Rating": the
+ * old label sat directly beside the real star rating on the same card, so a
+ * brand-new worker appeared to have two different, contradictory ratings. The
+ * stars (RatingStars) are the canonical reputation; this row only says whether
+ * reputation could be used as a matching signal for this pair.
+ */
 const LABELS = {
   skill: "Skill",
   location: "Location",
   availability: "Availability",
   pay: "Pay",
-  rating: "Rating",
+  rating: "Reputation fit",
   relevance: "Relevance",
 };
 
@@ -34,8 +44,10 @@ export function MatchFactorsList({ matchFactors, explanation }) {
           const tooltip =
             factorExp?.summary ||
             (available
-              ? `${LABELS[factor]}: ${Math.round(factorVal)}%`
-              : `${LABELS[factor]}: Not available`);
+              ? `${LABELS[factor]}: ${Math.round(factorVal)}% match on this factor`
+              : factor === "rating"
+                ? "Not rated yet, so reputation was not used as a matching signal"
+                : `${LABELS[factor]}: Not available for this pair`);
 
           return (
             <li

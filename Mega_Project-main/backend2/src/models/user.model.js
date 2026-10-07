@@ -19,6 +19,19 @@ const userSchema = new mongoose.Schema(
       },
     },
 
+    // The canonical personal name for the ACCOUNT, independent of role.
+    // WorkerProfile.fullName is the worker-facing name and stays as-is; this
+    // is what an employer with no business name is displayed as, and what a
+    // dual-role account shares between both roles. Nullable because accounts
+    // created before this field existed have no value for it (a backfill is
+    // provided in scripts/backfill-user-fullname.mjs) - code that displays a
+    // name must fall back rather than assume it is set.
+    fullName: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+
     email: {
       type: String,
       trim: true,

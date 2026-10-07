@@ -6,6 +6,8 @@ from typing import List, Optional
 from app.extraction.local_llm_runtime import LocalLLMRuntime
 from app.skills.models import CatalogSkillEntry, SkillResolutionResult
 
+from app.runtime.inference_gate import run_exclusive
+
 logger = logging.getLogger(__name__)
 
 _SYSTEM_PROMPT_TEMPLATE = """You are resolving raw, free-text skill phrases - extracted from a voice transcript for a blue-collar job platform in India - against a FIXED catalog of real skills. The phrases may be in Marathi, Hindi, English, or a mix of these.
@@ -77,7 +79,10 @@ async def resolve_skills_semantically(
         "Raw skill phrases to resolve:\n" + "\n".join(f"- {raw}" for raw in raw_skills)
     )
 
-    raw_output = await asyncio.to_thread(LocalLLMRuntime.generate, system_prompt, user_content, 768)
+    raw_output = await run_exclusive(
+        "qwen.resolve_skills",
+        lambda: asyncio.to_thread(LocalLLMRuntime.generate, system_prompt, user_content, 768),
+    )
 
     parsed: list = []
     try:

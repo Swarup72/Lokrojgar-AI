@@ -1,4 +1,3 @@
-import { useMemo } from "react";
 import { useAsync } from "../../hooks/useAsync";
 import * as ratingsApi from "../../api/ratings";
 import { RatingStars } from "../common/RatingStars";
@@ -6,21 +5,34 @@ import { Spinner } from "../common/Spinner";
 import { ErrorBanner } from "../common/ErrorBanner";
 import "./RatingList.css";
 
-/** Read-only list of ratings received by `userId`, with an average summary. */
-export function RatingList({ userId }) {
+/**
+ * Read-only list of the ratings someone has received.
+ *
+ * The summary at the top shows the CANONICAL aggregate - `ratingAvg` /
+ * `ratingCount` from the profile, which the backend maintains atomically -
+ * rather than an average this component recomputes from the fetched list.
+ * Recomputing here was a second source of truth for the same number: the two
+ * agreed only as long as the list was complete and the aggregate was correct,
+ * and a disagreement would show the same person two different ratings on two
+ * different screens. The list below is the evidence; the aggregate is the value.
+ *
+ * @param {{userId: string, ratingAvg?: number, ratingCount?: number}} props
+ */
+export function RatingList({ userId, ratingAvg, ratingCount }) {
   const { data: ratings, loading, error } = useAsync(() => ratingsApi.getForUser(userId), { deps: [userId] });
-
-  const average = useMemo(() => {
-    if (!ratings?.length) return 0;
-    return ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length;
-  }, [ratings]);
 
   if (loading) return <Spinner label="Loading reviews..." />;
   if (error) return <ErrorBanner error={error} />;
 
   return (
     <div className="rating-list">
-      <RatingStars value={average} count={ratings.length} />
+      {/* Falls back to the fetched list's own length only when the caller did
+          not pass the profile aggregate, so the component still works for a
+          user whose profile is not to hand. */}
+      <RatingStars
+        value={typeof ratingAvg === "number" ? ratingAvg : 0}
+        count={typeof ratingCount === "number" ? ratingCount : ratings.length}
+      />
 
       {ratings.length === 0 && <p className="rating-list-empty">No reviews yet.</p>}
 

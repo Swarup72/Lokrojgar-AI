@@ -28,7 +28,13 @@ class WorkerProfile(AIBaseModel):
 
     bio: Optional[MultilingualText] = None
 
-    location: GeoPoint
+    # Optional, because a newly registered worker genuinely has no location
+    # until they set one. It used to be required, which only worked because the
+    # Node backend seeded every new profile with Pune coordinates - a real point
+    # that this matcher then scored as if it were the truth. A worker with no
+    # location now makes the location factor UNAVAILABLE (None), which the
+    # ranking already excludes from both numerator and denominator.
+    location: Optional[GeoPoint] = None
 
     availability: Literal["available", "busy", "unavailable"] = "available"
 

@@ -229,8 +229,27 @@ const FAKE_CATEGORIES = [
   { _id: "CAT_CONSTRUCTION", name: { en: "Construction Work", hi: "निर्माण कार्य", mr: "बांधकाम कार्य" }, isActive: true },
 ];
 
+const WORKER_PROFILE_ID = "WORKERPROFILE001";
+
+/**
+ * Mocks VoiceProfile.findOne so it answers only the filter it is given - the
+ * way MongoDB would. Ownership is part of that filter now, so a lookup for a
+ * VoiceProfile belonging to a different worker genuinely finds nothing, and
+ * these tests exercise the check instead of stepping around it.
+ */
+function mockOwnedVoiceProfile(voiceProfile, ownerWorkerId = WORKER_PROFILE_ID) {
+  return mock.method(VoiceProfile, "findOne", async (filter) => {
+    if (String(filter._id) !== String(voiceProfile._id)) return null;
+    if (String(filter.workerId) !== String(ownerWorkerId)) return null;
+    return voiceProfile;
+  });
+}
+
 function fakeWorkerProfile(overrides = {}) {
   return {
+    // The VoiceProfile is now looked up by { _id, workerId }, so the profile
+    // needs an id for ownership to be checked against.
+    _id: WORKER_PROFILE_ID,
     userId: "USER001",
     fullName: "Old Name",
     bio: {},
@@ -246,15 +265,15 @@ function fakeWorkerProfile(overrides = {}) {
 
 test("confirmAndApplyToProfile: applies availability, languages, and bio", async (t) => {
   const workerProfile = fakeWorkerProfile();
-  const voiceProfile = { _id: "VP001", language: "mr" };
+  const voiceProfile = { _id: "VP001", language: "mr", status: "committed", save: async function () { return this; } };
 
-  const voiceProfileFindByIdMock = mock.method(VoiceProfile, "findById", async () => voiceProfile);
+  const voiceProfileFindOneMock = mockOwnedVoiceProfile(voiceProfile);
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => workerProfile);
   const skillFindMock = mock.method(Skill, "find", async () => []);
   const categoryFindMock = mock.method(JobCategory, "find", async () => []);
 
   t.after(() => {
-    voiceProfileFindByIdMock.mock.restore();
+    voiceProfileFindOneMock.mock.restore();
     workerFindOneMock.mock.restore();
     skillFindMock.mock.restore();
     categoryFindMock.mock.restore();
@@ -286,16 +305,16 @@ test("confirmAndApplyToProfile: applies availability, languages, and bio", async
 
 test("confirmAndApplyToProfile: a known skill alias resolves and creates a WorkerSkill", async (t) => {
   const workerProfile = fakeWorkerProfile();
-  const voiceProfile = { _id: "VP001", language: "hi" };
+  const voiceProfile = { _id: "VP001", language: "hi", status: "committed", save: async function () { return this; } };
 
-  const voiceProfileFindByIdMock = mock.method(VoiceProfile, "findById", async () => voiceProfile);
+  const voiceProfileFindOneMock = mockOwnedVoiceProfile(voiceProfile);
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => workerProfile);
   const skillFindMock = mock.method(Skill, "find", async () => FAKE_SKILLS);
   const categoryFindMock = mock.method(JobCategory, "find", async () => []);
   const workerSkillUpsertMock = mock.method(WorkerSkill, "findOneAndUpdate", async () => ({}));
 
   t.after(() => {
-    voiceProfileFindByIdMock.mock.restore();
+    voiceProfileFindOneMock.mock.restore();
     workerFindOneMock.mock.restore();
     skillFindMock.mock.restore();
     categoryFindMock.mock.restore();
@@ -325,9 +344,9 @@ test("confirmAndApplyToProfile: a known skill alias resolves and creates a Worke
 
 test("confirmAndApplyToProfile: an unrecognized skill stays as unresolved free text, no WorkerSkill created", async (t) => {
   const workerProfile = fakeWorkerProfile();
-  const voiceProfile = { _id: "VP001", language: "hi" };
+  const voiceProfile = { _id: "VP001", language: "hi", status: "committed", save: async function () { return this; } };
 
-  const voiceProfileFindByIdMock = mock.method(VoiceProfile, "findById", async () => voiceProfile);
+  const voiceProfileFindOneMock = mockOwnedVoiceProfile(voiceProfile);
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => workerProfile);
   const skillFindMock = mock.method(Skill, "find", async () => FAKE_SKILLS);
   const categoryFindMock = mock.method(JobCategory, "find", async () => []);
@@ -352,7 +371,7 @@ test("confirmAndApplyToProfile: an unrecognized skill stays as unresolved free t
   }));
 
   t.after(() => {
-    voiceProfileFindByIdMock.mock.restore();
+    voiceProfileFindOneMock.mock.restore();
     workerFindOneMock.mock.restore();
     skillFindMock.mock.restore();
     categoryFindMock.mock.restore();
@@ -379,16 +398,16 @@ test("confirmAndApplyToProfile: an unrecognized skill stays as unresolved free t
 
 test("confirmAndApplyToProfile: duplicate extracted skills resolving to the same catalog skill create only one WorkerSkill", async (t) => {
   const workerProfile = fakeWorkerProfile();
-  const voiceProfile = { _id: "VP001", language: "en" };
+  const voiceProfile = { _id: "VP001", language: "en", status: "committed", save: async function () { return this; } };
 
-  const voiceProfileFindByIdMock = mock.method(VoiceProfile, "findById", async () => voiceProfile);
+  const voiceProfileFindOneMock = mockOwnedVoiceProfile(voiceProfile);
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => workerProfile);
   const skillFindMock = mock.method(Skill, "find", async () => FAKE_SKILLS);
   const categoryFindMock = mock.method(JobCategory, "find", async () => []);
   const workerSkillUpsertMock = mock.method(WorkerSkill, "findOneAndUpdate", async () => ({}));
 
   t.after(() => {
-    voiceProfileFindByIdMock.mock.restore();
+    voiceProfileFindOneMock.mock.restore();
     workerFindOneMock.mock.restore();
     skillFindMock.mock.restore();
     categoryFindMock.mock.restore();
@@ -414,15 +433,15 @@ test("confirmAndApplyToProfile: duplicate extracted skills resolving to the same
 
 test("confirmAndApplyToProfile: preferredJobCategories resolve and append without duplicating existing ones", async (t) => {
   const workerProfile = fakeWorkerProfile({ preferredJobCategories: ["CAT_CONSTRUCTION"] });
-  const voiceProfile = { _id: "VP001", language: "en" };
+  const voiceProfile = { _id: "VP001", language: "en", status: "committed", save: async function () { return this; } };
 
-  const voiceProfileFindByIdMock = mock.method(VoiceProfile, "findById", async () => voiceProfile);
+  const voiceProfileFindOneMock = mockOwnedVoiceProfile(voiceProfile);
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => workerProfile);
   const skillFindMock = mock.method(Skill, "find", async () => []);
   const categoryFindMock = mock.method(JobCategory, "find", async () => FAKE_CATEGORIES);
 
   t.after(() => {
-    voiceProfileFindByIdMock.mock.restore();
+    voiceProfileFindOneMock.mock.restore();
     workerFindOneMock.mock.restore();
     skillFindMock.mock.restore();
     categoryFindMock.mock.restore();
@@ -449,9 +468,9 @@ test("confirmAndApplyToProfile: preferredJobCategories resolve and append withou
 
 test("confirmAndApplyToProfile: an existing worker's already-linked skill is not duplicated or reset", async (t) => {
   const workerProfile = fakeWorkerProfile();
-  const voiceProfile = { _id: "VP001", language: "en" };
+  const voiceProfile = { _id: "VP001", language: "en", status: "committed", save: async function () { return this; } };
 
-  const voiceProfileFindByIdMock = mock.method(VoiceProfile, "findById", async () => voiceProfile);
+  const voiceProfileFindOneMock = mockOwnedVoiceProfile(voiceProfile);
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => workerProfile);
   const skillFindMock = mock.method(Skill, "find", async () => FAKE_SKILLS);
   const categoryFindMock = mock.method(JobCategory, "find", async () => []);
@@ -466,7 +485,7 @@ test("confirmAndApplyToProfile: an existing worker's already-linked skill is not
   }));
 
   t.after(() => {
-    voiceProfileFindByIdMock.mock.restore();
+    voiceProfileFindOneMock.mock.restore();
     workerFindOneMock.mock.restore();
     skillFindMock.mock.restore();
     categoryFindMock.mock.restore();
@@ -488,9 +507,9 @@ test("confirmAndApplyToProfile: an existing worker's already-linked skill is not
 
 test("confirmAndApplyToProfile: a worker with no extracted skills triggers no WorkerSkill lookups", async (t) => {
   const workerProfile = fakeWorkerProfile();
-  const voiceProfile = { _id: "VP001", language: "en" };
+  const voiceProfile = { _id: "VP001", language: "en", status: "committed", save: async function () { return this; } };
 
-  const voiceProfileFindByIdMock = mock.method(VoiceProfile, "findById", async () => voiceProfile);
+  const voiceProfileFindOneMock = mockOwnedVoiceProfile(voiceProfile);
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => workerProfile);
   const skillFindMock = mock.method(Skill, "find", async () => {
     throw new Error("should not be called when no skills were extracted");
@@ -498,7 +517,7 @@ test("confirmAndApplyToProfile: a worker with no extracted skills triggers no Wo
   const workerSkillUpsertMock = mock.method(WorkerSkill, "findOneAndUpdate", async () => ({}));
 
   t.after(() => {
-    voiceProfileFindByIdMock.mock.restore();
+    voiceProfileFindOneMock.mock.restore();
     workerFindOneMock.mock.restore();
     skillFindMock.mock.restore();
     workerSkillUpsertMock.mock.restore();

@@ -44,12 +44,18 @@ export function RegisterPage() {
       return;
     }
 
+    // The personal name is required for every account now - it is the
+    // canonical User.fullName, and the name an employer who gives no business
+    // name is displayed as. Business details are employer-only and optional;
+    // blank values are omitted entirely rather than sent as "".
     const payload = {
       phone: phone.trim(),
       password,
       roles: [role],
       preferredLanguage,
-      ...(role === USER_ROLES.WORKER ? { fullName } : { businessName, businessType }),
+      fullName: fullName.trim(),
+      ...(role === USER_ROLES.EMPLOYER && businessName.trim() ? { businessName: businessName.trim() } : {}),
+      ...(role === USER_ROLES.EMPLOYER && businessType.trim() ? { businessType: businessType.trim() } : {}),
     };
 
     setSubmitting(true);
@@ -121,33 +127,35 @@ export function RegisterPage() {
             </div>
           </label>
 
-          {role === USER_ROLES.WORKER ? (
-            <label className="auth-field">
-              <span>{t("auth.register.fullName")}</span>
-              <div className="auth-input-wrap">
-                <User size={18} aria-hidden="true" />
-                {/* Required: the server cannot create the WorkerProfile
-                    without it, and a worker with no profile cannot use any
-                    worker feature. */}
-                <input type="text" required value={fullName} onChange={(event) => setFullName(event.target.value)} />
-              </div>
-            </label>
-          ) : (
+          {/* Asked of every account, whichever role: this is the person's own
+              name, and for an employer with no business name it is the name
+              workers will see. */}
+          <label className="auth-field">
+            <span>{t("auth.register.fullName")}</span>
+            <div className="auth-input-wrap">
+              <User size={18} aria-hidden="true" />
+              <input type="text" required minLength={2} value={fullName} onChange={(event) => setFullName(event.target.value)} />
+            </div>
+          </label>
+
+          {role === USER_ROLES.EMPLOYER && (
             <>
               <label className="auth-field">
-                <span>{t("auth.register.businessName")}</span>
+                <span>
+                  {t("auth.register.businessName")} <em>({t("common.optional")})</em>
+                </span>
                 <div className="auth-input-wrap">
                   <Building2 size={18} aria-hidden="true" />
-                  {/* Required: the server cannot create the EmployerProfile
-                      without it, and an employer with no profile cannot post
-                      a job. */}
+                  {/* Optional by product decision - an employer may hire under
+                      their own name. Left blank, jobs are shown as posted by
+                      the person named above. */}
                   <input
                     type="text"
-                    required
                     value={businessName}
                     onChange={(event) => setBusinessName(event.target.value)}
                   />
                 </div>
+                <small className="auth-field-hint">{t("auth.register.businessNameHint")}</small>
               </label>
               <label className="auth-field">
                 <span>

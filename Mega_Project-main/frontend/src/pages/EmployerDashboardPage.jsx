@@ -13,9 +13,10 @@ import { ErrorBanner } from "../components/common/ErrorBanner";
 import { EmptyState } from "../components/common/EmptyState";
 import { JobStatusActions } from "../components/jobs/JobStatusActions";
 import "./EmployerDashboardPage.css";
+import { ownEmployerName } from "../utils/displayName";
 
 export function EmployerDashboardPage() {
-  const { employerProfile } = useAuth();
+  const { user, employerProfile } = useAuth();
   const { language } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
@@ -64,7 +65,7 @@ export function EmployerDashboardPage() {
         </div>
       )}
 
-      <h1>Hello, {employerProfile?.businessName || "Employer"}</h1>
+      <h1>Hello, {ownEmployerName(employerProfile, user) || "there"}</h1>
 
       <div className="employer-dashboard-actions">
         <Link to="/post-job" className="btn btn-primary">

@@ -1,26 +1,19 @@
 import fs from "fs";
 import path from "path";
-import Offer from "../models/offer.model.js";
 import Job from "../models/job.model.js";
 import Shift from "../models/shift.model.js";
 import logger from "../utils/logger.js";
 
-/**
- * 1. Expire offers past their expiresAt date
- */
-export const expireOffersJob = async () => {
-  try {
-    const result = await Offer.updateMany(
-      { status: "sent", expiresAt: { $lt: new Date() } },
-      { status: "expired" }
-    );
-    if (result.modifiedCount > 0) {
-      logger.info(`[CRON] Expired ${result.modifiedCount} job offers.`);
-    }
-  } catch (error) {
-    logger.error("[CRON] Expire Offers Job Error:", error);
-  }
-};
+// NOTE: expireOffersJob was removed with the Offer collection. Employer-initiated
+// hiring is now an Application with status "invited" (see
+// controllers/application.controller.js), and an invitation has no expiry to
+// sweep - it stays pending until the worker answers it.
+//
+// NOTE ALSO: initCronJobs() is not called from anywhere in this codebase, so
+// none of the tasks below currently run. That is pre-existing and is reported
+// rather than changed here - wiring it up would alter runtime behaviour (jobs
+// past their application deadline would start being marked "expired"), which is
+// outside the scope of this cleanup.
 
 /**
  * 2. Expire jobs past application deadline
@@ -94,14 +87,12 @@ export const initCronJobs = () => {
   logger.info("Initializing Cron Background Tasks...");
 
   // Run tasks immediately on startup
-  expireOffersJob();
   expireJobsJob();
   markMissedShiftsJob();
   cleanTempDirectoryJob();
 
   // Schedule intervals:
-  // - Offers & Jobs expiry: Every 15 minutes
-  setInterval(expireOffersJob, 15 * 60 * 1000);
+  // - Jobs expiry: Every 15 minutes
   setInterval(expireJobsJob, 15 * 60 * 1000);
 
   // - Missed shifts check: Every 30 minutes

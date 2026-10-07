@@ -1,15 +1,18 @@
 import { useState } from "react";
-import { FileText, Star, Lock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { FileText, Star, Lock, Phone, MessageSquare } from "lucide-react";
 import { useAsync } from "../hooks/useAsync";
 import { useLanguage } from "../hooks/useLanguage";
 import * as applicationsApi from "../api/applications";
 import * as jobsApi from "../api/jobs";
 import * as ratingsApi from "../api/ratings";
+import * as chatApi from "../api/chat";
 import { normalizeError } from "../api/client";
 import { pickLocalizedText } from "../utils/localizedText";
 import { Card } from "../components/common/Card";
 import { StatusPill } from "../components/common/StatusPill";
 import { RatingForm } from "../components/reviews/RatingForm";
+import { MapLink } from "../components/common/MapLink";
 import { Spinner } from "../components/common/Spinner";
 import { ErrorBanner } from "../components/common/ErrorBanner";
 import { EmptyState } from "../components/common/EmptyState";
@@ -17,6 +20,7 @@ import "./ApplicationsPage.css";
 
 export function ApplicationsPage() {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const [withdrawingId, setWithdrawingId] = useState(null);
   const [withdrawError, setWithdrawError] = useState(null);
   const [ratingApplicationId, setRatingApplicationId] = useState(null);
@@ -24,6 +28,9 @@ export function ApplicationsPage() {
   const [submittingRating, setSubmittingRating] = useState(false);
   const [resolvingEmployerId, setResolvingEmployerId] = useState(null);
   const [ratingError, setRatingError] = useState(null);
+  const [contactByApplication, setContactByApplication] = useState({});
+  const [contactBusyId, setContactBusyId] = useState(null);
+  const [chatBusyId, setChatBusyId] = useState(null);
   const { data: applications, loading, error, run: refetch } = useAsync(applicationsApi.getMine);
 
   const handleWithdraw = async (applicationId) => {
@@ -37,6 +44,108 @@ export function ApplicationsPage() {
     } finally {
       setWithdrawingId(null);
     }
+  };
+
+
+  /**
+   * The employer's contact details, which the server releases only once this
+   * application has been accepted. Fetched on demand rather than with the list,
+   * so a worker's application list does not pull contact data for every
+   * employer they have ever applied to.
+   */
+  const loadEmployerContact = async (application) => {
+    setContactBusyId(application._id);
+    setRatingError(null);
+    try {
+      const contact = await jobsApi.getEmployerContact(application.jobId._id);
+      setContactByApplication((previous) => ({ ...previous, [application._id]: contact }));
+    } catch (err) {
+      setRatingError(normalizeError(err));
+    } finally {
+      setContactBusyId(null);
+    }
+  };
+
+  /** Opens (or reopens) the chat for this job and goes to it. */
+  const openChat = async (application) => {
+    setChatBusyId(application._id);
+    setRatingError(null);
+    try {
+      const conversation = await chatApi.getOrCreateConversation({ jobId: application.jobId._id });
+      navigate("/messages", { state: { conversationId: conversation._id } });
+    } catch (err) {
+      setRatingError(normalizeError(err));
+    } finally {
+      setChatBusyId(null);
+    }
+  };
+
+  /**
+   * What the worker can see and do once the relationship is accepted. Before
+   * acceptance they already have the job's own location from the job itself;
+   * this adds the employer's contact details and chat, which exist only because
+   * a hiring relationship now does.
+   */
+  const renderAcceptedExtras = (application) => {
+    if (!["accepted", "completed"].includes(application.status)) return null;
+    const contact = contactByApplication[application._id];
+
+    return (
+      <div className="application-accepted-extras">
+        <p className="application-next-step">
+          {application.status === "accepted"
+            ? "You have this job. Contact the employer to agree when to start."
+            : "This work is marked finished. Rating opens once the employer closes the job."}
+        </p>
+
+        {/* The JOB site - distinct from the employer's own location below. */}
+        <MapLink
+          location={application.jobId?.location}
+          label={application.jobId?.address || application.jobId?.city}
+          kind="Job location"
+        />
+
+        <div className="application-contact-row">
+          {contact ? (
+            <div className="application-contact">
+              <strong>{contact.employerName || "Employer"}</strong>
+              {contact.phone && (
+                <a href={`tel:${contact.phone}`} className="application-contact-phone">
+                  <Phone size={14} aria-hidden="true" /> {contact.phone}
+                </a>
+              )}
+              {contact.employerLocation && (
+                <MapLink
+                  location={contact.employerLocation}
+                  label={contact.city || contact.village}
+                  kind="Employer location"
+                />
+              )}
+            </div>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => loadEmployerContact(application)}
+              disabled={contactBusyId === application._id}
+            >
+              <Phone size={15} aria-hidden="true" />{" "}
+              {contactBusyId === application._id ? "Loading..." : "Show employer contact"}
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => openChat(application)}
+            disabled={chatBusyId === application._id}
+          >
+            <MessageSquare size={15} aria-hidden="true" />{" "}
+            {chatBusyId === application._id ? "Opening..." : "Message employer"}
+          </button>
+        </div>
+      </div>
+    );
   };
 
   const markRated = (applicationId) => {
@@ -182,6 +291,7 @@ export function ApplicationsPage() {
                   )}
                   {renderRateEmployer(application)}
                 </div>
+                {renderAcceptedExtras(application)}
               </Card>
             );
           })}

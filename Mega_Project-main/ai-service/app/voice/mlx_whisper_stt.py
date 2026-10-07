@@ -9,6 +9,8 @@ from app.sarvam.errors import AiServiceUnavailableError
 from app.voice.interface import STTProvider
 from app.voice.whisper_stt import _resolve_whisper_language
 
+from app.runtime.inference_gate import run_exclusive
+
 logger = logging.getLogger(__name__)
 
 DEFAULT_MLX_WHISPER_MODEL = "mlx-community/whisper-large-v3-turbo"
@@ -148,7 +150,17 @@ class MLXWhisperSTT(STTProvider):
             # mlx_whisper.transcribe() is a synchronous, GPU(Metal)-bound
             # call - run it in a thread so it never blocks FastAPI's event
             # loop, exactly like WhisperSTT does for openai-whisper.
-            return await asyncio.to_thread(self._transcribe_sync, temp_path, whisper_language)
+            #
+            # Wrapped in the shared inference gate so at most one MLX inference
+            # runs at a time. Measured: three concurrent transcriptions made
+            # every individual call ~2.5x slower for ~13% more throughput, which
+            # is the wrong trade for a flow where a worker waits on one short
+            # step. The decoding call itself and every parameter to it are
+            # unchanged - this only decides WHEN it is allowed to start.
+            return await run_exclusive(
+                "whisper.transcribe",
+                lambda: asyncio.to_thread(self._transcribe_sync, temp_path, whisper_language),
+            )
         finally:
             if os.path.exists(temp_path):
                 os.unlink(temp_path)

@@ -126,6 +126,27 @@ async function callRecommendedWorkers() {
 
 // --- 1. Eligible jobs still get recommendations ------------------------------
 
+/**
+ * A chainable populate() mock. Job reads now chain two populate() calls - the
+ * second pulls employerId.userId.fullName so an employer who hires under
+ * their own name still has a name to display - and `populate` must therefore
+ * return something chainable rather than a promise. `calls` records every
+ * populate argument so a test can assert WHAT was populated, not just that it
+ * resolved.
+ */
+function chainablePopulate(resolve) {
+  const calls = [];
+  const chain = {
+    calls,
+    populate(arg) {
+      calls.push(arg);
+      return chain;
+    },
+    then: (onFulfilled, onRejected) => Promise.resolve(resolve()).then(onFulfilled, onRejected),
+  };
+  return chain;
+}
+
 test("H-4: an open job gets worker recommendations, AI is called, and returned workers/order are preserved", async (t) => {
   const { aiCalls } = mockRecommendedWorkersScenario(t, { job: fakeJob("open") });
 
@@ -228,7 +249,7 @@ test("H-4: worker->jobs candidate query still uses exactly the same status set",
   let capturedFilter = null;
   const jobFindMock = mock.method(Job, "find", (filter) => {
     capturedFilter = filter;
-    return { populate: () => ({ limit: async () => [] }) };
+    return { populate: () => ({ populate: () => ({ limit: async () => [] }) }) };
   });
   t.after(() => {
     workerFindOneMock.mock.restore();
@@ -471,9 +492,7 @@ test("getJobById: returns job for owning employer with isOwner=true", async (t) 
   const empFindMock = mock.method(EmployerProfile, "findOne", async () => ({
     _id: "EMPPROFILE001",
   }));
-  const jobFindByIdMock = mock.method(Job, "findById", () => ({
-    populate: async () => jobDoc,
-  }));
+  const jobFindByIdMock = mock.method(Job, "findById", () => chainablePopulate(() => jobDoc));
 
   t.after(() => {
     empFindMock.mock.restore();
@@ -507,9 +526,7 @@ test("getJobById: hides draft job from non-owner (404)", async (t) => {
   const empFindMock = mock.method(EmployerProfile, "findOne", async () => ({
     _id: "OTHER_EMP",
   }));
-  const jobFindByIdMock = mock.method(Job, "findById", () => ({
-    populate: async () => jobDoc,
-  }));
+  const jobFindByIdMock = mock.method(Job, "findById", () => chainablePopulate(() => jobDoc));
 
   t.after(() => {
     empFindMock.mock.restore();

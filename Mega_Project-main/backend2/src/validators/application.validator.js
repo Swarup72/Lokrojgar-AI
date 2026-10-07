@@ -20,7 +20,16 @@ export const getJobApplicantsValidator = z.object({
   query: z
     .object({
       status: z
-        .enum(["applied", "shortlisted", "accepted", "rejected", "completed", "withdrawn"])
+        .enum([
+          "applied",
+          "invited",
+          "shortlisted",
+          "accepted",
+          "rejected",
+          "declined",
+          "completed",
+          "withdrawn",
+        ])
         .optional(),
     })
     .optional(),
@@ -52,5 +61,27 @@ export const acceptOrRejectApplicationValidator = z.object({
 export const completeApplicationValidator = z.object({
   params: z.object({
     applicationId: z.string().min(1, "Application ID is required"),
+  }),
+});
+
+// --- Employer-initiated hiring ("job requests") -----------------------------
+
+export const inviteWorkerValidator = z.object({
+  body: z.object({
+    jobId: z.string().min(1, "Job ID is required"),
+    // The WorkerProfile id, as the recommended-workers list returns it. The
+    // employer is never taken from the body - it comes from the JWT.
+    workerId: z.string().min(1, "Worker ID is required"),
+    // Optional: an employer may offer a different rate than the job's default.
+    proposedPay: z.number().min(0, "Proposed pay cannot be negative").optional(),
+  }),
+});
+
+export const respondToInvitationValidator = z.object({
+  params: z.object({
+    applicationId: z.string().min(1, "Application ID is required"),
+  }),
+  body: z.object({
+    response: z.enum(["accepted", "declined"], { message: "Response must be accepted or declined" }),
   }),
 });

@@ -4,6 +4,7 @@ import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { MatchScoreBadge } from "../recommendations/MatchScoreBadge";
 import { MatchFactorsList } from "../recommendations/MatchFactorsList";
+import { employerName } from "../../utils/displayName";
 import "./JobCard.css";
 
 /**
@@ -24,7 +25,9 @@ export function JobCard({ job, categoriesById, matchScore, matchFactors, explana
   const navigate = useNavigate();
 
   const title = job.titleText || pickLocalizedText(job.title, language, job.originalLanguage);
-  const employerName = typeof job.employerId === "object" ? job.employerId?.businessName : null;
+  // businessName is optional now - an employer may hire under their own name,
+  // which job reads supply as employerId.userId.fullName.
+  const postedBy = employerName(job.employerId);
   const category =
     typeof job.categoryId === "object" ? job.categoryId : categoriesById?.[job.categoryId];
   // A category populated directly on a Job (via Mongoose .populate) is the
@@ -50,7 +53,7 @@ export function JobCard({ job, categoriesById, matchScore, matchFactors, explana
           <h2>{title || "Untitled job"}</h2>
           <MatchScoreBadge score={matchScore} />
         </div>
-        {employerName && <h3>{employerName}</h3>}
+        {postedBy && <h3>{postedBy}</h3>}
         <div className="job-card-meta">
           {job.city && (
             <span>

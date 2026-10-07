@@ -72,3 +72,73 @@ def test_invalid_coordinate_structure_raises():
 
     with pytest.raises(ValueError):
         calculate_distance_km(worker_location, job_location)
+
+
+# =============================================================================
+# A WORKER WITH NO LOCATION
+#
+# WorkerProfile.location used to be required, which only held together because
+# the Node backend seeded every newly registered profile with Pune city-centre
+# coordinates. Those are real, valid coordinates, so this matcher scored them as
+# fact: measured against the running service with both side by side, a worker
+# carrying the placeholder scored location=96.5 for a Pune job from a value they
+# had never supplied, while the same worker with no location now scores None.
+#
+# "No location" is therefore reported as UNAVAILABLE, exactly as
+# calculate_rating_match reports a worker who has never been rated.
+# calculate_ranking already excludes a None factor from both the numerator and
+# the denominator, so no weight and no formula changed to support this.
+# =============================================================================
+
+
+def test_worker_with_no_location_is_unavailable_not_zero():
+    result = calculate_location_match(None, [73.85, 18.52], 20)
+
+    assert result.score is None, "0 would claim 'maximally far', which the data does not support"
+    assert result.location_available is False
+    assert result.distance_km is None
+    assert result.within_radius is False
+    assert "worker" in result.reason
+
+
+def test_job_with_no_location_is_also_unavailable():
+    result = calculate_location_match([73.85, 18.52], None, 20)
+
+    assert result.score is None
+    assert result.location_available is False
+    assert "job" in result.reason
+
+
+def test_both_sides_missing_is_unavailable():
+    result = calculate_location_match(None, None, 20)
+
+    assert result.score is None
+    assert result.location_available is False
+
+
+def test_a_missing_location_is_not_confused_with_a_zero_radius():
+    # A zero radius is a real, computed answer: the worker will not travel, so
+    # the score is genuinely 0. A missing location is unknown, which is not the
+    # same thing and must not collapse into it.
+    no_radius = calculate_location_match([73.85, 18.52], [73.85, 18.52], 0)
+    assert no_radius.score == 0.0
+    assert no_radius.location_available is True
+
+    no_location = calculate_location_match(None, [73.85, 18.52], 0)
+    assert no_location.score is None
+    assert no_location.location_available is False
+
+
+def test_a_present_location_still_scores_exactly_as_before():
+    # The whole point of the change is that nothing about a real location moved.
+    same_point = calculate_location_match([73.85, 18.52], [73.85, 18.52], 20)
+    assert same_point.score == 100.0
+    assert same_point.location_available is True
+    assert same_point.distance_km == 0.0
+    assert same_point.within_radius is True
+
+    out_of_range = calculate_location_match([73.85, 18.52], [80.0, 25.0], 20)
+    assert out_of_range.score == 0.0
+    assert out_of_range.location_available is True
+    assert out_of_range.distance_km > 20
+    assert out_of_range.within_radius is False

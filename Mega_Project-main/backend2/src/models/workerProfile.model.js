@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { PREFERRED_LANGUAGES } from "../constants.js";
+import { optionalGeoPoint } from "./geoPoint.schema.js";
 
 const workerProfileSchema = new mongoose.Schema(
   {
@@ -40,34 +41,9 @@ const workerProfileSchema = new mongoose.Schema(
       default: null,
     },
 
-    location: {
-      type: {
-        type: String,
-        enum: ["Point"],
-        default: "Point",
-        required: true,
-      },
-
-      coordinates: {
-        type: [Number],
-        required: true,
-        validate: {
-          validator: function (val) {
-            if (!Array.isArray(val) || val.length !== 2) return false;
-            const [lng, lat] = val;
-            return (
-              typeof lng === "number" &&
-              typeof lat === "number" &&
-              lng >= -180 &&
-              lng <= 180 &&
-              lat >= -90 &&
-              lat <= 90
-            );
-          },
-          message: "Coordinates must be [longitude, latitude] with longitude in [-180, 180] and latitude in [-90, 90].",
-        },
-      },
-    },
+    // OPTIONAL, with no default - see models/geoPoint.schema.js for why a
+    // placeholder location is worse than no location at all.
+    location: optionalGeoPoint(),
 
     availability: {
       type: String,

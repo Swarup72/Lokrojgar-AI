@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
+import { employerName } from "../utils/displayName";
 import { pickLocalizedText } from "../utils/localizedText";
 import { USER_ROLES } from "../utils/enums";
 import * as jobsApi from "../api/jobs";
@@ -105,7 +106,9 @@ export function JobDetailsPage() {
   const title = job.titleText || pickLocalizedText(job.title, language, job.originalLanguage);
   const description =
     job.descriptionText || pickLocalizedText(job.description, language, job.originalLanguage);
-  const employerName = typeof job.employerId === "object" ? job.employerId?.businessName : null;
+  // businessName is optional - an employer may hire under their own personal
+  // name, which the job read supplies as employerId.userId.fullName.
+  const postedBy = employerName(job.employerId);
   const isWorker = user?.roles?.includes(USER_ROLES.WORKER);
   const isOwner =
     job.isOwner ||
@@ -213,7 +216,7 @@ export function JobDetailsPage() {
               <h1>{title || "Untitled job"}</h1>
               <StatusPill status={job.status} />
             </div>
-            {employerName && <p className="job-details-employer">{employerName}</p>}
+            {postedBy && <p className="job-details-employer">{postedBy}</p>}
           </div>
         </div>
 

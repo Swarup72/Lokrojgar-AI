@@ -13,6 +13,7 @@ import {
   getNearbyJobs,
   getRecommendedJobs,
   getRecommendedWorkers,
+  getJobEmployerContact,
 } from "../controllers/job.controller.js";
 import { verifyJWT, optionalVerifyJWT } from "../middlewares/auth.middleware.js";
 import { authorizeRoles } from "../middlewares/role.middleware.js";
@@ -51,6 +52,14 @@ router.post("/:jobId/cancel", authorizeRoles("employer", "admin"), validate(jobI
 router.post("/:jobId/close", authorizeRoles("employer", "admin"), validate(jobIdParamValidator), closeJob);
 router.post("/:jobId/reopen", authorizeRoles("employer", "admin"), validate(reopenJobValidator), reopenJob);
 router.delete("/:jobId", authorizeRoles("employer", "admin"), validate(jobIdParamValidator), deleteJob);
+// Gated: released only to a worker whose application/job request for this job
+// has been accepted. See getJobEmployerContact for the privacy boundary.
+router.get(
+  "/:jobId/employer-contact",
+  authorizeRoles("worker", "admin"),
+  validate(jobIdParamValidator),
+  getJobEmployerContact
+);
 router.get("/:jobId/recommended-workers", authorizeRoles("employer", "admin"), validate(jobIdParamValidator), getRecommendedWorkers);
 
 export default router;

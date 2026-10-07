@@ -60,3 +60,30 @@ def test_worker_profile_to_job_location_match():
 
     assert result.within_radius is True
     assert 0.0 < result.score <= 100.0
+
+
+def test_extract_worker_location_returns_none_when_the_worker_has_no_location():
+    """
+    A newly registered worker genuinely has no location until they set one. This
+    must return None rather than substituting a default city - supplying one is
+    what made every new worker look like they lived in central Pune.
+    """
+    worker = WorkerProfile(
+        _id="507f1f77bcf86cd799490001",
+        userId="507f1f77bcf86cd799490002",
+        fullName="No Location Worker",
+    )
+
+    assert worker.location is None
+    assert extract_worker_location(worker) is None
+
+
+def test_extract_worker_location_still_returns_a_real_location():
+    worker = WorkerProfile(
+        _id="507f1f77bcf86cd799490003",
+        userId="507f1f77bcf86cd799490004",
+        fullName="Located Worker",
+        location={"type": "Point", "coordinates": [73.9, 18.6]},
+    )
+
+    assert extract_worker_location(worker) == [73.9, 18.6]

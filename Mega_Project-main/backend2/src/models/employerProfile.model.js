@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { optionalGeoPoint } from "./geoPoint.schema.js";
 
 const employerProfileSchema = new mongoose.Schema(
   {
@@ -9,15 +10,20 @@ const employerProfileSchema = new mongoose.Schema(
       unique: true,
     },
 
+    // Optional by product decision: an employer may hire under their own
+    // personal name (User.fullName). Code that displays an employer must go
+    // through employerDisplayName() in utils/displayName.js rather than
+    // reading this field directly, so a nameless business never renders as
+    // blank or as an invented placeholder.
     businessName: {
       type: String,
-      required: true,
+      default: null,
       trim: true,
     },
 
     businessType: {
       type: String,
-      required: true,
+      default: null,
       trim: true,
     },
 
@@ -45,34 +51,9 @@ const employerProfileSchema = new mongoose.Schema(
       default: null,
     },
 
-    location: {
-      type: {
-        type: String,
-        enum: ["Point"],
-        default: "Point",
-        required: true,
-      },
-
-      coordinates: {
-        type: [Number],
-        required: true,
-        validate: {
-          validator: function (val) {
-            if (!Array.isArray(val) || val.length !== 2) return false;
-            const [lng, lat] = val;
-            return (
-              typeof lng === "number" &&
-              typeof lat === "number" &&
-              lng >= -180 &&
-              lng <= 180 &&
-              lat >= -90 &&
-              lat <= 90
-            );
-          },
-          message: "Coordinates must be [longitude, latitude] with longitude in [-180, 180] and latitude in [-90, 90].",
-        },
-      },
-    },
+    // OPTIONAL, with no default - see models/geoPoint.schema.js for why a
+    // placeholder location is worse than no location at all.
+    location: optionalGeoPoint(),
 
     ratingAvg: {
       type: Number,

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { APPLICATION_STATUS } from "../constants.js";
+import { APPLICATION_STATUS, APPLICATION_INITIATORS } from "../constants.js";
 
 const applicationSchema = new mongoose.Schema(
   {
@@ -22,6 +22,28 @@ const applicationSchema = new mongoose.Schema(
       enum: Object.values(APPLICATION_STATUS),
       default: APPLICATION_STATUS.APPLIED,
       required: true,
+    },
+
+    // Which side started this hiring relationship. A worker applying and an
+    // employer sending a job request produce the SAME kind of document - this
+    // records which, so the UI can say "you applied" vs "you were invited" and
+    // so the lifecycle can require the right party to respond.
+    //
+    // Defaults to "worker": every Application that existed before this field
+    // was added was created by a worker applying, so the default is the
+    // historically correct value and no migration is required.
+    initiatedBy: {
+      type: String,
+      enum: Object.values(APPLICATION_INITIATORS),
+      default: APPLICATION_INITIATORS.WORKER,
+      required: true,
+      index: true,
+    },
+
+    // When the worker answered an employer-initiated invitation.
+    respondedAt: {
+      type: Date,
+      default: null,
     },
 
     proposedPay: {
