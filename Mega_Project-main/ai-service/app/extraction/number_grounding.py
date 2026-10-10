@@ -113,6 +113,16 @@ def grounded_numbers(transcript: str) -> Set[float]:
 
     # Digit forms, including grouped ones such as 15,000 and 1,50,000.
     for raw in re.findall(r"\d[\d,]*(?:\.\d+)?", text):
+        # A TRAILING comma is sentence punctuation, not digit grouping -
+        # grouping requires digits after the comma. The regex above swallows
+        # it, which made "800," split into ["800", ""] and fail the grouping
+        # check, so a wage Whisper transcribed as "₹800," grounded to nothing
+        # and the pay step silently reported "no number found". Stripping it
+        # cannot weaken the malformed-digit guard below: "2,7,7" has no
+        # trailing comma and is still rejected unchanged.
+        raw = raw.rstrip(",")
+        if not raw:
+            continue
         if "," in raw and not _is_valid_digit_grouping(raw):
             # Not a number anyone wrote: a comma run of single digits is how
             # speech-to-text renders a number it could not resolve into one

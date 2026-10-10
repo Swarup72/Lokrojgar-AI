@@ -3,6 +3,7 @@ import * as catalogApi from "../../api/catalog";
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { PAY_TYPES, SHIFT_TYPES, APP_LANGUAGES, LANGUAGE_LABELS } from "../../utils/enums";
+import { PAY_TYPE_KEYS, SHIFT_TYPE_KEYS } from "../../utils/enumLabels";
 import { Button } from "../common/Button";
 import { LocationField } from "../common/LocationField";
 import "../common/Form.css";
@@ -10,11 +11,11 @@ import "../common/Form.css";
 export function JobForm({
   initialValues = {},
   onSubmit,
-  submitLabel = "Review Job Details",
+  submitLabel = null,
   secondaryAction = null,
   loading = false,
 }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const [categories, setCategories] = useState([]);
   const [skills, setSkills] = useState([]);
@@ -76,7 +77,7 @@ export function JobForm({
   const handleSubmit = (event) => {
     event.preventDefault();
     if (!coordinates || !Array.isArray(coordinates) || coordinates.length !== 2) {
-      setFormError("Please select a location on the map.");
+      setFormError(t("jobs.form.locationRequired"));
       return;
     }
     setFormError(null);
@@ -114,30 +115,30 @@ export function JobForm({
       )}
 
       <label className="form-field">
-        <span>Job title *</span>
+        <span>{t("jobs.form.titleRequired")}</span>
         <input
           type="text"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="e.g. Need 2 Plumbers for residential pipe fitting"
+          placeholder={t("jobs.form.titlePlaceholder")}
           required
         />
       </label>
 
       <label className="form-field">
         <span>
-          Description <em>(optional)</em>
+          {t("jobs.form.description")} <em>({t("common.optional")})</em>
         </span>
         <textarea
           rows={4}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
-          placeholder="Describe the job duties, tools needed, or site conditions..."
+          placeholder={t("jobs.form.descriptionPlaceholder")}
         />
       </label>
 
       <label className="form-field">
-        <span>Language you are writing in</span>
+        <span>{t("jobs.form.writingLanguage")}</span>
         <select value={originalLanguage} onChange={(e) => setOriginalLanguage(e.target.value)}>
           {APP_LANGUAGES.map((lang) => (
             <option key={lang} value={lang}>
@@ -145,16 +146,14 @@ export function JobForm({
             </option>
           ))}
         </select>
-        <span className="form-field-hint">
-          LokRozgar AI will automatically translate your job into all supported languages.
-        </span>
+        <span className="form-field-hint">{t("jobs.form.autoTranslateHint")}</span>
       </label>
 
       <div className="form-field-row">
         <label className="form-field">
-          <span>Category *</span>
+          <span>{t("jobs.form.categoryRequired")}</span>
           <select value={categoryId} onChange={(e) => setCategoryId(e.target.value)} required>
-            <option value="">Select a category</option>
+            <option value="">{t("jobs.form.selectCategory")}</option>
             {categories.map((category) => (
               <option key={category._id} value={category._id}>
                 {pickLocalizedText(category.nameMultilingual, language) || category.name}
@@ -163,38 +162,35 @@ export function JobForm({
           </select>
         </label>
         <label className="form-field">
-          <span>City</span>
+          <span>{t("common.city")}</span>
           <input
             type="text"
             value={city}
             onChange={(e) => setCity(e.target.value)}
-            placeholder="e.g. Sangli, Pune, Mumbai"
+            placeholder={t("jobs.form.cityPlaceholder")}
           />
         </label>
       </div>
 
       <label className="form-field">
-        <span>Address or Landmark</span>
+        <span>{t("jobs.form.address")}</span>
         <input
           type="text"
           value={address}
           onChange={(e) => setAddress(e.target.value)}
-          placeholder="e.g. Near Ganpati Temple, Market Yard"
+          placeholder={t("jobs.form.addressPlaceholder")}
         />
       </label>
 
       {skills.length > 0 && (
         <div className="form-field">
-          <span>Skills needed</span>
+          <span>{t("jobs.form.skillsNeeded")}</span>
           {/* Grouped by trade, with the trade itself selectable alongside its
               specific tasks. Picking the trade AND a task is what distinguishes
               a strong match from a weak one: a worker who has both scores
               higher than one who only has the trade. Both are ordinary skill
               ids on the job, so the matching needs no special handling. */}
-          <p className="form-hint">
-            Pick the trade, and any specific tasks the job needs. Workers who have the exact tasks are matched
-            more strongly.
-          </p>
+          <p className="form-hint">{t("jobs.form.skillsHint")}</p>
           {skills
             .filter((skill) => !skill.parentSkillId)
             .map((trade) => {
@@ -254,34 +250,34 @@ export function JobForm({
       )}
 
       <label className="form-field">
-        <span>Job Location on Map *</span>
+        <span>{t("jobs.form.mapLocationRequired")}</span>
         <LocationField coordinates={coordinates} onChange={setCoordinates} />
       </label>
 
       <div className="form-field-row">
         <label className="form-field">
-          <span>Pay type *</span>
+          <span>{t("jobs.form.payTypeRequired")}</span>
           <select value={payType} onChange={(e) => setPayType(e.target.value)}>
             {PAY_TYPES.map((type) => (
               <option key={type} value={type}>
-                {type}
+                {t(PAY_TYPE_KEYS[type])}
               </option>
             ))}
           </select>
         </label>
         <label className="form-field">
-          <span>Pay amount (₹) *</span>
+          <span>{t("jobs.form.payAmountRequired")}</span>
           <input
             type="number"
             min="0"
             value={payAmount}
             onChange={(e) => setPayAmount(e.target.value)}
-            placeholder="e.g. 600"
+            placeholder={t("jobs.form.payAmountPlaceholder")}
             required
           />
         </label>
         <label className="form-field">
-          <span>Workers needed *</span>
+          <span>{t("jobs.form.workersRequired")}</span>
           <input
             type="number"
             min="1"
@@ -294,7 +290,7 @@ export function JobForm({
 
       <div className="form-field-row">
         <label className="form-field">
-          <span>Start date *</span>
+          <span>{t("jobs.form.startDateRequired")}</span>
           <input
             type="date"
             value={startDate}
@@ -304,7 +300,7 @@ export function JobForm({
         </label>
         <label className="form-field">
           <span>
-            Application deadline <em>(optional)</em>
+            {t("deadline")} <em>({t("common.optional")})</em>
           </span>
           <input
             type="date"
@@ -314,7 +310,7 @@ export function JobForm({
         </label>
         <label className="form-field">
           <span>
-            Min experience (years) <em>(optional)</em>
+            {t("jobs.form.minExperience")} <em>({t("common.optional")})</em>
           </span>
           <input
             type="number"
@@ -328,18 +324,18 @@ export function JobForm({
 
       <div className="form-field-row">
         <label className="form-field">
-          <span>Shift</span>
+          <span>{t("jobs.form.shiftLabel")}</span>
           <select value={shiftType} onChange={(e) => setShiftType(e.target.value)}>
             {SHIFT_TYPES.map((type) => (
               <option key={type} value={type}>
-                {type}
+                {t(SHIFT_TYPE_KEYS[type])}
               </option>
             ))}
           </select>
         </label>
         <label className="form-field">
           <span>
-            Start time <em>(optional)</em>
+            {t("jobs.form.startTime")} <em>({t("common.optional")})</em>
           </span>
           <input
             type="time"
@@ -349,7 +345,7 @@ export function JobForm({
         </label>
         <label className="form-field">
           <span>
-            End time <em>(optional)</em>
+            {t("jobs.form.endTime")} <em>({t("common.optional")})</em>
           </span>
           <input
             type="time"
@@ -361,7 +357,7 @@ export function JobForm({
 
       <div className="form-field">
         <span>
-          Preferred worker languages <em>(optional)</em>
+          {t("jobs.form.preferredLanguages")} <em>({t("common.optional")})</em>
         </span>
         <div className="form-chip-group">
           {APP_LANGUAGES.map((lang) => (
@@ -379,7 +375,7 @@ export function JobForm({
 
       <div style={{ display: "flex", gap: 12, marginTop: 24, alignItems: "center" }}>
         <Button type="submit" size="lg" disabled={loading}>
-          {loading ? "Processing..." : submitLabel}
+          {loading ? t("common.processing") : (submitLabel ?? t("jobs.form.reviewDetails"))}
         </Button>
         {secondaryAction}
       </div>

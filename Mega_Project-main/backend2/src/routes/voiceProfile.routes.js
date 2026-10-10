@@ -22,7 +22,7 @@ import {
 const router = Router();
 
 router.use(verifyJWT);
-router.use(authorizeRoles("worker", "admin"));
+router.use(authorizeRoles("worker", "employer", "admin"));
 
 // --- Quick flow: one recording, one extraction. UNCHANGED. -------------------
 router.post("/extract", uploadAudio.single("audio"), uploadAudioAndExtract);

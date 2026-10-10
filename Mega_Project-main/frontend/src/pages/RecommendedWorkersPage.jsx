@@ -18,16 +18,13 @@ export function RecommendedWorkersPage() {
   const { jobId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const [job, setJob] = useState(location.state?.job || null);
   const [requestedWorkerIds, setRequestedWorkerIds] = useState(new Set());
   const [sendingWorkerId, setSendingWorkerId] = useState(null);
   const [requestError, setRequestError] = useState(null);
 
-  // On a cold load (no router state, e.g. a page refresh) the employer's
-  // own job list is the one place this job's data can be recovered from -
-  // there is no GET /jobs/:jobId endpoint to fetch it directly.
   useEffect(() => {
     if (!job) {
       jobsApi
@@ -43,12 +40,6 @@ export function RecommendedWorkersPage() {
 
   const title = job ? pickLocalizedText(job.title, language, job.originalLanguage) : null;
 
-  /**
-   * Sends this worker a job request. The request becomes an Application with
-   * status "invited" - the same document the worker would have created by
-   * applying - so accepting it goes through the one hiring path and cannot
-   * over-hire the job.
-   */
   const sendRequest = async (worker) => {
     setSendingWorkerId(worker._id);
     setRequestError(null);
@@ -57,9 +48,6 @@ export function RecommendedWorkersPage() {
       setRequestedWorkerIds((previous) => new Set(previous).add(worker._id));
     } catch (err) {
       const normalized = normalizeError(err);
-      // 409 means this worker already has a request or application for the job -
-      // the same end state the button was trying to reach, so it is shown as
-      // done rather than as a failure.
       if (normalized.status === 409) {
         setRequestedWorkerIds((previous) => new Set(previous).add(worker._id));
       } else {
@@ -71,22 +59,27 @@ export function RecommendedWorkersPage() {
   };
 
   return (
-    <div className="container recommended-workers-page">
+    <div className="container recommended-workers-page page-animate">
       <button type="button" className="recommended-workers-back" onClick={() => navigate(-1)}>
-        <ArrowLeft size={16} aria-hidden="true" /> Back
+        <ArrowLeft size={16} aria-hidden="true" /> <span>{t("common.back")}</span>
       </button>
 
-      <h1>
-        <Sparkles size={22} aria-hidden="true" /> Recommended Workers
-      </h1>
-      {title && <p className="recommended-workers-subtitle">For: {title}</p>}
+      <div className="recommended-workers-header">
+        <h1>
+          <Sparkles size={24} aria-hidden="true" /> <span>{t("recommendedWorkers.title")}</span>
+        </h1>
+        {title && <p className="recommended-workers-subtitle">{t("forJob")} {title}</p>}
+      </div>
 
       {requestError && <ErrorBanner error={requestError} />}
-      {loading && <Spinner label="Finding matching workers..." />}
+      {loading && <Spinner label={t("findingMatchingWorkers")} />}
       {!loading && error && <ErrorBanner error={error} />}
 
       {!loading && !error && matches?.length === 0 && (
-        <EmptyState title="No matching workers found yet" description="Check back once more workers have joined." />
+        <EmptyState
+          title={t("noMatchingWorkers")}
+          description={t("noMatchingWorkersDesc")}
+        />
       )}
 
       {!loading && !error && matches?.length > 0 && (
@@ -101,17 +94,17 @@ export function RecommendedWorkersPage() {
               actions={
                 requestedWorkerIds.has(match.worker._id) ? (
                   <span className="recommended-workers-sent">
-                    <Check size={14} aria-hidden="true" /> Request sent — waiting for their answer
+                    <Check size={14} aria-hidden="true" /> {t("requestSentWaiting")}
                   </span>
                 ) : (
                   <button
                     type="button"
-                    className="btn btn-primary"
+                    className="btn btn-primary animated-button"
                     onClick={() => sendRequest(match.worker)}
                     disabled={sendingWorkerId === match.worker._id}
                   >
                     <Send size={15} aria-hidden="true" />{" "}
-                    {sendingWorkerId === match.worker._id ? "Sending..." : "Send job request"}
+                    <span>{sendingWorkerId === match.worker._id ? t("sending") : t("sendJobRequest")}</span>
                   </button>
                 )
               }

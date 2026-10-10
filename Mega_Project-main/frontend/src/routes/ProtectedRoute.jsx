@@ -3,11 +3,13 @@ import { useAuth } from "../hooks/useAuth";
 import { FullPageSpinner } from "../components/common/Spinner";
 import { EmptyState } from "../components/common/EmptyState";
 import { ShieldAlert } from "lucide-react";
+import { useLanguage } from "../hooks/useLanguage";
 
 /**
  * @param {{allowedRoles?: string[], children: React.ReactNode}} props
  */
 export function ProtectedRoute({ allowedRoles, children }) {
+  const { t } = useLanguage();
   const { user, isBootstrapped } = useAuth();
   const location = useLocation();
 
@@ -24,9 +26,9 @@ export function ProtectedRoute({ allowedRoles, children }) {
       <div className="container" style={{ padding: "60px 0" }}>
         <EmptyState
           icon={ShieldAlert}
-          title="You don't have access to this page"
-          description="This page isn't available for your current account role."
-          action={<Link to="/">Go back home</Link>}
+          title={t("forbidden.title")}
+          description={t("forbidden.description")}
+          action={<Link to="/">{t("common.goHome")}</Link>}
         />
       </div>
     );

@@ -2,13 +2,14 @@ import { Search, Navigation } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { PAY_TYPES } from "../../utils/enums";
+import { PAY_TYPE_KEYS } from "../../utils/enumLabels";
 import "./JobFilters.css";
 
 /**
  * @param {{mode:"search"|"nearby", onModeChange:(m:string)=>void, filters:object, onFilterChange:(f:object)=>void, categories:object[]}} props
  */
 export function JobFilters({ mode, onModeChange, filters, onFilterChange, categories }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const update = (key, value) => onFilterChange({ ...filters, [key]: value || undefined });
 
@@ -16,17 +17,17 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
     <div className="job-filters">
       <div className="job-filters-mode">
         <button type="button" className={mode === "search" ? "active" : ""} onClick={() => onModeChange("search")}>
-          <Search size={15} aria-hidden="true" /> Search
+          <Search size={15} aria-hidden="true" /> {t("common.search")}
         </button>
         <button type="button" className={mode === "nearby" ? "active" : ""} onClick={() => onModeChange("nearby")}>
-          <Navigation size={15} aria-hidden="true" /> Near me
+          <Navigation size={15} aria-hidden="true" /> {t("jobs.search.nearMe")}
         </button>
       </div>
 
       {mode === "search" && (
         <div className="job-filters-fields">
           <select value={filters.categoryId || ""} onChange={(event) => update("categoryId", event.target.value)}>
-            <option value="">All categories</option>
+            <option value="">{t("jobs.search.allCategories")}</option>
             {categories.map((category) => (
               <option key={category._id} value={category._id}>
                 {pickLocalizedText(category.nameMultilingual, language) || category.name}
@@ -35,10 +36,10 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
           </select>
 
           <select value={filters.payType || ""} onChange={(event) => update("payType", event.target.value)}>
-            <option value="">Any pay type</option>
+            <option value="">{t("jobs.search.anyPayType")}</option>
             {PAY_TYPES.map((type) => (
               <option key={type} value={type}>
-                {type}
+                {t(PAY_TYPE_KEYS[type])}
               </option>
             ))}
           </select>
@@ -46,7 +47,7 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
           <input
             type="number"
             min="0"
-            placeholder="Min pay (₹)"
+            placeholder={t("jobs.search.minPay")}
             value={filters.minPay || ""}
             onChange={(event) => update("minPay", event.target.value)}
           />

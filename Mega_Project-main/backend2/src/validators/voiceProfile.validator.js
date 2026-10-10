@@ -17,14 +17,18 @@ import { z } from "zod";
 
 const SPOKEN_LANGUAGES = ["mr", "hi", "en"];
 export const GUIDED_VOICE_FIELDS = ["fullName", "expectedPay", "experienceYears", "skills", "city"];
-export const GUIDED_ALL_FIELDS = [...GUIDED_VOICE_FIELDS, "languages", "availability"];
+export const GUIDED_EMPLOYER_VOICE_FIELDS = ["fullName", "businessName", "businessType", "city"];
+export const GUIDED_ALL_VOICE_FIELDS = [...new Set([...GUIDED_VOICE_FIELDS, ...GUIDED_EMPLOYER_VOICE_FIELDS])];
+export const GUIDED_ALL_FIELDS = [...new Set([...GUIDED_ALL_VOICE_FIELDS, "languages", "availability"])];
 
 const spokenLanguage = z.enum(SPOKEN_LANGUAGES, { message: "Language must be mr, hi or en" });
+const targetRole = z.enum(["worker", "employer"], { message: "Role must be worker or employer" });
 
 export const guidedStartValidator = z.object({
   body: z.object({
-    // The language the worker will SPEAK - not the UI language.
+    // The language the worker/employer will SPEAK - not the UI language.
     language: spokenLanguage.optional(),
+    role: targetRole.optional(),
   }),
 });
 
@@ -32,6 +36,7 @@ export const guidedDraftQueryValidator = z.object({
   query: z
     .object({
       language: spokenLanguage.optional(),
+      role: targetRole.optional(),
     })
     .optional(),
 });
@@ -39,9 +44,10 @@ export const guidedDraftQueryValidator = z.object({
 export const guidedSetFieldValidator = z.object({
   body: z.object({
     language: spokenLanguage.optional(),
+    role: targetRole.optional(),
     field: z.enum(GUIDED_ALL_FIELDS, { message: `Field must be one of: ${GUIDED_ALL_FIELDS.join(", ")}` }),
     // Shapes differ per field (number, string, array, enum), so the type check
-    // lives in the controller next to the WorkerProfile schema it must match.
+    // lives in the controller next to the profile schema it must match.
     // null is explicitly allowed: it clears a DRAFT answer, and a draft is not
     // the canonical profile.
     value: z.any(),
@@ -55,6 +61,9 @@ export const confirmVoiceProfileValidator = z.object({
       .object({
         fullName: z.string().nullish(),
         city: z.string().nullish(),
+        village: z.string().nullish(),
+        businessName: z.string().nullish(),
+        businessType: z.string().nullish(),
         // .min(0) only - no upper bound here, because the WorkerProfile schema
         // owns that. 0 must pass.
         expectedPay: z.number().min(0, "Expected pay cannot be negative").nullish(),

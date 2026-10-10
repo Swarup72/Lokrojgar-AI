@@ -292,6 +292,134 @@ def extract_city(transcript: str) -> FieldExtractionResult:
     return result
 
 
+# --- business name ----------------------------------------------------------
+
+_MAX_BUSINESS_NAME_WORDS = 8
+_BUSINESS_NAME_PUNCTUATION = set(" &'-./+#")
+
+_BUSINESS_NAME_CARRIERS = [
+    "माझ्या व्यवसायाचे नाव आहे", "माझ्या व्यवसायाचं नाव आहे",
+    "माझ्या व्यवसायाचे नाव", "माझ्या व्यवसायाचं नाव",
+    "माझ्या दुकानाचे नाव आहे", "माझ्या दुकानाचं नाव आहे",
+    "माझ्या दुकानाचे नाव", "माझ्या दुकानाचं नाव",
+    "माझ्या कंपनीचे नाव आहे", "माझ्या कंपनीचं नाव आहे",
+    "माझ्या कंपनीचे नाव", "माझ्या कंपनीचं नाव",
+    "माझा व्यवसाय आहे", "माझा व्यवसाय", "माझे व्यवसाय",
+    "माझे दुकान आहे", "माझे दुकान", "माझं दुकान", "माझा दुकान",
+    "माझी कंपनी आहे", "माझी कंपनी",
+    "व्यवसायाचे नाव", "व्यवसायाचं नाव", "व्यवसाय", "दुकान", "कंपनी",
+    "मेरे व्यवसाय का नाम है", "मेरे व्यवसाय का नाम",
+    "मेरे व्यापार का नाम है", "मेरे व्यापार का नाम",
+    "मेरी दुकान का नाम है", "मेरी दुकान का नाम",
+    "मेरी कंपनी का नाम है", "मेरी कंपनी का नाम",
+    "मेरा व्यवसाय है", "मेरा व्यवसाय", "मेरा व्यापार है", "मेरा व्यापार",
+    "मेरी दुकान है", "मेरी दुकान", "मेरी कंपनी है", "मेरी कंपनी",
+    "व्यवसाय का नाम", "दुकान का नाम", "कंपनी का नाम", "व्यवसाय", "व्यापार", "दुकान", "कंपनी",
+    "my business name is", "my business is called", "my business's name is", "my business is",
+    "my shop name is", "my shop is called", "my shop is",
+    "my company name is", "my company is called", "my company is",
+    "business name is", "shop name is", "company name is",
+    "business name", "shop name", "company name", "business", "shop", "company",
+]
+_BUSINESS_NAME_TRAILERS = ["आहे", "हे", "है", "हूँ", "हूं", "नाव", "नाम", "name"]
+
+
+def _looks_like_business_name(text: str) -> bool:
+    """True when text contains letters and valid business name punctuation/digits."""
+    if not text:
+        return False
+    if not any(unicodedata.category(ch).startswith("L") for ch in text):
+        return False
+    for ch in text:
+        category = unicodedata.category(ch)
+        if category.startswith("L") or category.startswith("M") or category.startswith("N") or ch in _BUSINESS_NAME_PUNCTUATION:
+            continue
+        return False
+    return True
+
+
+def extract_business_name(transcript: str) -> FieldExtractionResult:
+    """
+    The employer's business name, with carrier phrase removed.
+    """
+    result = FieldExtractionResult(field="businessName", transcript=transcript)
+    candidate = _strip_carriers(transcript, _BUSINESS_NAME_CARRIERS, _BUSINESS_NAME_TRAILERS)
+
+    if not candidate:
+        result.reason = "no_speech"
+        return result
+    if not _looks_like_business_name(candidate):
+        result.reason = "not_name_like"
+        return result
+    if len(candidate) < 2:
+        result.reason = "too_short"
+        return result
+    if len(candidate.split()) > _MAX_BUSINESS_NAME_WORDS:
+        result.reason = "too_many_words"
+        return result
+
+    result.value = candidate
+    result.ok = True
+    return result
+
+
+# --- business type ----------------------------------------------------------
+
+_MAX_BUSINESS_TYPE_WORDS = 10
+_BUSINESS_TYPE_PUNCTUATION = set(" &'-./,")
+
+_BUSINESS_TYPE_CARRIERS = [
+    "आम्ही काम करतो", "आम्ही काम करते", "आमचे काम आहे", "आमचं काम आहे",
+    "आमचा व्यवसाय आहे", "आमचा व्यवसाय", "आमचे काम", "आमचं काम",
+    "कामाचे स्वरूप आहे", "कामाचे स्वरूप", "कामाचा प्रकार", "काम आहे",
+    "हम काम करते हैं", "हम काम करते", "हमारा काम है", "हमारा व्यवसाय है",
+    "हमारा काम", "हमारा व्यवसाय", "काम का प्रकार", "काम है",
+    "we do work in", "we do work of", "our work is", "we provide", "we do",
+    "type of work is", "type of business is", "work of", "business type is",
+    "type of business", "business type", "work type", "kind of work",
+]
+_BUSINESS_TYPE_TRAILERS = ["आहे", "हे", "है", "करतो", "करते", "करते हैं", "हूँ", "हूं", "का", "चे", "चा", "ची"]
+
+
+def _looks_like_business_type(text: str) -> bool:
+    """True when text contains letters and valid business type punctuation/words."""
+    if not text:
+        return False
+    if not any(unicodedata.category(ch).startswith("L") for ch in text):
+        return False
+    for ch in text:
+        category = unicodedata.category(ch)
+        if category.startswith("L") or category.startswith("M") or category.startswith("N") or ch in _BUSINESS_TYPE_PUNCTUATION:
+            continue
+        return False
+    return True
+
+
+def extract_business_type(transcript: str) -> FieldExtractionResult:
+    """
+    The employer's type of work or business, with carrier phrase removed.
+    """
+    result = FieldExtractionResult(field="businessType", transcript=transcript)
+    candidate = _strip_carriers(transcript, _BUSINESS_TYPE_CARRIERS, _BUSINESS_TYPE_TRAILERS)
+
+    if not candidate:
+        result.reason = "no_speech"
+        return result
+    if not _looks_like_business_type(candidate):
+        result.reason = "not_work_like"
+        return result
+    if len(candidate) < 2:
+        result.reason = "too_short"
+        return result
+    if len(candidate.split()) > _MAX_BUSINESS_TYPE_WORDS:
+        result.reason = "too_many_words"
+        return result
+
+    result.value = candidate
+    result.ok = True
+    return result
+
+
 # --- dispatch ---------------------------------------------------------------
 
 DETERMINISTIC_FIELDS = {
@@ -299,6 +427,8 @@ DETERMINISTIC_FIELDS = {
     "expectedPay": extract_pay,
     "experienceYears": extract_experience,
     "city": extract_city,
+    "businessName": extract_business_name,
+    "businessType": extract_business_type,
 }
 
 
@@ -314,3 +444,344 @@ def extract_field(field: str, transcript: str) -> FieldExtractionResult:
     if extractor is None:
         raise ValueError(f"No deterministic extractor for field {field!r}")
     return extractor(transcript)
+
+
+
+# ===========================================================================
+# Guided voice JOB POSTING fields
+# ===========================================================================
+#
+# The employer-side counterpart to the worker fields above. Same contract and
+# same guarantees: every value comes from something the transcript actually
+# says, numbers come only from grounded_numbers() so the malformed-digit guard
+# still applies, and anything unclear returns None with a reason so the wizard
+# can ask again rather than publish a guess into a live job advert.
+#
+# These are deliberately separate functions from the worker ones even where the
+# parsing is similar (pay, city). They report their own field name, which is
+# what the draft is keyed by, and they carry job-specific bounds - a job's pay
+# and a worker's expected pay are not the same quantity and should not share a
+# range by accident.
+
+# --- job title / work type --------------------------------------------------
+
+_MAX_JOB_TITLE_WORDS = 12
+_JOB_TITLE_PUNCTUATION = set(" &'-./,")
+
+_JOB_TITLE_CARRIERS = [
+    "मला कामासाठी माणसं पाहिजेत", "मला माणसं पाहिजेत", "मला कामगार पाहिजेत",
+    "मला पाहिजे आहेत", "मला पाहिजेत", "मला पाहिजे", "मला हवेत", "मला हवा",
+    "कामाचं नाव आहे", "कामाचे नाव आहे", "कामाचं नाव", "कामाचे नाव",
+    "कामाचा प्रकार आहे", "कामाचा प्रकार", "काम आहे",
+    "मुझे चाहिए हैं", "मुझे चाहिए", "मुझे काम के लिए", "मुझे लोग चाहिए",
+    "काम का नाम है", "काम का नाम", "काम का प्रकार", "काम है",
+    "i need", "i want", "i am looking for", "i'm looking for", "looking for",
+    "we need", "we want", "the job is", "job title is", "work type is",
+    "type of work is", "the work is", "required", "requirement is",
+]
+_JOB_TITLE_TRAILERS = [
+    "पाहिजेत", "पाहिजे", "हवेत", "हवा", "आहे", "हे", "चाहिए", "है", "हैं",
+    "साठी", "करिता", "के लिए", "का काम", "चं काम", "चे काम",
+]
+
+
+def _looks_like_job_text(text: str, punctuation: Set[str]) -> bool:
+    """True when the text is words (letters/marks), optionally with digits."""
+    if not text:
+        return False
+    if not any(unicodedata.category(ch).startswith("L") for ch in text):
+        return False
+    for ch in text:
+        category = unicodedata.category(ch)
+        if (
+            category.startswith("L")
+            or category.startswith("M")
+            or category.startswith("N")
+            or ch in punctuation
+        ):
+            continue
+        return False
+    return True
+
+
+def extract_job_title(transcript: str) -> FieldExtractionResult:
+    """
+    The kind of work being advertised ("electrician", "वायरिंगचं काम").
+
+    Carrier phrases here are requests rather than statements - an employer says
+    "मला दोन इलेक्ट्रिशियन पाहिजेत", not "the job title is electrician" - so the
+    carrier list is built around asking for workers.
+    """
+    result = FieldExtractionResult(field="jobTitle", transcript=transcript)
+    candidate = _strip_carriers(transcript, _JOB_TITLE_CARRIERS, _JOB_TITLE_TRAILERS)
+
+    if not candidate:
+        result.reason = "no_speech"
+        return result
+    if not _looks_like_job_text(candidate, _JOB_TITLE_PUNCTUATION):
+        result.reason = "not_work_like"
+        return result
+    if len(candidate) < 2:
+        result.reason = "too_short"
+        return result
+    if len(candidate.split()) > _MAX_JOB_TITLE_WORDS:
+        result.reason = "too_many_words"
+        return result
+
+    result.value = candidate
+    result.ok = True
+    return result
+
+
+# --- job description --------------------------------------------------------
+
+# A description is prose, so it is bounded generously and its carriers are only
+# the lead-ins; the body is kept verbatim. Nothing is summarised or rephrased:
+# whatever the employer said is what the advert will show them for review.
+_MAX_JOB_DESCRIPTION_WORDS = 120
+_JOB_DESCRIPTION_PUNCTUATION = set(" &'-./,()₹%:;")
+
+_JOB_DESCRIPTION_CARRIERS = [
+    "कामाचं वर्णन आहे", "कामाचे वर्णन आहे", "कामाचं वर्णन", "कामाचे वर्णन",
+    "काम असं आहे", "काम असे आहे", "काय काम आहे",
+    "काम का विवरण है", "काम का विवरण", "काम ऐसा है", "क्या काम है",
+    "the work is", "work description is", "description is",
+    "the job involves", "job involves", "work involves",
+]
+_JOB_DESCRIPTION_TRAILERS = ["आहे", "हे", "है", "हैं"]
+
+
+def extract_job_description(transcript: str) -> FieldExtractionResult:
+    """What the work actually involves, kept as spoken."""
+    result = FieldExtractionResult(field="jobDescription", transcript=transcript)
+    candidate = _strip_carriers(
+        transcript, _JOB_DESCRIPTION_CARRIERS, _JOB_DESCRIPTION_TRAILERS
+    )
+
+    if not candidate:
+        result.reason = "no_speech"
+        return result
+    if not _looks_like_job_text(candidate, _JOB_DESCRIPTION_PUNCTUATION):
+        result.reason = "not_work_like"
+        return result
+    if len(candidate) < 2:
+        result.reason = "too_short"
+        return result
+    if len(candidate.split()) > _MAX_JOB_DESCRIPTION_WORDS:
+        result.reason = "too_many_words"
+        return result
+
+    result.value = candidate
+    result.ok = True
+    return result
+
+
+# --- number of workers ------------------------------------------------------
+
+# Job.requiredWorkers is `min: 1`. An employer hiring more than this many
+# through one advert is outside what this flow is for, and a number that large
+# is far more likely to be a wage that landed in the wrong step.
+_MAX_REQUIRED_WORKERS = 99
+
+
+def extract_job_worker_count(transcript: str) -> FieldExtractionResult:
+    """
+    How many workers are needed. Must be a whole number of people.
+
+    A fractional answer is a mis-hearing, not a quantity of workers, so it is
+    rejected rather than rounded - rounding would silently change the advert.
+    """
+    result = FieldExtractionResult(field="jobWorkerCount", transcript=transcript)
+    found = grounded_numbers(transcript)
+
+    if not found:
+        result.reason = "no_number_found"
+        return result
+
+    whole = sorted(
+        v for v in found if float(v).is_integer() and 1 <= v <= _MAX_REQUIRED_WORKERS
+    )
+    result.candidates = whole
+
+    if not whole:
+        result.reason = "out_of_range"
+        return result
+    if len(whole) > 1:
+        # Two plausible counts in one sentence is genuinely ambiguous; the
+        # employer is asked rather than one being picked for them.
+        result.reason = "multiple_numbers"
+        return result
+
+    result.value = int(whole[0])
+    result.ok = True
+    return result
+
+
+# --- job pay amount ---------------------------------------------------------
+
+
+def extract_job_pay_amount(transcript: str) -> FieldExtractionResult:
+    """
+    The advertised amount. Mirrors extract_pay()'s reasoning, including the
+    "दहा हजार" composite-number case, but reports the job field name.
+    """
+    result = FieldExtractionResult(field="jobPayAmount", transcript=transcript)
+    found = grounded_numbers(transcript)
+
+    if not found:
+        result.reason = "no_number_found"
+        return result
+
+    candidates = _plausible_pay(found)
+    result.candidates = candidates
+
+    if not candidates:
+        result.reason = "no_plausible_amount"
+        return result
+
+    if len(candidates) > 1:
+        largest = candidates[-1]
+        if all(largest % c == 0 or c < _MIN_MEANINGFUL_PAY for c in candidates[:-1]):
+            result.value = largest
+            result.ok = True
+            return result
+        result.reason = "multiple_amounts"
+        return result
+
+    result.value = candidates[0]
+    result.ok = True
+    return result
+
+
+# --- job pay type -----------------------------------------------------------
+
+# Job.payType is enum ["daily", "monthly", "fixed"]. These are the spoken forms
+# of each, and nothing outside them resolves: an unrecognised frequency returns
+# None so the employer picks it, because guessing "daily" on a monthly salary
+# would advertise a wage thirty times too low.
+_PAY_TYPE_WORDS = {
+    "daily": [
+        "रोजंदारी", "रोजनदारी", "रोजचे", "रोजच्या", "दररोज", "दिवसाला", "दिवसाचे",
+        "प्रतिदिन", "रोज",
+        "रोज़ाना", "रोजाना", "हर दिन", "दिन के", "दिहाड़ी", "दिहाडी", "रोज़", "प्रतिदिन",
+        "per day", "a day", "each day", "every day", "daily", "day rate", "day wage",
+        # Hinglish, and how Whisper renders an English "per day" spoken inside
+        # a Devanagari-language recording. Observed end to end: "rupees per
+        # day" came back as "रुपीज पर दे".
+        "पर दे", "पर डे", "पर दिन", "प्रति दिन",
+    ],
+    "monthly": [
+        "महिन्याला", "महिन्याचे", "दरमहा", "प्रतिमाह", "मासिक", "महिना",
+        "महीने के", "हर महीने", "माहवार", "महीना",
+        "per month", "a month", "each month", "every month", "monthly",
+        "month salary", "salary per month",
+        "पर मंथ", "प्रति माह", "पर महीना",
+    ],
+    "fixed": [
+        "एकरकमी", "ठरलेली रक्कम", "ठरलेले", "ठोक", "संपूर्ण कामासाठी",
+        "एकमुश्त", "ठेका", "पूरे काम का", "कुल",
+        "fixed", "lump sum", "lumpsum", "one time", "total for the job",
+        "for the whole job", "contract rate", "per job",
+    ],
+}
+
+
+def extract_job_pay_type(transcript: str) -> FieldExtractionResult:
+    """
+    Whether the amount is per day, per month, or for the job as a whole.
+
+    Matching is substring-based over a spoken-forms list rather than token
+    based, because Marathi and Hindi attach the frequency to the noun
+    ("महिन्याला", "दिवसाला") and tokenising would split those endings off.
+    """
+    result = FieldExtractionResult(field="jobPayType", transcript=transcript)
+    text = transcript.lower()
+
+    if not text.strip():
+        result.reason = "no_speech"
+        return result
+
+    matched = {
+        pay_type
+        for pay_type, words in _PAY_TYPE_WORDS.items()
+        if any(word.lower() in text for word in words)
+    }
+
+    if not matched:
+        result.reason = "no_pay_type_found"
+        return result
+    if len(matched) > 1:
+        # e.g. "रोज ८०० किंवा महिन्याला २०००० " - a real choice the employer
+        # has to make, not something to resolve by precedence.
+        result.reason = "multiple_pay_types"
+        return result
+
+    result.value = matched.pop()
+    result.ok = True
+    return result
+
+
+# --- job city ---------------------------------------------------------------
+
+_JOB_CITY_CARRIERS = [
+    "काम आहे", "कामाचं ठिकाण आहे", "कामाचे ठिकाण आहे", "कामाचं ठिकाण", "कामाचे ठिकाण",
+    "ठिकाण आहे", "ठिकाण", "जागा आहे", "इथे", "येथे",
+    "काम है", "काम की जगह है", "काम की जगह", "जगह है", "जगह", "यहाँ", "यहां",
+    # "काम" standalone: an employer says "काम कोल्हापूरमध्ये आहे", where the
+    # carrier brackets the answer rather than preceding it contiguously.
+    "काम",
+    "the work is in", "work is in", "the job is in", "job is in",
+    "located in", "location is", "place is", "site is", "in",
+]
+_JOB_CITY_TRAILERS = [
+    "मध्ये", "मधे", "मध्येच", "में", "ला", "आहे", "हे", "है", "वर", "पाशी", "जवळ",
+]
+
+_MAX_JOB_CITY_WORDS = 5
+
+
+def extract_job_city(transcript: str) -> FieldExtractionResult:
+    """
+    Where the work is. Never defaulted: an unrecognised answer stays empty so
+    the employer types it, because a job advertised in the wrong town is worse
+    than one with no town yet.
+    """
+    result = FieldExtractionResult(field="jobCity", transcript=transcript)
+    candidate = _strip_carriers(transcript, _JOB_CITY_CARRIERS, _JOB_CITY_TRAILERS)
+
+    if not candidate:
+        result.reason = "no_speech"
+        return result
+    if not _looks_like_words(candidate):
+        result.reason = "not_place_like"
+        return result
+    if len(candidate) < 2:
+        result.reason = "too_short"
+        return result
+    if len(candidate.split()) > _MAX_JOB_CITY_WORDS:
+        result.reason = "too_many_words"
+        return result
+
+    result.value = candidate
+    result.ok = True
+    return result
+
+
+# Registered after definition so GUIDED_VOICE_FIELDS picks them up without the
+# API layer needing its own list.
+DETERMINISTIC_FIELDS.update(
+    {
+        "jobTitle": extract_job_title,
+        "jobDescription": extract_job_description,
+        "jobWorkerCount": extract_job_worker_count,
+        "jobPayAmount": extract_job_pay_amount,
+        "jobPayType": extract_job_pay_type,
+        "jobCity": extract_job_city,
+    }
+)
+
+# Fields whose mapping genuinely needs the language model. "skills" is the
+# worker catalog step; "jobSkills" is its employer-side twin. Both resolve free
+# multilingual speech onto the fixed Skill catalog, which is the one mapping
+# deterministic parsing cannot do.
+LLM_FIELDS = frozenset({"skills", "jobSkills"})

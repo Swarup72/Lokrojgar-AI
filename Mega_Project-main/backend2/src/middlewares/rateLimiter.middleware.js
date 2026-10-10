@@ -2,6 +2,27 @@ import rateLimit from "express-rate-limit";
 import { ApiError } from "../utils/ApiError.js";
 
 /**
+ * Resolves the rate limiter key for login attempts.
+ * In development/demo environments, keying by IP + normalized phone number allows
+ * instructors, reviewers, and developers to log in as multiple test accounts (Worker,
+ * Employer, Admin) from the same device/IP without sharing a single 5-attempt quota,
+ * while still strictly protecting each individual account against brute-force attacks.
+ * In production, standard IP keying is enforced.
+ */
+export function resolveLoginRateLimitKey(req, env = process.env) {
+  const isProd = env.NODE_ENV === "production";
+  if (!isProd && req.body && req.body.phone) {
+    const raw = String(req.body.phone).trim();
+    const digits = raw.replace(/\D/g, "");
+    const normalized = digits.length > 10 ? digits.slice(-10) : digits;
+    if (normalized) {
+      return `${req.ip}_${normalized}`;
+    }
+  }
+  return req.ip;
+}
+
+/**
  * Stricter Rate Limiter for OTP Generation and Verification.
  * Limits to 5 requests per 15 minutes window per IP.
  */
@@ -10,6 +31,7 @@ export const otpRateLimiter = rateLimit({
   max: 5, // 5 requests max
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === "OPTIONS",
   handler: (req, res, next, options) => {
     next(
       new ApiError(
@@ -22,13 +44,17 @@ export const otpRateLimiter = rateLimit({
 
 /**
  * Rate Limiter for Login Endpoint.
- * Limits to 5 failed login attempts per 15 minutes window per IP.
+ * Limits to 5 attempts per 15 minutes window.
+ * In development, uses per-account keying (IP + normalized phone) to allow demoing
+ * multiple user personas seamlessly.
  */
 export const loginRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 5, // 5 attempts max
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => req.method === "OPTIONS",
+  keyGenerator: (req) => resolveLoginRateLimitKey(req),
   handler: (req, res, next, options) => {
     next(
       new ApiError(

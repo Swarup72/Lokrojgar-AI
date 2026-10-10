@@ -5,7 +5,22 @@ const voiceProfileSchema = new mongoose.Schema(
     workerId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "WorkerProfile",
+      default: null,
+    },
+
+    employerId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "EmployerProfile",
+      default: null,
+    },
+
+    // "worker" | "employer"
+    profileType: {
+      type: String,
+      enum: ["worker", "employer"],
+      default: "worker",
       required: true,
+      index: true,
     },
 
     language: {
@@ -19,11 +34,11 @@ const voiceProfileSchema = new mongoose.Schema(
     // "quick"  - the original single-recording flow: one recording, one
     //            extraction, one review.
     // "guided" - the field-by-field flow: one short recording per question,
-    //            accumulated in `draftFields` until the worker confirms.
+    //            accumulated in `draftFields` until the user confirms.
     //
     // Defaults to "quick" so the 12 documents that existed before this field
     // read correctly without being rewritten. The unique index below includes
-    // `mode`, which is what lets a worker hold a guided draft and a quick
+    // `mode`, which is what lets a user hold a guided draft and a quick
     // extraction in the same language at once instead of one silently
     // overwriting the other.
     mode: {
@@ -34,24 +49,22 @@ const voiceProfileSchema = new mongoose.Schema(
       index: true,
     },
 
-    // A guided session's answers so far, keyed by WorkerProfile field name
-    // (fullName, expectedPay, experienceYears, skills, city, languages,
-    // availability). This is a DRAFT: nothing here reaches the canonical
-    // WorkerProfile until the worker confirms, so an abandoned wizard cannot
-    // half-overwrite a good profile.
+    // A guided session's answers so far, keyed by profile field name.
+    // This is a DRAFT: nothing here reaches the canonical profile until
+    // the user confirms, so an abandoned wizard cannot half-overwrite a good profile.
     draftFields: {
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
 
-    // Which steps the worker has answered, so the wizard can be resumed where
+    // Which steps the user has answered, so the wizard can be resumed where
     // they left off rather than restarted.
     completedSteps: {
       type: [String],
       default: [],
     },
 
-    // "draft" until the worker confirms, then "committed". A committed document
+    // "draft" until the user confirms, then "committed". A committed document
     // is kept as the record of what was applied; it is not a second profile.
     status: {
       type: String,
@@ -99,17 +112,15 @@ const voiceProfileSchema = new mongoose.Schema(
   }
 );
 
-// One voice profile per worker, per language, PER MODE.
-//
-// `mode` was added to this key because the two flows would otherwise collide:
-// the quick flow upserts on { workerId, language }, so starting a guided draft
-// in a language the worker had already used would have overwritten their quick
-// extraction (and vice versa). Existing documents were backfilled with
-// mode: "quick" by scripts/backfill-voiceprofile-mode.mjs so none of them
-// changes meaning under the new key.
+// One voice profile per worker/employer, per language, PER MODE.
 voiceProfileSchema.index(
   { workerId: 1, language: 1, mode: 1 },
-  { unique: true }
+  { unique: true, partialFilterExpression: { workerId: { $type: "objectId" } } }
+);
+
+voiceProfileSchema.index(
+  { employerId: 1, language: 1, mode: 1 },
+  { unique: true, partialFilterExpression: { employerId: { $type: "objectId" } } }
 );
 
 const VoiceProfile = mongoose.model(

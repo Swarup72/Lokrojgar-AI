@@ -65,7 +65,7 @@
 
 .job-request-description {
   margin: 0;
-  color: var(--color-body);
+  color: var(--color-text);
 }
 
 .job-request-actions {

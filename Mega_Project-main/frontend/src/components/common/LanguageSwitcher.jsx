@@ -3,10 +3,10 @@ import { APP_LANGUAGES, LANGUAGE_LABELS } from "../../utils/enums";
 import "./LanguageSwitcher.css";
 
 export function LanguageSwitcher() {
-  const { language, setLanguage } = useLanguage();
+  const { language, setLanguage, t } = useLanguage();
 
   return (
-    <div className="language-switcher" role="group" aria-label="Choose language">
+    <div className="language-switcher" role="group" aria-label={t("chooseLanguage")}>
       {APP_LANGUAGES.map((lang) => (
         <button
           key={lang}

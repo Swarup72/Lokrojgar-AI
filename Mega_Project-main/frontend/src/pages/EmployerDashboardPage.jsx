@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { PlusCircle, Briefcase, Eye } from "lucide-react";
+import { PlusCircle, Briefcase, Eye, Users } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useAsync } from "../hooks/useAsync";
+import { PAY_TYPE_KEYS } from "../utils/enumLabels";
 import { useLanguage } from "../hooks/useLanguage";
 import * as jobsApi from "../api/jobs";
 import { pickLocalizedText } from "../utils/localizedText";
@@ -17,11 +18,11 @@ import { ownEmployerName } from "../utils/displayName";
 
 export function EmployerDashboardPage() {
   const { user, employerProfile } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [activeFilter, setActiveFilter] = useState("all"); // "all" | "active" | "draft" | "closed"
+  const [activeFilter, setActiveFilter] = useState("all");
 
   const { data: jobs, loading, error, run: refetchJobs } = useAsync(jobsApi.getEmployerMine);
 
@@ -47,8 +48,15 @@ export function EmployerDashboardPage() {
 
   const filteredJobs = filterJobs(jobs);
 
+  const tabs = [
+    { id: "all", label: t("common.all") },
+    { id: "active", label: t("common.active") },
+    { id: "draft", label: t("tabs.draft") },
+    { id: "closed", label: t("tabs.closed") },
+  ];
+
   return (
-    <div className="container employer-dashboard">
+    <div className="container employer-dashboard page-animate">
       {location.state?.message && (
         <div
           style={{
@@ -65,51 +73,32 @@ export function EmployerDashboardPage() {
         </div>
       )}
 
-      <h1>Hello, {ownEmployerName(employerProfile, user) || "there"}</h1>
+      <div className="employer-dashboard-header">
+        <h1>{t("dashboard.greeting", { name: ownEmployerName(employerProfile, user) || "there" })}</h1>
+        <p className="employer-dashboard-sub">{t("dashboard.employerSubtitle")}</p>
+      </div>
 
       <div className="employer-dashboard-actions">
-        <Link to="/post-job" className="btn btn-primary">
-          <PlusCircle size={17} aria-hidden="true" /> Post New Job
+        <Link to="/post-job" className="btn btn-primary visual-action-btn animated-button">
+          <PlusCircle size={18} aria-hidden="true" />
+          <span>{t("postJob")}</span>
         </Link>
-        <Link to="/profile" className="btn btn-secondary">
-          View Profile
+        <Link to="/profile" className="btn btn-secondary visual-action-btn">
+          <span>{t("profile")}</span>
         </Link>
       </div>
 
       <section className="employer-dashboard-section">
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 12,
-            marginBottom: 16,
-          }}
-        >
-          <h2>My Jobs ({jobs?.length || 0})</h2>
+        <div className="employer-section-heading">
+          <h2>{t("myJobs")} ({jobs?.length || 0})</h2>
 
-          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-            {[
-              { id: "all", label: "All" },
-              { id: "active", label: "Active" },
-              { id: "draft", label: "Drafts" },
-              { id: "closed", label: "Closed / Inactive" },
-            ].map((tab) => (
+          <div className="employer-filter-tabs">
+            {tabs.map((tab) => (
               <button
                 type="button"
                 key={tab.id}
                 onClick={() => setActiveFilter(tab.id)}
-                style={{
-                  padding: "6px 12px",
-                  borderRadius: "var(--radius-pill, 9999px)",
-                  border: "1px solid var(--color-border)",
-                  background: activeFilter === tab.id ? "var(--color-primary)" : "var(--color-surface)",
-                  color: activeFilter === tab.id ? "#ffffff" : "var(--color-text)",
-                  fontSize: "var(--text-xs)",
-                  cursor: "pointer",
-                  fontWeight: activeFilter === tab.id ? 600 : 400,
-                }}
+                className={`employer-filter-tab ${activeFilter === tab.id ? "active" : ""}`}
               >
                 {tab.label}
               </button>
@@ -117,21 +106,21 @@ export function EmployerDashboardPage() {
           </div>
         </div>
 
-        {loading && <Spinner label="Loading your jobs..." />}
+        {loading && <Spinner label={t("loadingJobs")} />}
         {!loading && error && <ErrorBanner error={error} onRetry={refetchJobs} />}
 
         {!loading && !error && jobs?.length === 0 && (
           <EmptyState
             icon={Briefcase}
-            title="You haven't posted any jobs yet"
-            description="Post a job to start receiving applicants from local workers."
-            action={<Link to="/post-job">Post your first job</Link>}
+            title={t("employer.dashboard.noJobs")}
+            description={t("postJobPromptDesc")}
+            action={<Link to="/post-job">{t("postJob")}</Link>}
           />
         )}
 
         {!loading && !error && jobs?.length > 0 && filteredJobs.length === 0 && (
           <p style={{ color: "var(--color-muted)", fontSize: "var(--text-sm)", padding: "20px 0" }}>
-            No jobs match the '{activeFilter}' filter.
+            {t("noJobsMatchFilter", { filter: activeFilter })}
           </p>
         )}
 
@@ -147,7 +136,7 @@ export function EmployerDashboardPage() {
                   : null;
 
               return (
-                <Card key={job._id} className="employer-job-card">
+                <Card key={job._id} className="employer-job-card animated-card">
                   <div className="employer-job-card-header">
                     <div>
                       <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -159,30 +148,38 @@ export function EmployerDashboardPage() {
                             color: "inherit",
                           }}
                         >
-                          <h3 style={{ margin: 0 }}>{title || "Untitled job"}</h3>
+                          <h3 style={{ margin: 0, fontSize: "17px", color: "var(--color-ink)" }}>{title || "Untitled job"}</h3>
                         </Link>
                       </div>
-                      <p style={{ marginTop: 4 }}>
+                      <p style={{ marginTop: 6, color: "var(--color-muted)", fontSize: "14px" }}>
                         {categoryName ? `${categoryName} · ` : ""}
-                        {job.city ? `${job.city} · ` : ""}₹{job.payAmount} / {job.payType} ·{" "}
+                        {job.city ? `${job.city} · ` : ""}₹{job.payAmount} / {t(PAY_TYPE_KEYS[job.payType] ?? job.payType)} ·{" "}
                         <strong>
                           {job.filledWorkers || 0}/{job.requiredWorkers}
                         </strong>{" "}
-                        workers hired
+                        {t("workersHired")}
                       </p>
                     </div>
                     <StatusPill status={job.status} />
                   </div>
 
-                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 12 }}>
+                  <div className="employer-job-actions">
                     <button
                       type="button"
                       className="btn btn-secondary"
                       onClick={() => navigate(`/jobs/${job._id}`, { state: { job } })}
-                      style={{ padding: "8px 14px", fontSize: "var(--text-xs)" }}
+                      style={{ padding: "8px 14px", fontSize: "var(--text-xs)", display: "inline-flex", alignItems: "center", gap: 6 }}
                     >
-                      <Eye size={15} aria-hidden="true" /> View Details
+                      <Eye size={15} aria-hidden="true" /> <span>{t("common.viewDetails")}</span>
                     </button>
+                    <Link
+                      to={`/jobs/${job._id}/applicants`}
+                      state={{ job }}
+                      className="btn btn-secondary"
+                      style={{ padding: "8px 14px", fontSize: "var(--text-xs)", display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none" }}
+                    >
+                      <Users size={15} aria-hidden="true" /> <span>{t("applicants")}</span>
+                    </Link>
                     <JobStatusActions job={job} onActionCompleted={refetchJobs} compact />
                   </div>
                 </Card>

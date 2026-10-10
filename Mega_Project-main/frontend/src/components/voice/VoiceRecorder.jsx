@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Mic, Square, RefreshCw, Play, Pause } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 import "./VoiceRecorder.css";
 
 function formatTime(totalSeconds) {
@@ -19,6 +20,7 @@ function formatTime(totalSeconds) {
  * @param {{onRecordingComplete: (blob: Blob) => void}} props
  */
 export function VoiceRecorder({ onRecordingComplete }) {
+  const { t } = useLanguage();
   const [permissionState, setPermissionState] = useState("idle"); // idle | requesting | denied
   const [recordingState, setRecordingState] = useState("idle"); // idle | recording | stopped
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -101,8 +103,8 @@ export function VoiceRecorder({ onRecordingComplete }) {
           </button>
           <p className="voice-recorder-hint">
             {permissionState === "denied"
-              ? "Microphone access was denied. Please allow microphone access in your browser, or upload an audio file instead."
-              : "Tap to start recording"}
+              ? t("voice.micDenied")
+              : t("voice.tapToRecord")}
           </p>
         </>
       )}
@@ -116,7 +118,7 @@ export function VoiceRecorder({ onRecordingComplete }) {
             {formatTime(elapsedSeconds)}
           </p>
           <button type="button" className="voice-recorder-stop" onClick={stopRecording}>
-            <Square size={16} aria-hidden="true" /> Stop Recording
+            <Square size={16} aria-hidden="true" /> {t("voice.stopRecording")}
           </button>
         </>
       )}
@@ -136,7 +138,7 @@ export function VoiceRecorder({ onRecordingComplete }) {
           </button>
           <span className="voice-recorder-duration">{formatTime(elapsedSeconds)}</span>
           <button type="button" className="voice-recorder-rerecord" onClick={reRecord}>
-            <RefreshCw size={15} aria-hidden="true" /> Re-record
+            <RefreshCw size={15} aria-hidden="true" /> {t("voice.review.reRecord")}
           </button>
         </div>
       )}

@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { User, MapPin, Briefcase, Wallet, Languages, Clock, FileText, ArrowLeft, CheckCircle } from "lucide-react";
 import { AVAILABILITY_OPTIONS, APP_LANGUAGES, LANGUAGE_LABELS } from "../../utils/enums";
+import { useLanguage } from "../../hooks/useLanguage";
+import { AVAILABILITY_KEYS } from "../../utils/enumLabels";
 import "../common/Form.css";
 import "./VoiceProfileReview.css";
 
@@ -19,6 +21,7 @@ import "./VoiceProfileReview.css";
  * @param {{extractedFields: object, recordedLanguage: string, onConfirm: (fields:object) => void, onBack: () => void, saving: boolean}} props
  */
 export function VoiceProfileReview({ extractedFields, recordedLanguage, onConfirm, onBack, saving }) {
+  const { t } = useLanguage();
   const [fullName, setFullName] = useState(extractedFields.fullName || "");
   const [city, setCity] = useState(extractedFields.city || "");
   const [expectedPay, setExpectedPay] = useState(extractedFields.expectedPay ?? "");
@@ -50,60 +53,58 @@ export function VoiceProfileReview({ extractedFields, recordedLanguage, onConfir
 
   return (
     <form className="voice-review" onSubmit={handleSubmit}>
-      <h2 className="voice-review-title">Review Your Profile</h2>
-      <p className="voice-review-subtitle">
-        Please check the information extracted from your voice. You can edit anything before saving.
-      </p>
+      <h2 className="voice-review-title">{t("voice.review.title")}</h2>
+      <p className="voice-review-subtitle">{t("voice.review.subtitle")}</p>
 
       <label className="form-field">
         <span>
-          <User size={15} aria-hidden="true" /> Full Name
+          <User size={15} aria-hidden="true" /> {t("profile.fullName")}
         </span>
-        <input type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder="Not mentioned" />
+        <input type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} placeholder={t("voice.review.notMentioned")} />
       </label>
 
       <div className="form-field-row">
         <label className="form-field">
           <span>
-            <MapPin size={15} aria-hidden="true" /> City
+            <MapPin size={15} aria-hidden="true" /> {t("common.city")}
           </span>
-          <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder="Not mentioned" />
+          <input type="text" value={city} onChange={(event) => setCity(event.target.value)} placeholder={t("voice.review.notMentioned")} />
         </label>
         <label className="form-field">
           <span>
-            <Briefcase size={15} aria-hidden="true" /> Experience (years)
+            <Briefcase size={15} aria-hidden="true" /> {t("profile.experienceYears")}
           </span>
           <input
             type="number"
             min="0"
             value={experienceYears}
             onChange={(event) => setExperienceYears(event.target.value)}
-            placeholder="Not mentioned"
+            placeholder={t("voice.review.notMentioned")}
           />
         </label>
         <label className="form-field">
           <span>
-            <Wallet size={15} aria-hidden="true" /> Expected Pay (₹)
+            <Wallet size={15} aria-hidden="true" /> {t("profile.expectedPay")}
           </span>
           <input
             type="number"
             min="0"
             value={expectedPay}
             onChange={(event) => setExpectedPay(event.target.value)}
-            placeholder="Not mentioned"
+            placeholder={t("voice.review.notMentioned")}
           />
         </label>
       </div>
 
       <label className="form-field">
         <span>
-          <Clock size={15} aria-hidden="true" /> Availability
+          <Clock size={15} aria-hidden="true" /> {t("voice.guided.availability.label")}
         </span>
         <select value={availability} onChange={(event) => setAvailability(event.target.value)}>
-          <option value="">Not mentioned</option>
+          <option value="">{t("voice.review.notMentioned")}</option>
           {AVAILABILITY_OPTIONS.map((option) => (
             <option key={option} value={option}>
-              {option}
+              {t(AVAILABILITY_KEYS[option])}
             </option>
           ))}
         </select>
@@ -111,7 +112,7 @@ export function VoiceProfileReview({ extractedFields, recordedLanguage, onConfir
 
       <div className="form-field">
         <span>
-          <Languages size={15} aria-hidden="true" /> Languages
+          <Languages size={15} aria-hidden="true" /> {t("profile.languages")}
         </span>
         <div className="form-chip-group">
           {APP_LANGUAGES.map((lang) => (
@@ -129,37 +130,34 @@ export function VoiceProfileReview({ extractedFields, recordedLanguage, onConfir
 
       <label className="form-field">
         <span>
-          <FileText size={15} aria-hidden="true" /> About You ({LANGUAGE_LABELS[recordedLanguage] || recordedLanguage})
+          <FileText size={15} aria-hidden="true" /> {t("profile.aboutYou", { language: LANGUAGE_LABELS[recordedLanguage] || recordedLanguage })}
         </span>
-        <textarea rows={3} value={bio} onChange={(event) => setBio(event.target.value)} placeholder="Not mentioned" />
-        <em className="voice-review-hint">This updates your bio in {LANGUAGE_LABELS[recordedLanguage] || recordedLanguage} only.</em>
+        <textarea rows={3} value={bio} onChange={(event) => setBio(event.target.value)} placeholder={t("voice.review.notMentioned")} />
+        <em className="voice-review-hint">{t("voice.review.bioLanguageNote", { language: LANGUAGE_LABELS[recordedLanguage] || recordedLanguage })}</em>
       </label>
 
       {(extractedFields.skills?.length > 0 || extractedFields.preferredJobCategories?.length > 0) && (
         <div className="voice-review-heard">
           <p>
-            <strong>We also heard:</strong>
+            <strong>{t("voice.review.alsoHeard")}</strong>
           </p>
           {extractedFields.skills?.length > 0 && (
-            <p>Skills: {extractedFields.skills.join(", ")}</p>
+            <p>{t("voice.review.heardSkills", { skills: extractedFields.skills.join(", ") })}</p>
           )}
           {extractedFields.preferredJobCategories?.length > 0 && (
-            <p>Interested in: {extractedFields.preferredJobCategories.join(", ")}</p>
+            <p>{t("voice.review.heardInterests", { interests: extractedFields.preferredJobCategories.join(", ") })}</p>
           )}
-          <p className="voice-review-heard-note">
-            Recognized skills/interests will be added to your profile automatically. Anything not recognized will
-            show up after saving so you can add it manually from your Skills section.
-          </p>
+          <p className="voice-review-heard-note">{t("voice.review.heardNote")}</p>
         </div>
       )}
 
       <div className="voice-review-actions">
         <button type="button" className="btn btn-secondary" onClick={onBack} disabled={saving}>
-          <ArrowLeft size={16} aria-hidden="true" /> Re-record
+          <ArrowLeft size={16} aria-hidden="true" /> {t("voice.review.reRecord")}
         </button>
         <button type="submit" className="btn btn-primary btn-lg" disabled={saving}>
           <CheckCircle size={18} aria-hidden="true" />
-          {saving ? "Saving..." : "Confirm & Save Profile"}
+          {saving ? t("voice.guided.saving") : t("voice.review.confirmSave")}
         </button>
       </div>
     </form>

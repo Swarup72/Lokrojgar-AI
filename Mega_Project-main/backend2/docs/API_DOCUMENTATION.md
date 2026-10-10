@@ -131,11 +131,189 @@ it.
 
 ---
 
-## 8. Saved Jobs (`/saved-jobs`), Shifts (`/shifts`), Payments (`/payments`), Ratings (`/ratings`), Disputes (`/disputes`), Chat (`/chat`), Notifications (`/notifications`), & Admin (`/admin`)
+## 8. Voice Profile Module (`/voice-profile`)
 
-For full endpoint definitions, request/response payload examples, and Socket.io event lists, refer to the source codebase and schema files.
+All routes require authentication and `worker` or `admin` role.
 
-### Employer-initiated hiring (formerly `/offers`)
+### Quick Flow (single recording → full extraction)
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/voice-profile/extract` | `POST` | Worker/Admin | Upload a single audio recording (multipart `audio` field, ≤15 MB). The backend proxies it to the AI service for STT + LLM extraction. Returns the transcript and all extracted profile fields. No audio is persisted. |
+
+### Guided Flow (one question at a time, server-side draft)
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/voice-profile/guided/start` | `POST` | Worker/Admin | Start a guided session. Creates a server-side draft keyed by `workerId`. Body: `{ language }`. |
+| `/voice-profile/guided/draft` | `GET` | Worker/Admin | Retrieve the current draft state. Query: `?language=mr`. |
+| `/voice-profile/guided/step` | `POST` | Worker/Admin | Submit a voice recording for one field (multipart `audio`). Transcribes and extracts deterministically for all fields except `skills` (which triggers one LLM call). |
+| `/voice-profile/guided/step` | `PATCH` | Worker/Admin | Set a field by value without audio (tap-only steps: `languages`, `availability`, review-screen edits). Body: `{ field, value }`. |
+| `/voice-profile/guided/draft` | `DELETE` | Worker/Admin | Discard the in-progress draft. |
+
+### Shared Commit Path (both flows)
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/voice-profile/confirm` | `POST` | Worker/Admin | Commit extracted fields to `WorkerProfile` and upsert `WorkerSkill` documents. Used by both quick and guided flows. |
+
+---
+
+## 9. Worker Skills Module (`/worker-skills`)
+
+All routes require authentication and `worker` or `admin` role.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/worker-skills/mine` | `GET` | Worker/Admin | List current worker's skills with proficiency and verification status |
+| `/worker-skills` | `POST` | Worker/Admin | Add a skill to worker's profile (by `skillId`) |
+| `/worker-skills/:id` | `PATCH` | Worker/Admin | Update proficiency level for an existing skill |
+| `/worker-skills/:id` | `DELETE` | Worker/Admin | Remove a skill from worker's profile |
+| `/worker-skills/:id/verify-request` | `POST` | Worker/Admin | Request admin verification for a skill |
+| `/worker-skills/:id/evidence` | `POST` | Worker/Admin | Attach a completed job as evidence for a skill claim |
+
+---
+
+## 10. Resume Module (`/resumes`)
+
+All routes require authentication and `worker` or `admin` role.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/resumes/me` | `GET` | Worker/Admin | Fetch current worker's resume |
+| `/resumes/me` | `PUT` | Worker/Admin | Edit resume fields (headline, summary, experience) |
+| `/resumes/generate-from-voice` | `POST` | Worker/Admin | Generate an AI resume from the latest voice profile extraction |
+| `/resumes/status` | `PATCH` | Worker/Admin | Publish or archive resume |
+| `/resumes/export-pdf` | `GET` | Worker/Admin | Export resume as a downloadable PDF |
+
+---
+
+## 11. Documents Module (`/documents`)
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/documents/upload` | `POST` | Authenticated | Upload a document file (multipart `document` field, e.g., Aadhaar, PAN, certificates) |
+| `/documents/mine` | `GET` | Authenticated | List current user's uploaded documents |
+| `/documents/:id/verify` | `PATCH` | Admin | Verify or reject a document (admin only) |
+
+---
+
+## 12. Saved Jobs Module (`/saved-jobs`)
+
+All routes require authentication and `worker` or `admin` role.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/saved-jobs` | `POST` | Worker/Admin | Save/bookmark a job. Body: `{ jobId }` |
+| `/saved-jobs/:jobId` | `DELETE` | Worker/Admin | Remove a saved job |
+| `/saved-jobs/mine` | `GET` | Worker/Admin | List all saved jobs for the current worker |
+
+---
+
+## 13. Shifts Module (`/shifts`)
+
+All routes require authentication.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/shifts/schedule` | `POST` | Employer/Admin | Schedule a shift for a hired worker. Body: `{ jobId, workerId, shiftDate, startTime, endTime }` |
+| `/shifts/:shiftId/check-in` | `POST` | Worker | Record check-in for a scheduled shift (sets `checkInAt` timestamp) |
+| `/shifts/:shiftId/check-out` | `POST` | Worker | Record check-out for a shift (sets `checkOutAt` timestamp) |
+| `/shifts/missed` | `GET` | Admin | List missed shifts (scheduled but no check-in) |
+
+---
+
+## 14. Payments Module (`/payments`)
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/payments/razorpay/webhook` | `POST` | **Public** | Razorpay webhook callback (no auth header — verified by Razorpay signature) |
+| `/payments/record-offline` | `POST` | Authenticated | Record a cash or UPI payment made outside the platform |
+| `/payments/razorpay/order` | `POST` | Authenticated | Create a Razorpay order for online payment |
+| `/payments/razorpay/verify` | `POST` | Authenticated | Verify Razorpay payment signature after client-side checkout |
+| `/payments/history` | `GET` | Authenticated | Fetch payment history for the current user |
+| `/payments/:paymentId/mark-paid` | `PATCH` | Employer/Admin | Manually mark a payment as paid (offline/cash confirmation) |
+| `/payments/:paymentId/refund` | `POST` | Admin | Process a refund for a payment |
+
+**Note**: The Razorpay webhook endpoint is registered **before** the `verifyJWT` middleware to allow Razorpay's servers to call it directly without a bearer token. Authentication is via Razorpay webhook signature verification instead.
+
+---
+
+## 15. Ratings Module (`/ratings`)
+
+All routes require authentication.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/ratings` | `POST` | Authenticated | Submit a rating. Body: `{ jobId, toUserId, rating (1-5), review }`. Validated via `submitRatingValidator`. Unique index `{ jobId, fromUserId, toUserId }` prevents duplicate ratings. |
+| `/ratings/user/:userId` | `GET` | Authenticated | Get all ratings for a specific user. Validated via `userRatingsParamValidator`. |
+
+Rating submission updates the target user's `ratingAvg` on their `WorkerProfile` or `EmployerProfile` using an aggregation recalculation.
+
+---
+
+## 16. Disputes Module (`/disputes`)
+
+All routes require authentication.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/disputes` | `POST` | Authenticated | Raise a dispute. Body: `{ jobId, againstUserId, reason }`. Status starts as `open`. |
+| `/disputes/mine` | `GET` | Authenticated | List disputes raised by or against the current user |
+| `/disputes/:disputeId/evidence` | `POST` | Authenticated | Upload evidence for a dispute (multipart `evidence` image file) |
+| `/disputes/:disputeId/resolve` | `PATCH` | Admin | Resolve or reject a dispute. Body: `{ status: "resolved" | "rejected", resolution }` |
+
+---
+
+## 17. Chat Module (`/chat`)
+
+All routes require authentication. There is deliberately **no** `authorizeRoles` middleware — a dual-role account can be the worker in one conversation and the employer in another. Per-conversation participant membership is the sole authority.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/chat/conversations` | `POST` | Authenticated | Create a new conversation or return existing one. Body: `{ jobId, workerId }`. Validated via `createConversationValidator`. |
+| `/chat/conversations` | `GET` | Authenticated | List all conversations for the current user |
+| `/chat/conversations/:conversationId/messages` | `GET` | Authenticated | List messages in a conversation. Query: `?after=<ISO>` for polling. Validated via `listMessagesValidator`. |
+| `/chat/conversations/:conversationId/messages` | `POST` | Authenticated | Send a message. Body: `{ text }`. Validated via `sendMessageValidator`. |
+| `/chat/conversations/:conversationId/read` | `PATCH` | Authenticated | Mark all messages in a conversation as read. Validated via `conversationIdValidator`. |
+
+**Authorization**: Every read and write re-checks that the requesting user is a participant in the conversation and that a valid hiring relationship (`Application` status `accepted` or `completed`) exists. A conversation ID on its own grants no access.
+
+**Transport**: Plain HTTP with polling (`after` query parameter). The previously existing `POST /chat/voice-message` endpoint was removed — it uploaded audio to Cloudinary without any relationship check.
+
+---
+
+## 18. Notifications Module (`/notifications`)
+
+All routes require authentication.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/notifications` | `GET` | Authenticated | List notifications for the current user. Language resolved via `languageMiddleware` — trilingual title/body is returned in the user's preferred language. |
+| `/notifications/unread-count` | `GET` | Authenticated | Get count of unread notifications |
+| `/notifications/:id/read` | `PATCH` | Authenticated | Mark a single notification as read (sets `readAt`) |
+| `/notifications/read-all` | `PATCH` | Authenticated | Mark all notifications as read |
+
+---
+
+## 19. Admin Module (`/admin`)
+
+All routes require authentication **and** `admin` role.
+
+| Endpoint | Method | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `/admin/dashboard-stats` | `GET` | Admin | Platform-wide dashboard statistics (user counts, job counts, revenue) |
+| `/admin/users/:userId/block` | `PATCH` | Admin | Block a user account (prevents login) |
+| `/admin/users/:userId/unblock` | `PATCH` | Admin | Unblock a previously blocked user |
+| `/admin/users/:userId/flag` | `PATCH` | Admin | Flag a user for review (sets `isFlagged: true`) |
+| `/admin/documents/:docId/verify` | `PATCH` | Admin | Verify or reject an uploaded identity document |
+| `/admin/skills/:skillId/verify` | `PATCH` | Admin | Verify a worker's skill claim (sets `verified: true` on `WorkerSkill`) |
+| `/admin/jobs/:jobId/moderate` | `PATCH` | Admin | Moderate a job posting (approve, flag, or remove) |
+| `/admin/audit-logs` | `GET` | Admin | View admin action audit trail (`AdminAction` collection) |
+
+---
+
+## Appendix A: Employer-Initiated Hiring (formerly `/offers`)
 
 `/offers` no longer exists. An employer asking a specific worker to take a job
 is the SAME `Application` document a worker creates by applying, distinguished
@@ -143,31 +321,41 @@ by `initiatedBy: "employer"` and `status: "invited"`:
 
 | Method | Path | Who |
 |---|---|---|
-| `POST` | `/applications/invite` | employer who owns the job |
-| `GET` | `/applications/invitations` | the invited worker |
-| `POST` | `/applications/:applicationId/respond` | the invited worker (`accepted` / `declined`) |
+| `POST` | `/applications/invite` | Employer who owns the job |
+| `GET` | `/applications/invitations` | The invited worker |
+| `POST` | `/applications/:applicationId/respond` | The invited worker (`accepted` / `declined`) |
 
-This keeps ONE authoritative hiring path: the unique `{jobId, workerId}` index
+This keeps **one** authoritative hiring path: the unique `{jobId, workerId}` index
 prevents a duplicate request and prevents a request coexisting with an
 application for the same pair, and accepting an invitation goes through the same
 atomic capacity reservation (`reserveWorkerSlot`) as an employer accepting an
-application. The removed `/offers` path did neither - it called an uncapped
+application. The removed `/offers` path did neither — it called an uncapped
 increment, and three workers accepting requests for a one-worker job drove
 `filledWorkers` to 3.
 
-### Chat (`/chat`)
+---
 
-Chat is scoped to one job and one worker/employer pair, and opens only once
-their `Application` is `accepted` or `completed`:
+## Appendix B: Legacy Matching Engine
 
-| Method | Path |
-|---|---|
-| `POST` | `/chat/conversations` |
-| `GET` | `/chat/conversations` |
-| `GET` | `/chat/conversations/:conversationId/messages?after=<ISO>` |
-| `POST` | `/chat/conversations/:conversationId/messages` |
-| `PATCH` | `/chat/conversations/:conversationId/read` |
+`services/matching.service.js` (`calculateMatchScore`) is no longer used by any
+production route. All match scoring is done by the Python AI service via
+`services/aiService.client.js`. The legacy service remains in the repository for
+reference and is still covered by its own unit test in `tests/api.test.js`,
+pending an explicit decision to remove it.
 
-Every read and write re-checks participation and the hiring relationship, so a
-conversation id on its own grants nothing. Transport is plain HTTP; clients poll
-with `after` while a thread is open.
+---
+
+## Appendix C: Error Response Format
+
+All error responses follow this consistent structure:
+
+```json
+{
+  "statusCode": 400,
+  "success": false,
+  "message": "Human-readable error description",
+  "errors": []
+}
+```
+
+In `development` mode, a `stack` field is also included. In `production`, stack traces are suppressed. Malformed ObjectID parameters (`CastError`) return `400` with message `"Malformed ID format"` rather than `500`.

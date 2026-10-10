@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Inbox, Check, X, Wallet, MapPin, Calendar, Briefcase } from "lucide-react";
 import { useAsync } from "../hooks/useAsync";
+import { SHIFT_TYPE_KEYS } from "../utils/enumLabels";
 import { useLanguage } from "../hooks/useLanguage";
 import * as applicationsApi from "../api/applications";
 import { normalizeError } from "../api/client";
@@ -14,16 +15,8 @@ import { EmptyState } from "../components/common/EmptyState";
 import { MapLink } from "../components/common/MapLink";
 import "./JobRequestsPage.css";
 
-/**
- * A worker's incoming job requests - employers who picked them for a job.
- *
- * These are Applications with `initiatedBy: "employer"`, the same documents as
- * the worker's own applications, which is why accepting one goes straight into
- * the existing hiring flow rather than a parallel one. They get their own page
- * because the action required is the opposite: here the WORKER decides.
- */
 export function JobRequestsPage() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [respondingId, setRespondingId] = useState(null);
   const [actionError, setActionError] = useState(null);
   const { data: requests, loading, error, run: refetch } = useAsync(applicationsApi.getInvitations);
@@ -35,8 +28,6 @@ export function JobRequestsPage() {
       await applicationsApi.respondToInvitation(application._id, response);
       refetch();
     } catch (err) {
-      // A 400 here is usually "the job filled up while you were deciding" -
-      // the server's message says which, and it must not be swallowed.
       setActionError(normalizeError(err));
       refetch();
     } finally {
@@ -55,7 +46,7 @@ export function JobRequestsPage() {
     const isResponding = respondingId === request._id;
 
     return (
-      <Card key={request._id} className="job-request-card">
+      <Card key={request._id} className="job-request-card animated-card">
         <div className="job-request-head">
           <div>
             <h3>{title || "Job"}</h3>
@@ -67,7 +58,7 @@ export function JobRequestsPage() {
         <div className="job-request-meta">
           <span>
             <Wallet size={15} aria-hidden="true" /> ₹{request.proposedPay || job?.payAmount} / {job?.payType}
-            {request.proposedPay && request.proposedPay !== job?.payAmount ? " (offered)" : ""}
+            {request.proposedPay && request.proposedPay !== job?.payAmount ? ` (${t("offered")})` : ""}
           </span>
           {job?.city && (
             <span>
@@ -76,12 +67,12 @@ export function JobRequestsPage() {
           )}
           {job?.startDate && (
             <span>
-              <Calendar size={15} aria-hidden="true" /> Starts {new Date(job.startDate).toLocaleDateString()}
+              <Calendar size={15} aria-hidden="true" /> {t("starts")} {new Date(job.startDate).toLocaleDateString()}
             </span>
           )}
           {job?.shiftType && (
             <span>
-              <Briefcase size={15} aria-hidden="true" /> {job.shiftType} shift
+              <Briefcase size={15} aria-hidden="true" /> {t(SHIFT_TYPE_KEYS[job.shiftType] ?? job.shiftType)}
             </span>
           )}
         </div>
@@ -98,9 +89,7 @@ export function JobRequestsPage() {
 
         {description && <p className="job-request-description">{description}</p>}
 
-        {/* The job's OWN location - not the employer's. Contact details stay
-            hidden until the request is accepted. */}
-        <MapLink location={job?.location} label={job?.address || job?.city} kind="Job location" />
+        <MapLink location={job?.location} label={job?.address || job?.city} kind={t("jobLocation")} />
 
         {actionable ? (
           <div className="job-request-actions">
@@ -110,7 +99,7 @@ export function JobRequestsPage() {
               onClick={() => respond(request, "accepted")}
               disabled={isResponding}
             >
-              <Check size={15} aria-hidden="true" /> {isResponding ? "Working..." : "Accept"}
+              <Check size={15} aria-hidden="true" /> <span>{isResponding ? t("common.loading") : t("accept")}</span>
             </button>
             <button
               type="button"
@@ -118,14 +107,14 @@ export function JobRequestsPage() {
               onClick={() => respond(request, "declined")}
               disabled={isResponding}
             >
-              <X size={15} aria-hidden="true" /> Decline
+              <X size={15} aria-hidden="true" /> <span>{t("jobRequests.reject")}</span>
             </button>
           </div>
         ) : (
           <p className="job-request-answered">
-            {request.status === "accepted" && "You accepted this request. It now appears in My Applications."}
-            {request.status === "declined" && "You declined this request."}
-            {request.status === "completed" && "This work is finished."}
+            {request.status === "accepted" && (t("acceptedRequestNote"))}
+            {request.status === "declined" && (t("declinedRequestNote"))}
+            {request.status === "completed" && (t("completedRequestNote"))}
             {!["accepted", "declined", "completed"].includes(request.status) &&
               `This request is ${request.status}.`}
           </p>
@@ -135,34 +124,36 @@ export function JobRequestsPage() {
   };
 
   return (
-    <div className="container job-requests-page">
-      <h1>
-        <Inbox size={22} aria-hidden="true" /> Job requests
-      </h1>
-      <p className="job-requests-intro">Employers who have asked you directly to take a job.</p>
+    <div className="container job-requests-page page-animate">
+      <div className="job-requests-header">
+        <h1>
+          <Inbox size={24} aria-hidden="true" /> <span>{t("nav.jobRequests")}</span>
+        </h1>
+        <p className="job-requests-intro">{t("jobRequestsIntro")}</p>
+      </div>
 
       {actionError && <ErrorBanner error={actionError} />}
-      {loading && <Spinner label="Loading your job requests..." />}
+      {loading && <Spinner label={t("loadingJobRequests")} />}
       {!loading && error && <ErrorBanner error={error} onRetry={refetch} />}
 
       {!loading && !error && requests?.length === 0 && (
         <EmptyState
           icon={Inbox}
-          title="No job requests yet"
-          description="When an employer picks you for a job, their request will appear here. Keeping your skills and availability up to date makes you easier to find."
+          title={t("noJobRequestsYet")}
+          description={t("noJobRequestsDesc")}
         />
       )}
 
       {pending.length > 0 && (
         <section className="job-requests-section">
-          <h2>Waiting for your answer ({pending.length})</h2>
+          <h2>{t("waitingForAnswer")} ({pending.length})</h2>
           {pending.map((request) => renderRequest(request, { actionable: true }))}
         </section>
       )}
 
       {answered.length > 0 && (
         <section className="job-requests-section">
-          <h2>Already answered</h2>
+          <h2>{t("alreadyAnswered")}</h2>
           {answered.map((request) => renderRequest(request, { actionable: false }))}
         </section>
       )}

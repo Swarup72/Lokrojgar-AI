@@ -1,4 +1,5 @@
 import { MapPin, Navigation } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 import "./MapLink.css";
 
 /**
@@ -16,7 +17,8 @@ import "./MapLink.css";
  *   because the three in this product - job site, employer, worker - are
  *   genuinely different places and must not be presented as interchangeable.
  */
-export function MapLink({ location, label, kind = "Location" }) {
+export function MapLink({ location, label, kind }) {
+  const { t } = useLanguage();
   const coordinates = Array.isArray(location?.coordinates) ? location.coordinates : null;
   const hasPoint =
     coordinates?.length === 2 &&
@@ -28,8 +30,8 @@ export function MapLink({ location, label, kind = "Location" }) {
       <span className="map-link map-link-unavailable">
         <MapPin size={14} aria-hidden="true" />
         <span>
-          {label || "Location not recorded"}
-          <em> — map not available</em>
+          {label || t("map.notRecorded")}
+          <em> — {t("map.unavailable")}</em>
         </span>
       </span>
     );
@@ -44,16 +46,16 @@ export function MapLink({ location, label, kind = "Location" }) {
   return (
     <span className="map-link">
       <span className="map-link-label">
-        <MapPin size={14} aria-hidden="true" /> {kind}
+        <MapPin size={14} aria-hidden="true" /> {kind ?? t("common.location")}
         {label ? `: ${label}` : ""}
       </span>
       {/* noreferrer alongside noopener: these open a third-party map, and the
           referrer would otherwise leak the page the user came from. */}
       <a href={viewUrl} target="_blank" rel="noopener noreferrer">
-        View on map
+        {t("map.viewOnMap")}
       </a>
       <a href={navigateUrl} target="_blank" rel="noopener noreferrer">
-        <Navigation size={13} aria-hidden="true" /> Navigate
+        <Navigation size={13} aria-hidden="true" /> {t("map.navigate")}
       </a>
     </span>
   );

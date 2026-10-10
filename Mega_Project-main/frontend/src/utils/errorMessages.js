@@ -1,43 +1,49 @@
 // Turns a normalized {status, message, isNetworkError} (see api/client.js)
-// into copy that is safe to show a user - never the raw backend `message`
-// for known status codes, since that could leak internal/provider details
-// (e.g. a raw Sarvam error string). Unrecognized statuses fall back to a
-// generic message rather than exposing whatever the server actually said.
+// into the TRANSLATION KEY of copy that is safe to show a user - never the raw
+// backend `message` for known status codes, since that could leak internal/
+// provider details (e.g. a raw Sarvam error string). Unrecognized statuses fall
+// back to a generic key rather than exposing whatever the server actually said.
+//
+// A key, not a finished sentence: this module is imported by plain functions
+// that have no React context, so it cannot call t() itself. The component that
+// renders the error translates the key, which is what makes error copy appear
+// in the user's own language instead of always in English.
 
-const DEFAULT_MESSAGES = {
-  400: "Please check your input and try again.",
-  401: "Your session has expired. Please log in again.",
-  403: "You don't have permission to do that.",
-  404: "We couldn't find what you were looking for.",
-  409: "This action has already been completed.",
-  413: "That file is too large. Please choose a smaller one.",
-  429: "Too many attempts. Please wait a moment and try again.",
-  503: "This service is temporarily unavailable. Please try again later.",
+const DEFAULT_KEYS = {
+  400: "error.badRequest",
+  401: "error.sessionExpired",
+  403: "error.forbidden",
+  404: "error.notFound",
+  409: "error.conflict",
+  413: "error.tooLarge",
+  429: "error.tooManyAttempts",
+  503: "error.unavailable",
 };
 
-const VOICE_MESSAGES = {
-  400: "Please check the audio file and try again.",
-  403: "You are not authorized to create a voice profile.",
-  413: "Audio file is too large. Please choose a smaller file (max 15MB).",
-  503: "Voice AI is temporarily unavailable. Please try again later.",
+const VOICE_KEYS = {
+  400: "error.voice.badAudio",
+  403: "error.voice.forbidden",
+  413: "error.voice.tooLarge",
+  503: "error.voice.unavailable",
 };
 
-const NETWORK_MESSAGE = "Unable to connect to the server. Please check your internet connection.";
-const TIMEOUT_MESSAGE = "The request took too long. Please try again.";
-const UNKNOWN_MESSAGE = "Something went wrong. Please try again.";
+const NETWORK_KEY = "error.network";
+const TIMEOUT_KEY = "error.timeout";
+const UNKNOWN_KEY = "error.unknown";
 
 /**
- * @param {{status: number|null, isNetworkError: boolean}} normalizedError
+ * @param {{status: number|null, isNetworkError: boolean, isTimeout?: boolean}} normalizedError
  * @param {"voice"|"default"} [context]
+ * @returns {string} a translation key to pass to t()
  */
-export function mapErrorToFriendlyMessage(normalizedError, context = "default") {
+export function mapErrorToMessageKey(normalizedError, context = "default") {
   if (normalizedError?.isTimeout) {
-    return TIMEOUT_MESSAGE;
+    return TIMEOUT_KEY;
   }
   if (!normalizedError || normalizedError.isNetworkError || normalizedError.status === null) {
-    return NETWORK_MESSAGE;
+    return NETWORK_KEY;
   }
 
-  const contextMessages = context === "voice" ? VOICE_MESSAGES : {};
-  return contextMessages[normalizedError.status] || DEFAULT_MESSAGES[normalizedError.status] || UNKNOWN_MESSAGE;
+  const contextKeys = context === "voice" ? VOICE_KEYS : {};
+  return contextKeys[normalizedError.status] || DEFAULT_KEYS[normalizedError.status] || UNKNOWN_KEY;
 }

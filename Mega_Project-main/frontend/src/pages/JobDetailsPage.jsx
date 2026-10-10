@@ -11,6 +11,7 @@ import {
   Users,
 } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { PAY_TYPE_KEYS, SHIFT_TYPE_KEYS } from "../utils/enumLabels";
 import { useLanguage } from "../hooks/useLanguage";
 import { employerName } from "../utils/displayName";
 import { pickLocalizedText } from "../utils/localizedText";
@@ -32,7 +33,7 @@ export function JobDetailsPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { user, isAuthenticated, employerProfile } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const [job, setJob] = useState(location.state?.job || null);
   const [loading, setLoading] = useState(!location.state?.job);
@@ -69,7 +70,7 @@ export function JobDetailsPage() {
   if (loading) {
     return (
       <div className="container" style={{ padding: "60px 0" }}>
-        <Spinner label="Loading job details..." />
+        <Spinner label={t("common.loading")} />
       </div>
     );
   }
@@ -84,7 +85,7 @@ export function JobDetailsPage() {
           onClick={() => navigate(-1)}
           style={{ marginTop: 16 }}
         >
-          <ArrowLeft size={16} aria-hidden="true" /> Go Back
+          <ArrowLeft size={16} aria-hidden="true" /> {t("common.back")}
         </button>
       </div>
     );
@@ -95,9 +96,9 @@ export function JobDetailsPage() {
       <div className="container" style={{ padding: "60px 0" }}>
         <EmptyState
           icon={Briefcase}
-          title="Job not found"
-          description="The job you're looking for does not exist or has been removed."
-          action={<Link to="/jobs">Browse Find Jobs</Link>}
+          title={t("jobs.notFound")}
+          description={t("jobs.notFoundDesc")}
+          action={<Link to="/jobs">{t("browseAllJobs")}</Link>}
         />
       </div>
     );
@@ -106,8 +107,6 @@ export function JobDetailsPage() {
   const title = job.titleText || pickLocalizedText(job.title, language, job.originalLanguage);
   const description =
     job.descriptionText || pickLocalizedText(job.description, language, job.originalLanguage);
-  // businessName is optional - an employer may hire under their own personal
-  // name, which the job read supplies as employerId.userId.fullName.
   const postedBy = employerName(job.employerId);
   const isWorker = user?.roles?.includes(USER_ROLES.WORKER);
   const isOwner =
@@ -132,16 +131,16 @@ export function JobDetailsPage() {
 
   const handleEmployerAction = (action) => {
     if (action === "delete") {
-      navigate("/employer-dashboard", { state: { message: "Job deleted successfully." } });
+      navigate("/employer-dashboard", { state: { message: t("jobs.deletedSuccess") } });
     } else {
       fetchJob();
     }
   };
 
   return (
-    <div className="container job-details-page">
+    <div className="container job-details-page page-animate">
       <button type="button" className="job-details-back" onClick={() => navigate(-1)}>
-        <ArrowLeft size={16} aria-hidden="true" /> Back
+        <ArrowLeft size={16} aria-hidden="true" /> <span>{t("common.back")}</span>
       </button>
 
       {location.state?.message && (
@@ -183,13 +182,13 @@ export function JobDetailsPage() {
                   marginBottom: 4,
                 }}
               >
-                Employer Management
+                {t("jobs.employerManagement")}
               </span>
               <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                 <StatusPill status={job.status} />
                 <span style={{ fontSize: "var(--text-sm)", color: "var(--color-text-2)" }}>
                   <Users size={14} style={{ verticalAlign: "middle", marginRight: 4 }} />
-                  {job.filledWorkers || 0} of {job.requiredWorkers || 1} workers hired
+                  {job.filledWorkers || 0} / {job.requiredWorkers || 1} {t("workersHired")}
                 </span>
               </div>
             </div>
@@ -213,7 +212,7 @@ export function JobDetailsPage() {
                 flexWrap: "wrap",
               }}
             >
-              <h1>{title || "Untitled job"}</h1>
+              <h1>{title || t("jobs.untitled")}</h1>
               <StatusPill status={job.status} />
             </div>
             {postedBy && <p className="job-details-employer">{postedBy}</p>}
@@ -233,13 +232,13 @@ export function JobDetailsPage() {
           <div className="job-details-info">
             <Wallet size={17} aria-hidden="true" />
             <span>
-              ₹{job.payAmount} / {job.payType}
+              ₹{job.payAmount} / {t(PAY_TYPE_KEYS[job.payType] ?? job.payType)}
             </span>
           </div>
           <div className="job-details-info">
             <Users size={17} aria-hidden="true" />
             <span>
-              {job.requiredWorkers} needed ({job.filledWorkers || 0} hired)
+              {job.requiredWorkers} {t("workersNeeded")} ({job.filledWorkers || 0} {t("workersHired")})
             </span>
           </div>
           {typeof job.experienceRequired === "number" && (
@@ -247,8 +246,8 @@ export function JobDetailsPage() {
               <Briefcase size={17} aria-hidden="true" />
               <span>
                 {job.experienceRequired === 0
-                  ? "No experience required"
-                  : `${job.experienceRequired}+ years experience`}
+                  ? t("noExperienceRequired")
+                  : `${job.experienceRequired}+ ${t("yearsExperience")}`}
               </span>
             </div>
           )}
@@ -256,7 +255,7 @@ export function JobDetailsPage() {
             <div className="job-details-info">
               <Clock size={17} aria-hidden="true" />
               <span>
-                {job.shiftType} shift
+                {t(SHIFT_TYPE_KEYS[job.shiftType] ?? job.shiftType)}
                 {job.startTime && job.endTime ? ` (${job.startTime} - ${job.endTime})` : ""}
               </span>
             </div>
@@ -270,14 +269,14 @@ export function JobDetailsPage() {
           {job.startDate && (
             <div className="job-details-info">
               <CalendarDays size={17} aria-hidden="true" />
-              <span>Starts {new Date(job.startDate).toLocaleDateString()}</span>
+              <span>{t("starts")} {new Date(job.startDate).toLocaleDateString()}</span>
             </div>
           )}
           {job.applicationDeadline && (
             <div className="job-details-info">
               <CalendarDays size={17} aria-hidden="true" />
               <span>
-                Deadline {new Date(job.applicationDeadline).toLocaleDateString()}
+                {t("deadline")} {new Date(job.applicationDeadline).toLocaleDateString()}
               </span>
             </div>
           )}
@@ -285,7 +284,7 @@ export function JobDetailsPage() {
 
         {description && (
           <div className="job-details-description">
-            <h2>Description</h2>
+            <h2>{t("description")}</h2>
             <p>{description}</p>
           </div>
         )}
@@ -307,16 +306,16 @@ export function JobDetailsPage() {
           <div className="job-details-apply">
             {!isAuthenticated && (
               <p className="job-details-apply-hint">
-                <Link to="/login">Log in</Link> as a worker to apply for this job.
+                <Link to="/login">{t("login")}</Link> {t("jobs.loginToApply")}
               </p>
             )}
 
             {isAuthenticated && !isWorker && (
-              <p className="job-details-apply-hint">Only worker accounts can apply for jobs.</p>
+              <p className="job-details-apply-hint">{t("jobs.workerOnlyApply")}</p>
             )}
 
             {isAuthenticated && isWorker && !isOpen && (
-              <p className="job-details-apply-hint">This job is no longer accepting new applications.</p>
+              <p className="job-details-apply-hint">{t("jobs.noLongerAccepting")}</p>
             )}
 
             {isAuthenticated && isWorker && isOpen && !applied && (
@@ -324,22 +323,22 @@ export function JobDetailsPage() {
                 {applyError && <ErrorBanner error={applyError} />}
                 <label className="job-details-cover-note">
                   <span>
-                    Cover note <em>(optional)</em>
+                    {t("applications.coverNote")} <em>({t("common.optional")})</em>
                   </span>
                   <textarea
                     rows={3}
                     value={coverNote}
                     onChange={(event) => setCoverNote(event.target.value)}
-                    placeholder="Tell the employer why you're a good fit..."
+                    placeholder={t("coverNotePlaceholder")}
                   />
                 </label>
-                <Button type="submit" size="lg" disabled={applying}>
-                  {applying ? "Applying..." : "Apply for this job"}
+                <Button type="submit" size="lg" disabled={applying} className="animated-button">
+                  {applying ? t("applying") : t("jobs.details.applyTitle")}
                 </Button>
               </form>
             )}
 
-            {applied && <p className="job-details-applied">You've applied for this job.</p>}
+            {applied && <p className="job-details-applied">{t("youApplied")}</p>}
           </div>
         )}
       </Card>

@@ -10,7 +10,7 @@ import "../common/Form.css";
  * @param {{profile: object|null, categories: object[], saving: boolean, onSave: (payload:object) => void}} props
  */
 export function WorkerProfileForm({ profile, categories, saving, onSave }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const [fullName, setFullName] = useState(profile?.fullName || "");
   const [city, setCity] = useState(profile?.city || "");
@@ -57,43 +57,40 @@ export function WorkerProfileForm({ profile, categories, saving, onSave }) {
   return (
     <form className="worker-profile-form" onSubmit={handleSubmit}>
       <label className="form-field">
-        <span>Full name</span>
+        <span>{t("profile.fullName")}</span>
         <input type="text" value={fullName} onChange={(event) => setFullName(event.target.value)} required />
       </label>
 
       <div className="form-field-row">
         <label className="form-field">
-          <span>City</span>
+          <span>{t("common.city")}</span>
           <input type="text" value={city} onChange={(event) => setCity(event.target.value)} />
         </label>
         <label className="form-field">
-          <span>Village</span>
+          <span>{t("common.village")}</span>
           <input type="text" value={village} onChange={(event) => setVillage(event.target.value)} />
         </label>
       </div>
 
       <label className="form-field">
-        <span>Location</span>
+        <span>{t("common.location")}</span>
         <LocationField coordinates={coordinates} onChange={setCoordinates} />
         {/* Not required - a profile with no location is valid, and nothing
             invents one. But distance is one of the six matching factors, so
             without it that factor simply cannot be scored. Saying so is more
             useful than silently ranking them against a guessed city. */}
         {!coordinates && (
-          <small className="form-hint">
-            Optional, but jobs are matched partly on distance — set your location to be matched on how near
-            the work is.
-          </small>
+          <small className="form-hint">{t("profile.locationHint")}</small>
         )}
       </label>
 
       <div className="form-field-row">
         <label className="form-field">
-          <span>Expected pay (₹)</span>
+          <span>{t("profile.expectedPay")}</span>
           <input type="number" min="0" value={expectedPay} onChange={(event) => setExpectedPay(event.target.value)} />
         </label>
         <label className="form-field">
-          <span>Experience (years)</span>
+          <span>{t("profile.experienceYears")}</span>
           <input
             type="number"
             min="0"
@@ -102,7 +99,7 @@ export function WorkerProfileForm({ profile, categories, saving, onSave }) {
           />
         </label>
         <label className="form-field">
-          <span>Preferred radius (km)</span>
+          <span>{t("profile.radiusKm")}</span>
           <input
             type="number"
             min="1"
@@ -113,7 +110,7 @@ export function WorkerProfileForm({ profile, categories, saving, onSave }) {
       </div>
 
       <div className="form-field">
-        <span>Languages you speak</span>
+        <span>{t("profile.languages")}</span>
         <div className="form-chip-group">
           {APP_LANGUAGES.map((lang) => (
             <button
@@ -130,7 +127,7 @@ export function WorkerProfileForm({ profile, categories, saving, onSave }) {
 
       {categories.length > 0 && (
         <div className="form-field">
-          <span>Preferred job categories</span>
+          <span>{t("profile.categories")}</span>
           <div className="form-chip-group">
             {categories.map((category) => (
               <button
@@ -147,12 +144,12 @@ export function WorkerProfileForm({ profile, categories, saving, onSave }) {
       )}
 
       <label className="form-field">
-        <span>About you ({LANGUAGE_LABELS[language]})</span>
+        <span>{t("profile.aboutYou", { language: LANGUAGE_LABELS[language] })}</span>
         <textarea rows={4} value={bioText} onChange={(event) => setBioText(event.target.value)} />
       </label>
 
       <Button type="submit" size="lg" disabled={saving}>
-        {saving ? "Saving..." : "Save profile"}
+        {saving ? t("voice.guided.saving") : t("profile.save")}
       </Button>
     </form>
   );

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Mic, Upload, LoaderCircle, ListChecks } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
@@ -22,18 +22,20 @@ const EXAMPLE_TEXT = {
 };
 
 export function VoiceProfilePage() {
-  const { refreshBootstrap } = useAuth();
+  const { user, refreshBootstrap } = useAuth();
   const { language: uiLanguage, t } = useLanguage();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
-  // "mode" is a new FIRST step. Picking "quick" drops into the original state
-  // machine below, untouched: language -> input -> processing -> review -> success.
-  // Picking "guided" hands off to GuidedVoiceWizard after the same language step.
-  const [mode, setMode] = useState(null); // null | quick | guided
-  const [step, setStep] = useState("mode"); // mode | language | input | processing | review | success
+  const roleParam = searchParams.get("role");
+  const targetRole = roleParam === "employer" || (!roleParam && user?.activeRole === "employer") ? "employer" : "worker";
+  const isEmployer = targetRole === "employer";
+
+  const [mode, setMode] = useState(isEmployer ? "guided" : null);
+  const [step, setStep] = useState(isEmployer ? "language" : "mode");
   const [recordingLanguage, setRecordingLanguage] = useState(uiLanguage);
-  const [inputMode, setInputMode] = useState("record"); // record | upload
-  const [audioSource, setAudioSource] = useState(null); // Blob | File
+  const [inputMode, setInputMode] = useState("record");
+  const [audioSource, setAudioSource] = useState(null);
   const [voiceProfile, setVoiceProfile] = useState(null);
   const [confirmedProfile, setConfirmedProfile] = useState(null);
   const [skillResolution, setSkillResolution] = useState(null);
@@ -58,17 +60,18 @@ export function VoiceProfilePage() {
     setSaving(true);
     setError(null);
     try {
-      // The confirm response shape is { workerProfile, voiceSkillResolution }
-      // (not the bare WorkerProfile it used to be) since the backend now
-      // resolves voice-extracted skills/preferredJobCategories against the
-      // real catalog instead of silently ignoring them.
-      const { workerProfile, voiceSkillResolution } = await voiceProfileApi.confirm(
+      const result = await voiceProfileApi.confirm(
         voiceProfile._id,
-        confirmedFields
+        confirmedFields,
+        targetRole
       );
       await refreshBootstrap();
-      setConfirmedProfile(workerProfile);
-      setSkillResolution(voiceSkillResolution);
+      if (isEmployer) {
+        setConfirmedProfile(result.employerProfile);
+      } else {
+        setConfirmedProfile(result.workerProfile);
+        setSkillResolution(result.voiceSkillResolution);
+      }
       setStep("success");
     } catch (err) {
       setError(normalizeError(err));
@@ -85,17 +88,19 @@ export function VoiceProfilePage() {
   };
 
   return (
-    <div className="container voice-page">
+    <div className="container voice-page page-animate">
       <button type="button" className="voice-page-back" onClick={() => navigate("/profile")}>
-        <ArrowLeft size={16} aria-hidden="true" /> Back to Profile
+        <ArrowLeft size={16} aria-hidden="true" /> <span>{t("common.back")}</span>
       </button>
 
-      <Card className="voice-page-card">
+      <Card className="voice-page-card animated-card">
         {step !== "success" && (
           <>
-            <h1 className="voice-page-title">Create Your Profile with Voice</h1>
+            <h1 className="voice-page-title">
+              {isEmployer ? t("voice.guided.employer.title") : t("createProfileVoice")}
+            </h1>
             <p className="voice-page-subtitle">
-              Tell us about yourself naturally in your preferred language. We'll convert your speech into a profile.
+              {isEmployer ? t("voice.guided.employer.subtitle") : t("voiceProfileSubtitle")}
             </p>
           </>
         )}
@@ -106,9 +111,6 @@ export function VoiceProfilePage() {
           <div className="voice-mode-step">
             <p className="voice-step-label">{t("voice.mode.title")}</p>
             <div className="voice-mode-options">
-              {/* The existing single-recording flow, unchanged and still first:
-                  it is one wait instead of seven and was measured as accurate as
-                  the per-field flow on the real recordings. */}
               <button type="button" className="voice-mode-option" onClick={() => { setMode("quick"); setStep("language"); }}>
                 <Mic size={22} aria-hidden="true" />
                 <strong>{t("voice.mode.quick.title")}</strong>
@@ -128,23 +130,23 @@ export function VoiceProfilePage() {
         {step === "guided" && (
           <GuidedVoiceWizard
             spokenLanguage={recordingLanguage}
+            role={targetRole}
             onComplete={async (result) => {
-              setConfirmedProfile(result.workerProfile);
-              setSkillResolution(result.voiceSkillResolution);
+              if (isEmployer) {
+                setConfirmedProfile(result.employerProfile);
+              } else {
+                setConfirmedProfile(result.workerProfile);
+                setSkillResolution(result.voiceSkillResolution);
+              }
               await refreshBootstrap();
               setStep("success");
             }}
-            onExit={() => setStep("mode")}
+            onExit={() => (isEmployer ? navigate("/profile") : setStep("mode"))}
           />
         )}
 
         {step === "language" && (
           <div className="voice-language-step">
-            {/* This selects the SPOKEN language forwarded to Whisper
-                (voiceProfileApi.extract -> backend -> STT), not the app's UI
-                language. The old "Choose your language" read as a UI setting,
-                so a worker with a Marathi interface would record in English
-                and have it decoded as Marathi. */}
             <p className="voice-step-label">{t("voice.spokenLanguage")}</p>
             <div className="voice-language-options">
               {APP_LANGUAGES.map((lang) => (
@@ -160,10 +162,10 @@ export function VoiceProfilePage() {
             </div>
             <button
               type="button"
-              className="btn btn-primary btn-lg"
-              onClick={() => setStep(mode === "guided" ? "guided" : "input")}
+              className="btn btn-primary btn-lg animated-button"
+              onClick={() => setStep(mode === "guided" || isEmployer ? "guided" : "input")}
             >
-              Continue
+              {t("voice.guided.continue")}
             </button>
           </div>
         )}
@@ -171,17 +173,17 @@ export function VoiceProfilePage() {
         {step === "input" && (
           <div className="voice-input-step">
             <p className="voice-input-example">
-              <strong>Tell us about yourself.</strong>
+              <strong>{t("tellUsAboutYourself")}</strong>
               <br />
-              Example: {EXAMPLE_TEXT[recordingLanguage] || EXAMPLE_TEXT.en}
+              {t("example")}: {EXAMPLE_TEXT[recordingLanguage] || EXAMPLE_TEXT.en}
             </p>
 
             <div className="voice-input-mode">
               <button type="button" className={inputMode === "record" ? "active" : ""} onClick={() => setInputMode("record")}>
-                <Mic size={15} aria-hidden="true" /> Record Voice
+                <Mic size={15} aria-hidden="true" /> {t("recordVoice")}
               </button>
               <button type="button" className={inputMode === "upload" ? "active" : ""} onClick={() => setInputMode("upload")}>
-                <Upload size={15} aria-hidden="true" /> Upload Audio
+                <Upload size={15} aria-hidden="true" /> {t("uploadAudio")}
               </button>
             </div>
 
@@ -191,8 +193,8 @@ export function VoiceProfilePage() {
               <AudioUploader onFileReady={setAudioSource} />
             )}
 
-            <button type="button" className="btn btn-primary btn-lg voice-extract-btn" onClick={handleExtract} disabled={!audioSource}>
-              Extract Profile
+            <button type="button" className="btn btn-primary btn-lg voice-extract-btn animated-button" onClick={handleExtract} disabled={!audioSource}>
+              {t("extractProfile")}
             </button>
           </div>
         )}
@@ -200,8 +202,8 @@ export function VoiceProfilePage() {
         {step === "processing" && (
           <div className="voice-processing-step">
             <LoaderCircle size={40} className="voice-processing-spinner" aria-hidden="true" />
-            <h2>🎙 Processing your voice...</h2>
-            <p>Please wait while we create your profile.</p>
+            <h2>🎙 {t("processingVoice")}</h2>
+            <p>{t("processingVoiceDesc")}</p>
           </div>
         )}
 
@@ -216,13 +218,18 @@ export function VoiceProfilePage() {
         )}
 
         {step === "success" && (
-          <VoiceProfileSuccess workerProfile={confirmedProfile} skillResolution={skillResolution} />
+          <VoiceProfileSuccess
+            role={targetRole}
+            workerProfile={!isEmployer ? confirmedProfile : null}
+            employerProfile={isEmployer ? confirmedProfile : null}
+            skillResolution={skillResolution}
+          />
         )}
       </Card>
 
       {step !== "success" && (
         <p className="voice-page-alt-link">
-          Prefer to fill it in yourself? <Link to="/profile">Edit your profile manually</Link>
+          {t("preferManualFill")} <Link to="/profile">{t("editProfileManually")}</Link>
         </p>
       )}
     </div>

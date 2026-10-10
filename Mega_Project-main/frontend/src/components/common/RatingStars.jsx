@@ -1,4 +1,5 @@
 import { Star } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 import "./RatingStars.css";
 
 /**
@@ -20,13 +21,14 @@ import "./RatingStars.css";
  * @param {{value?: number, count?: number, compact?: boolean}} props
  */
 export function RatingStars({ value = 0, count, compact = false }) {
+  const { t } = useLanguage();
   const hasRatings = typeof count === "number" ? count > 0 : value > 0;
 
   if (!hasRatings) {
     return (
-      <span className="rating-stars rating-stars-unrated" title="This person has not been rated yet">
+      <span className="rating-stars rating-stars-unrated" title={t("rating.notRatedTitle")}>
         <Star size={16} aria-hidden="true" />
-        <span className="rating-stars-unrated-text">{compact ? "New" : "Not rated yet"}</span>
+        <span className="rating-stars-unrated-text">{compact ? t("rating.new") : t("rating.notRated")}</span>
       </span>
     );
   }
@@ -34,7 +36,7 @@ export function RatingStars({ value = 0, count, compact = false }) {
   const rounded = Math.round(value);
 
   return (
-    <span className="rating-stars" aria-label={`${value.toFixed(1)} out of 5 stars from ${count} rating${count === 1 ? "" : "s"}`}>
+    <span className="rating-stars" aria-label={t("rating.starsAria", { value: value.toFixed(1), count: count ?? 0 })}>
       {[1, 2, 3, 4, 5].map((star) => (
         <Star key={star} size={16} aria-hidden="true" className={star <= rounded ? "filled" : ""} />
       ))}

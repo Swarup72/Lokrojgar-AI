@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Mic, Star, Briefcase, HardHat } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
+import { useLanguage } from "../hooks/useLanguage";
 import * as workerProfileApi from "../api/workerProfile";
 import * as employerProfileApi from "../api/employerProfile";
 import * as workerSkillsApi from "../api/workerSkills";
@@ -21,6 +22,7 @@ import "./ProfilePage.css";
 
 export function ProfilePage() {
   const { user, workerProfile, employerProfile, refreshBootstrap } = useAuth();
+  const { t } = useLanguage();
   const roles = user?.roles || [];
   const hasBothRoles = roles.includes(USER_ROLES.WORKER) && roles.includes(USER_ROLES.EMPLOYER);
 
@@ -79,11 +81,6 @@ export function ProfilePage() {
   };
 
   const handleAddSkill = async (payload) => {
-    // Adding a sub-skill also records its parent trade server-side ("Wire
-    // Connection" implies "Electrician"), so the response is
-    // {workerSkill, impliedParentSkill} rather than one row - and the list has
-    // to be re-read rather than appended to, or the implied trade would be
-    // missing from the UI until the next reload.
     await workerSkillsApi.add(payload);
     setWorkerSkills(await workerSkillsApi.getMine());
   };
@@ -93,13 +90,6 @@ export function ProfilePage() {
     setWorkerSkills((prev) => prev.filter((skill) => skill._id !== id));
   };
 
-  /**
-   * Adds the other role to THIS account - no second account, no second phone
-   * number, no re-login. The server creates the matching profile in the same
-   * request, so the new capability works straight away; refreshBootstrap()
-   * then pulls the updated roles so the navigation and guards catch up.
-   * Authorization stays server-side: this only changes what the UI offers.
-   */
   const handleAddRole = async (role) => {
     setAddingRole(role);
     setError(null);
@@ -115,45 +105,40 @@ export function ProfilePage() {
   };
 
   return (
-    <div className="container profile-page">
-      <h1 className="profile-page-title">Profile</h1>
+    <div className="container profile-page page-animate">
+      <h1 className="profile-page-title">{t("profile")}</h1>
 
       {hasBothRoles && (
         <div className="profile-tabs">
           <button type="button" className={activeTab === "worker" ? "active" : ""} onClick={() => setActiveTab("worker")}>
-            Worker profile
+            {t("profile.title")}
           </button>
           <button type="button" className={activeTab === "employer" ? "active" : ""} onClick={() => setActiveTab("employer")}>
-            Employer profile
+            {t("employerProfile")}
           </button>
         </div>
       )}
 
       {error && <ErrorBanner error={error} />}
 
-      {/* One account, both capabilities. A worker who wants to hire - or an
-          employer who wants to work - adds the role here instead of
-          registering again with another phone number. Nothing is permanent and
-          nothing is lost: both profiles coexist, and the tabs above appear
-          once the account has both. */}
       {!hasBothRoles && (roles.includes(USER_ROLES.WORKER) || roles.includes(USER_ROLES.EMPLOYER)) && (
-        <Card className="profile-role-cta">
+        <Card className="profile-role-cta animated-card">
           <div>
             <h2>
               {roles.includes(USER_ROLES.WORKER) ? (
                 <>
-                  <Briefcase size={20} aria-hidden="true" /> Want to hire someone?
+                  <Briefcase size={20} aria-hidden="true" /> {t("wantToHire")}
                 </>
               ) : (
                 <>
-                  <HardHat size={20} aria-hidden="true" /> Looking for work yourself?
+                  <HardHat size={20} aria-hidden="true" /> {t("lookingForWork")}
                 </>
               )}
             </h2>
             <p>
               {roles.includes(USER_ROLES.WORKER)
-                ? "Add employer access to this same account - you can post jobs and hire workers without a second login."
-                : "Add worker access to this same account - you can apply for jobs while still posting your own."}
+                ? t("addEmployerAccessDesc")
+                : t("addWorkerAccessDesc")}
             </p>
           </div>
           <Button
@@ -161,52 +146,41 @@ export function ProfilePage() {
               handleAddRole(roles.includes(USER_ROLES.WORKER) ? USER_ROLES.EMPLOYER : USER_ROLES.WORKER)
             }
             disabled={addingRole !== null}
+            className="animated-button"
           >
             {addingRole
-              ? "Setting up..."
+              ? t("common.loading")
               : roles.includes(USER_ROLES.WORKER)
-                ? "Become an employer"
-                : "Become a worker"}
+                ? t("becomeEmployer")
+                : t("becomeWorker")}
           </Button>
         </Card>
       )}
 
       {activeTab === "worker" && roles.includes(USER_ROLES.WORKER) && (
         <>
-          <Card className="profile-voice-cta">
+          <Card className="profile-voice-cta animated-card">
             <div>
               <h2>
-                <Mic size={20} aria-hidden="true" /> Voice profile
+                <Mic size={20} aria-hidden="true" /> {t("voiceProfile")}
               </h2>
-              <p>Create or update your profile just by speaking.</p>
+              <p>{t("voiceProfileDesc")}</p>
             </div>
-            <Link to="/voice-profile" className="btn btn-primary btn-lg">
+            <Link to="/voice-profile" className="btn btn-primary btn-lg animated-button">
               <Mic size={18} aria-hidden="true" />
-              <span>{workerProfile ? "Update with voice" : "Create with voice"}</span>
+              <span>{workerProfile ? t("updateWithVoice") : t("createWithVoice")}</span>
             </Link>
           </Card>
 
           {workerProfile && (
             <Card className="profile-section">
-              <h2>Availability</h2>
+              <h2>{t("voice.guided.availability.label")}</h2>
               <AvailabilityToggle availability={workerProfile.availability} onChange={handleAvailabilityChange} />
             </Card>
           )}
 
           <Card className="profile-section">
-            <h2>Personal & professional details</h2>
-            {/* `key` is what fixes the voice flow losing its data.
-                WorkerProfileForm copies `profile` into useState, which runs ONLY
-                at mount - so once the voice wizard saved new values and
-                refreshBootstrap() updated `workerProfile`, this form still held
-                the values from before. It then DISPLAYED the stale values and,
-                on Save, wrote them back: measured on a real server, a stale save
-                reverted languages ["mr","hi"] -> ["mr"] and fullName
-                "Swarup Pal" -> the pre-voice name. (expectedPay/experienceYears/
-                city survived only because the form sends them as undefined when
-                blank, which the controller skips.)
-                Keying on updatedAt remounts the form whenever the profile it
-                mirrors actually changes, so it always starts from the truth. */}
+            <h2>{t("personalDetails")}</h2>
             <WorkerProfileForm
               key={workerProfile?.updatedAt || workerProfile?._id || "new-worker-profile"}
               profile={workerProfile}
@@ -218,7 +192,7 @@ export function ProfilePage() {
 
           {workerProfile && (
             <Card className="profile-section">
-              <h2>Skills</h2>
+              <h2>{t("common.skills")}</h2>
               <WorkerSkillsManager
                 skills={workerSkills}
                 catalogSkills={catalogSkills}
@@ -231,7 +205,7 @@ export function ProfilePage() {
           {user && (
             <Card className="profile-section">
               <h2>
-                <Star size={18} aria-hidden="true" /> Reviews
+                <Star size={18} aria-hidden="true" /> {t("reviews")}
               </h2>
               <RatingList
                 userId={user._id}
@@ -245,10 +219,21 @@ export function ProfilePage() {
 
       {activeTab === "employer" && roles.includes(USER_ROLES.EMPLOYER) && (
         <>
+          <Card className="profile-voice-cta animated-card">
+            <div>
+              <h2>
+                <Mic size={20} aria-hidden="true" /> {t("profile.employer.voiceBanner.title")}
+              </h2>
+              <p>{t("profile.employer.voiceBanner.desc")}</p>
+            </div>
+            <Link to="/voice-profile?role=employer" className="btn btn-primary btn-lg animated-button">
+              <Mic size={18} aria-hidden="true" />
+              <span>{employerProfile ? t("updateWithVoice") : t("profile.employer.voiceBanner.action")}</span>
+            </Link>
+          </Card>
+
           <Card className="profile-section">
-            <h2>Business details</h2>
-            {/* Same stale-state fix as the worker form above - it copies
-                `profile` into useState at mount and never re-syncs either. */}
+            <h2>{t("businessDetails")}</h2>
             <EmployerProfileForm
               key={employerProfile?.updatedAt || employerProfile?._id || "new-employer-profile"}
               profile={employerProfile}
@@ -260,7 +245,7 @@ export function ProfilePage() {
           {user && (
             <Card className="profile-section">
               <h2>
-                <Star size={18} aria-hidden="true" /> Reviews
+                <Star size={18} aria-hidden="true" /> {t("reviews")}
               </h2>
               <RatingList
                 userId={user._id}

@@ -6,12 +6,21 @@ import { Card } from "../components/common/Card";
 import { ErrorBanner } from "../components/common/ErrorBanner";
 import { JobForm } from "../components/jobs/JobForm";
 import { JobReview } from "../components/jobs/JobReview";
+import { GuidedVoiceJobWizard } from "../components/jobs/GuidedVoiceJobWizard";
+import { useLanguage } from "../hooks/useLanguage";
+import { APP_LANGUAGES, LANGUAGE_LABELS } from "../utils/enums";
+import { Mic, PencilLine } from "lucide-react";
 import "./PostJobPage.css";
 
 export function PostJobPage() {
   const navigate = useNavigate();
+  const { t, language } = useLanguage();
 
-  const [step, setStep] = useState("form"); // "form" | "review"
+  // "choose" -> "voice" -> "form" -> "review", or "choose" -> "form" -> "review".
+  // The manual path is unchanged: picking "manual" lands on exactly the form
+  // that existed before, with no initial values.
+  const [step, setStep] = useState("choose");
+  const [spokenLanguage, setSpokenLanguage] = useState(language);
   const [formData, setFormData] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [savingDraft, setSavingDraft] = useState(false);
@@ -53,7 +62,7 @@ export function PostJobPage() {
 
       const job = await jobsApi.create(payload);
       navigate("/employer-dashboard", {
-        state: { message: "Job published successfully with auto-translations!", newJob: job },
+        state: { message: t("jobs.form.successPublish"), newJob: job },
       });
     } catch (err) {
       setError(normalizeError(err));
@@ -92,7 +101,7 @@ export function PostJobPage() {
 
       const job = await jobsApi.create(payload);
       navigate("/employer-dashboard", {
-        state: { message: "Job saved as draft.", newJob: job },
+        state: { message: t("jobs.form.successDraft"), newJob: job },
       });
     } catch (err) {
       setError(normalizeError(err));
@@ -105,21 +114,71 @@ export function PostJobPage() {
     <div className="container post-job-page">
       {error && <ErrorBanner error={error} />}
 
+      {step === "choose" && (
+        <>
+          <h1>{t("home.hero.postJob")}</h1>
+          <p className="post-job-subtitle" style={{ color: "var(--color-muted)", marginBottom: 20 }}>
+            {t("voiceJob.chooseSubtitle")}
+          </p>
+          <div className="post-job-modes">
+            <button type="button" className="post-job-mode" onClick={() => setStep("form")}>
+              <PencilLine size={22} aria-hidden="true" />
+              <strong>{t("voiceJob.modeManual")}</strong>
+              <span>{t("voiceJob.modeManualDesc")}</span>
+            </button>
+            <button type="button" className="post-job-mode" onClick={() => setStep("voice")}>
+              <Mic size={22} aria-hidden="true" />
+              <strong>{t("voiceJob.modeVoice")}</strong>
+              <span>{t("voiceJob.modeVoiceDesc")}</span>
+            </button>
+          </div>
+        </>
+      )}
+
+      {step === "voice" && (
+        <>
+          <h1>{t("voiceJob.title")}</h1>
+          <label className="form-field post-job-voice-language">
+            <span>{t("voiceJob.spokenLanguage")}</span>
+            <select value={spokenLanguage} onChange={(event) => setSpokenLanguage(event.target.value)}>
+              {APP_LANGUAGES.map((lang) => (
+                <option key={lang} value={lang}>
+                  {LANGUAGE_LABELS[lang]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <Card>
+            <GuidedVoiceJobWizard
+              key={spokenLanguage}
+              spokenLanguage={spokenLanguage}
+              onComplete={(values) => {
+                // The wizard hands over reviewed values; they populate the
+                // existing form. Nothing has been published at this point.
+                setFormData(values);
+                setStep("form");
+              }}
+              onExit={() => setStep("choose")}
+            />
+          </Card>
+        </>
+      )}
+
       {step === "form" ? (
         <>
-          <h1>Post a Job</h1>
+          <h1>{t("home.hero.postJob")}</h1>
           <p className="post-job-subtitle" style={{ color: "var(--color-muted)", marginBottom: 20 }}>
-            Fill in the details below. You will have a chance to review everything before publishing.
+            {t("jobs.form.postSubtitle")}
           </p>
           <Card>
             <JobForm
               initialValues={formData || {}}
               onSubmit={handleFormSubmit}
-              submitLabel="Review Job Details"
+              submitLabel={t("jobs.form.reviewDetails")}
             />
           </Card>
         </>
-      ) : (
+      ) : step === "review" ? (
         <JobReview
           jobData={formData}
           onBack={() => setStep("form")}
@@ -128,7 +187,7 @@ export function PostJobPage() {
           publishing={submitting}
           savingDraft={savingDraft}
         />
-      )}
+      ) : null}
     </div>
   );
 }

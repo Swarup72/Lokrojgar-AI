@@ -1,5 +1,6 @@
 import { AlertCircle } from "lucide-react";
-import { mapErrorToFriendlyMessage } from "../../utils/errorMessages";
+import { mapErrorToMessageKey } from "../../utils/errorMessages";
+import { useLanguage } from "../../hooks/useLanguage";
 import "./ErrorBanner.css";
 
 /**
@@ -9,15 +10,16 @@ import "./ErrorBanner.css";
  * @param {{error: {status:number|null, isNetworkError:boolean}, context?: "voice"|"default", onRetry?: () => void}} props
  */
 export function ErrorBanner({ error, context = "default", onRetry }) {
+  const { t } = useLanguage();
   if (!error) return null;
 
   return (
     <div className="error-banner" role="alert">
       <AlertCircle size={18} aria-hidden="true" />
-      <span>{mapErrorToFriendlyMessage(error, context)}</span>
+      <span>{t(mapErrorToMessageKey(error, context))}</span>
       {onRetry && (
         <button type="button" className="error-banner-retry" onClick={onRetry}>
-          Try again
+          {t("error.tryAgain")}
         </button>
       )}
     </div>

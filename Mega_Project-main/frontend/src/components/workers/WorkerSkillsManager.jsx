@@ -3,13 +3,14 @@ import { X, Plus } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { WORKER_SKILL_PROFICIENCY } from "../../utils/enums";
+import { PROFICIENCY_KEYS } from "../../utils/enumLabels";
 import "./WorkerSkillsManager.css";
 
 /**
  * @param {{skills: object[], catalogSkills: object[], onAdd: (payload:object) => Promise<any>, onRemove: (id:string) => Promise<any>}} props
  */
 export function WorkerSkillsManager({ skills, catalogSkills, onAdd, onRemove }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [selectedSkillId, setSelectedSkillId] = useState("");
   const [proficiency, setProficiency] = useState("intermediate");
   const [saving, setSaving] = useState(false);
@@ -65,14 +66,14 @@ export function WorkerSkillsManager({ skills, catalogSkills, onAdd, onRemove }) 
   return (
     <div className="worker-skills-manager">
       <div className="worker-skills-list">
-        {skills.length === 0 && <p className="worker-skills-empty">No skills added yet.</p>}
+        {skills.length === 0 && <p className="worker-skills-empty">{t("skills.noneAdded")}</p>}
         {skills.map((skill) => {
           const skillDoc = typeof skill.skillId === "object" ? skill.skillId : null;
-          const name = skillDoc ? pickLocalizedText(skillDoc.name, language) : "Skill";
+          const name = skillDoc ? pickLocalizedText(skillDoc.name, language) : t("skills.fallbackName");
           return (
             <span className="worker-skill-tag" key={skill._id}>
-              {name} <em>({skill.proficiency})</em>
-              <button type="button" onClick={() => onRemove(skill._id)} aria-label={`Remove ${name}`}>
+              {name} <em>({t(PROFICIENCY_KEYS[skill.proficiency] ?? "skills.fallbackName")})</em>
+              <button type="button" onClick={() => onRemove(skill._id)} aria-label={t("skills.remove", { name })}>
                 <X size={13} aria-hidden="true" />
               </button>
             </span>
@@ -83,10 +84,10 @@ export function WorkerSkillsManager({ skills, catalogSkills, onAdd, onRemove }) 
       {availableCatalogSkills.length > 0 && (
         <form className="worker-skills-add" onSubmit={handleAdd}>
           <select value={selectedSkillId} onChange={(event) => setSelectedSkillId(event.target.value)}>
-            <option value="">Add a skill...</option>
+            <option value="">{t("skills.addPrompt")}</option>
             {grouped.groups.map(({ trade, tradeAvailable, subSkills }) => (
               <optgroup key={trade._id} label={label(trade)}>
-                {tradeAvailable && <option value={trade._id}>{label(trade)} (whole trade)</option>}
+                {tradeAvailable && <option value={trade._id}>{t("skills.wholeTrade", { trade: label(trade) })}</option>}
                 {subSkills.map((sub) => (
                   <option key={sub._id} value={sub._id}>
                     {label(sub)}
@@ -95,7 +96,7 @@ export function WorkerSkillsManager({ skills, catalogSkills, onAdd, onRemove }) 
               </optgroup>
             ))}
             {grouped.orphans.length > 0 && (
-              <optgroup label="Other">
+              <optgroup label={t("skills.other")}>
                 {grouped.orphans.map((skill) => (
                   <option key={skill._id} value={skill._id}>
                     {label(skill)}
@@ -107,12 +108,12 @@ export function WorkerSkillsManager({ skills, catalogSkills, onAdd, onRemove }) 
           <select value={proficiency} onChange={(event) => setProficiency(event.target.value)}>
             {WORKER_SKILL_PROFICIENCY.map((level) => (
               <option key={level} value={level}>
-                {level}
+                {t(PROFICIENCY_KEYS[level])}
               </option>
             ))}
           </select>
           <button type="submit" className="worker-skills-add-btn" disabled={!selectedSkillId || saving}>
-            <Plus size={15} aria-hidden="true" /> Add
+            <Plus size={15} aria-hidden="true" /> {t("skills.add")}
           </button>
         </form>
       )}

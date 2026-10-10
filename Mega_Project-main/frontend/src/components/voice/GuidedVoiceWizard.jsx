@@ -22,15 +22,19 @@ import "./GuidedVoiceWizard.css";
  * faster to tap than to say and cannot be misheard.
  */
 
-const VOICE_STEPS = ["fullName", "expectedPay", "experienceYears", "skills", "city"];
-const TAP_STEPS = ["languages", "availability"];
-const STEPS = [...VOICE_STEPS, ...TAP_STEPS];
-// Only the name is required: a profile with no name is not usable, while every
-// other field can be filled in later from the profile page.
+const WORKER_VOICE_STEPS = ["fullName", "expectedPay", "experienceYears", "skills", "city"];
+const WORKER_TAP_STEPS = ["languages", "availability"];
+const WORKER_STEPS = [...WORKER_VOICE_STEPS, ...WORKER_TAP_STEPS];
+
+const EMPLOYER_VOICE_STEPS = ["fullName", "businessName", "businessType", "city"];
+const EMPLOYER_TAP_STEPS = [];
+const EMPLOYER_STEPS = [...EMPLOYER_VOICE_STEPS, ...EMPLOYER_TAP_STEPS];
+
+// Only the name is required: a profile with no name is not usable, while other fields can be filled in later.
 const REQUIRED_STEPS = new Set(["fullName"]);
 const AVAILABILITY_OPTIONS = ["available", "busy", "unavailable"];
 
-/** How a captured value is shown back to the worker. */
+/** How a captured value is shown back to the user. */
 function formatValue(field, value, t) {
   if (value === null || value === undefined || value === "") return null;
   if (field === "expectedPay") return `₹${value}`;
@@ -40,8 +44,28 @@ function formatValue(field, value, t) {
   return String(value);
 }
 
-export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
+function getStepLabel(field, role, t) {
+  if (role === "employer") {
+    if (field === "fullName") return t("voice.guided.employer.fullName.label");
+    if (field === "city") return t("voice.guided.employer.city.label");
+  }
+  return t(`voice.guided.${field}.label`);
+}
+
+function getStepPrompt(field, role, t) {
+  if (role === "employer") {
+    if (field === "fullName") return t("voice.guided.employer.fullName.prompt");
+    if (field === "city") return t("voice.guided.employer.city.prompt");
+  }
+  return t(`voice.guided.${field}.prompt`);
+}
+
+export function GuidedVoiceWizard({ spokenLanguage, role = "worker", onComplete, onExit }) {
   const { t } = useLanguage();
+
+  const isEmployer = role === "employer";
+  const STEPS = isEmployer ? EMPLOYER_STEPS : WORKER_STEPS;
+  const VOICE_STEPS = isEmployer ? EMPLOYER_VOICE_STEPS : WORKER_VOICE_STEPS;
 
   const [stepIndex, setStepIndex] = useState(0);
   const [draftFields, setDraftFields] = useState({});
@@ -54,16 +78,16 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
   const [saving, setSaving] = useState(false);
   const [reviewing, setReviewing] = useState(false);
 
-  const field = STEPS[stepIndex];
+  const field = STEPS[stepIndex] || STEPS[0];
   const isVoiceStep = VOICE_STEPS.includes(field);
 
   // Start or RESUME. The draft already on the server is the source of truth for
-  // what has been answered, so a reload picks up where the worker left off.
+  // what has been answered, so a reload picks up where the user left off.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const session = await voiceProfileApi.startGuided(spokenLanguage);
+        const session = await voiceProfileApi.startGuided(spokenLanguage, role);
         if (cancelled) return;
         setDraftFields(session.draftFields || {});
         setCompletedSteps(session.completedSteps || []);
@@ -79,7 +103,7 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
     return () => {
       cancelled = true;
     };
-  }, [spokenLanguage]);
+  }, [spokenLanguage, role]);
 
   const applyDraft = useCallback((data) => {
     if (data?.draftFields) setDraftFields(data.draftFields);
@@ -93,10 +117,10 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
     setError(null);
     setLastResult(null);
     try {
-      const result = await voiceProfileApi.submitGuidedStep(audioBlob, spokenLanguage, field);
+      const result = await voiceProfileApi.submitGuidedStep(audioBlob, spokenLanguage, field, role);
       applyDraft(result);
       setLastResult(result);
-      // A result that could not be understood is not an error - the worker is
+      // A result that could not be understood is not an error - the user is
       // shown the transcript and the reason, and records that step again.
       setAudioBlob(null);
     } catch (err) {
@@ -109,7 +133,7 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
   const saveTapValue = async (value) => {
     setError(null);
     try {
-      const result = await voiceProfileApi.setGuidedField(spokenLanguage, field, value);
+      const result = await voiceProfileApi.setGuidedField(spokenLanguage, field, value, role);
       applyDraft(result);
     } catch (err) {
       setError(normalizeError(err));
@@ -132,8 +156,8 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
     setSaving(true);
     setError(null);
     try {
-      const session = await voiceProfileApi.getGuidedDraft(spokenLanguage);
-      if (!session?.voiceProfileId) throw new Error("Draft not found");
+      const session = await voiceProfileApi.getGuidedDraft(spokenLanguage, role);
+      if (!session?.voiceProfileId) throw new Error(t("voice.guided.draftNotFound"));
       // Only answered fields are sent. An unanswered field is simply absent, so
       // the server's additive merge leaves whatever the profile already has.
       const confirmedFields = {};
@@ -141,7 +165,7 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
         const value = session.draftFields?.[step];
         if (value !== null && value !== undefined && value !== "") confirmedFields[step] = value;
       }
-      const result = await voiceProfileApi.confirm(session.voiceProfileId, confirmedFields);
+      const result = await voiceProfileApi.confirm(session.voiceProfileId, confirmedFields, role);
       onComplete?.(result);
     } catch (err) {
       setError(normalizeError(err));
@@ -150,7 +174,7 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
     }
   };
 
-  const answeredCount = useMemo(() => STEPS.filter((step) => completedSteps.includes(step)).length, [completedSteps]);
+  const answeredCount = useMemo(() => STEPS.filter((step) => completedSteps.includes(step)).length, [STEPS, completedSteps]);
 
   if (starting) {
     return (
@@ -173,7 +197,7 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
             const display = formatValue(step, draftFields[step], t);
             return (
               <li key={step}>
-                <span className="guided-review-label">{t(`voice.guided.${step}.label`)}</span>
+                <span className="guided-review-label">{getStepLabel(step, role, t)}</span>
                 <span className={display ? "guided-review-value" : "guided-review-missing"}>
                   {display || t("voice.guided.notAnswered")}
                 </span>
@@ -190,7 +214,7 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
             <ArrowLeft size={16} aria-hidden="true" /> {t("voice.guided.back")}
           </button>
           <button type="button" className="btn btn-primary btn-lg" onClick={handleSave} disabled={saving}>
-            {saving ? t("voice.guided.saving") : t("voice.guided.save")}
+            {saving ? t("voice.guided.saving") : (isEmployer ? t("voice.guided.saveEmployer") : t("voice.guided.save"))}
           </button>
         </div>
       </div>
@@ -207,8 +231,8 @@ export function GuidedVoiceWizard({ spokenLanguage, onComplete, onExit }) {
         </div>
       </div>
 
-      <h2>{t(`voice.guided.${field}.label`)}</h2>
-      <p className="guided-prompt">{t(`voice.guided.${field}.prompt`)}</p>
+      <h2>{getStepLabel(field, role, t)}</h2>
+      <p className="guided-prompt">{getStepPrompt(field, role, t)}</p>
 
       {error && <ErrorBanner error={error} />}
 

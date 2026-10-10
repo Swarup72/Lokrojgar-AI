@@ -1,0 +1,462 @@
+/* ===========================================================================
+   LokRozgar AI — documentation stylesheet (print / PDF)
+
+   Shared by SYSTEM_DOCUMENTATION.pdf and API_DOCUMENTATION.pdf.
+   Rendered by WeasyPrint; see docs/generate_pdfs.py.
+
+   Visual language follows the supplied reference document: numbered section
+   headings, bold lead-in bullets, light-ruled tables with a bold header row,
+   centred monospace architecture diagrams, and a near-monochrome palette that
+   stays legible when printed in greyscale.
+   =========================================================================== */
+
+:root {
+  --ink:        #15202b;  /* body text                                   */
+  --ink-soft:   #44525f;  /* secondary text, captions                    */
+  --ink-faint:  #7b8794;  /* running heads, rules                        */
+  --navy:       #10243e;  /* section headings                            */
+  --accent:     #1f4e79;  /* subsection headings, links, rules           */
+  --accent-pale:#eaf0f6;  /* table header fill, callout fill             */
+  --rule:       #c9d4de;  /* table and block borders                     */
+  --rule-light: #e3e9ef;  /* interior table rules                        */
+  --code-bg:    #f6f8fa;
+  --code-border:#dde4ea;
+}
+
+/* --- page geometry ------------------------------------------------------ */
+
+@page {
+  size: A4 portrait;
+  margin: 20mm 18mm 18mm 18mm;
+
+  @top-left {
+    content: string(doctitle);
+    font-family: var(--sans);
+    font-size: 8pt;
+    color: var(--ink-faint);
+    padding-bottom: 2mm;
+    border-bottom: 0.4pt solid var(--rule-light);
+    width: 100%;
+    vertical-align: bottom;
+  }
+  @bottom-right {
+    content: "Page " counter(page) " of " counter(pages);
+    font-family: var(--sans);
+    font-size: 8pt;
+    color: var(--ink-faint);
+    padding-top: 2mm;
+  }
+  @bottom-left {
+    content: string(sectionhead);
+    font-family: var(--sans);
+    font-size: 8pt;
+    color: var(--ink-faint);
+    padding-top: 2mm;
+  }
+}
+
+/* The cover carries no running head, no folio. */
+@page cover {
+  margin: 28mm 22mm 22mm 22mm;
+  @top-left { content: none; border-bottom: none; }
+  @bottom-right { content: none; }
+  @bottom-left { content: none; }
+}
+
+/* Front matter (contents) numbered in roman, so body page 1 is body page 1. */
+@page frontmatter {
+  @bottom-right {
+    content: counter(page, lower-roman);
+  }
+  @bottom-left { content: none; }
+}
+
+/* Landscape escape hatch for any block that genuinely cannot fit portrait. */
+@page landscape {
+  size: A4 landscape;
+  margin: 16mm 18mm 16mm 18mm;
+}
+
+/* --- base --------------------------------------------------------------- */
+
+html {
+  --sans: "Inter", "Helvetica Neue", "Helvetica", "Arial", "Liberation Sans", sans-serif;
+  --mono: "Menlo", "DejaVu Sans Mono", "Consolas", "Liberation Mono", monospace;
+}
+
+body {
+  font-family: var(--sans);
+  font-size: 10.2pt;
+  line-height: 1.52;
+  color: var(--ink);
+  text-align: left;
+  hyphens: none;
+  margin: 0;
+}
+
+/* --- cover -------------------------------------------------------------- */
+
+.cover {
+  page: cover;
+  page-break-after: always;
+  display: block;
+}
+
+.cover-rule-top {
+  border-top: 2.4pt solid var(--navy);
+  margin-bottom: 14mm;
+}
+
+.cover-title {
+  font-size: 34pt;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.4pt;
+  color: var(--navy);
+  margin: 0 0 3mm 0;
+}
+
+.cover-subtitle {
+  font-size: 16pt;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 0 0 7mm 0;
+}
+
+.cover-descriptor {
+  font-size: 11.5pt;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  max-width: 118mm;
+  margin: 0 0 16mm 0;
+}
+
+.cover-rule-mid {
+  border-top: 0.6pt solid var(--rule);
+  margin-bottom: 7mm;
+}
+
+.cover-meta {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10pt;
+}
+
+.cover-meta th {
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink-faint);
+  text-transform: uppercase;
+  letter-spacing: 0.6pt;
+  font-size: 8pt;
+  padding: 0 8mm 3.4mm 0;
+  white-space: nowrap;
+  vertical-align: top;
+  width: 34mm;
+}
+
+.cover-meta td {
+  padding: 0 0 3.4mm 0;
+  color: var(--ink);
+  vertical-align: top;
+}
+
+.cover-foot {
+  margin-top: 16mm;
+  padding-top: 4mm;
+  border-top: 0.6pt solid var(--rule);
+  font-size: 8.6pt;
+  color: var(--ink-faint);
+}
+
+/* --- table of contents -------------------------------------------------- */
+
+.toc {
+  page: frontmatter;
+  page-break-after: always;
+}
+
+.toc > h2 {
+  font-size: 17pt;
+  color: var(--navy);
+  border-bottom: 1.2pt solid var(--navy);
+  padding-bottom: 2.5mm;
+  margin: 0 0 6mm 0;
+  string-set: none;
+}
+
+.toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.toc li {
+  margin: 0;
+  padding: 0;
+}
+
+.toc a {
+  display: block;
+  text-decoration: none;
+  color: var(--ink);
+  /* dot leader + page number, computed by WeasyPrint at layout time */
+  content: leader(dotted) target-counter(attr(href), page);
+}
+
+.toc-1 > a {
+  font-weight: 600;
+  color: var(--navy);
+  margin-top: 3.2mm;
+  font-size: 10.4pt;
+}
+
+.toc-2 > a {
+  margin-left: 7mm;
+  font-size: 9.6pt;
+  color: var(--ink-soft);
+  font-weight: 400;
+}
+
+.toc a::after {
+  content: leader(dotted) " " target-counter(attr(href), page);
+  color: var(--ink-faint);
+  font-weight: 400;
+}
+
+/* --- headings ----------------------------------------------------------- */
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--sans);
+  color: var(--navy);
+  page-break-after: avoid;
+  page-break-inside: avoid;
+  margin-bottom: 2.6mm;
+  line-height: 1.25;
+}
+
+/* Major section: starts a fresh page, mirrors the reference's clean breaks. */
+h2 {
+  font-size: 16pt;
+  font-weight: 700;
+  margin-top: 0;
+  padding-bottom: 2.4mm;
+  border-bottom: 1.2pt solid var(--navy);
+  page-break-before: always;
+  /* feeds the running foot */
+  string-set: sectionhead content();
+}
+
+/* The first section must not open with a blank page after the TOC. */
+h2.first-section {
+  page-break-before: avoid;
+}
+
+h3 {
+  font-size: 12.6pt;
+  font-weight: 700;
+  color: var(--accent);
+  margin-top: 7mm;
+}
+
+h4 {
+  font-size: 10.8pt;
+  font-weight: 700;
+  color: var(--ink);
+  margin-top: 5.4mm;
+}
+
+h5, h6 {
+  font-size: 10.2pt;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-top: 4.4mm;
+}
+
+/* --- body flow ---------------------------------------------------------- */
+
+p {
+  margin: 0 0 3.2mm 0;
+  orphans: 3;
+  widows: 3;
+}
+
+strong { font-weight: 700; color: var(--ink); }
+em     { font-style: italic; }
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+hr {
+  border: none;
+  border-top: 0.5pt solid var(--rule-light);
+  margin: 6mm 0;
+}
+
+/* --- lists -------------------------------------------------------------- */
+
+ul, ol {
+  margin: 0 0 3.4mm 0;
+  padding-left: 6.4mm;
+}
+
+li {
+  margin-bottom: 1.5mm;
+  padding-left: 1mm;
+  orphans: 2;
+  widows: 2;
+}
+
+li > ul, li > ol {
+  margin-top: 1.5mm;
+  margin-bottom: 0.6mm;
+}
+
+ul { list-style-type: disc; }
+ul ul { list-style-type: circle; }
+ol { list-style-type: decimal; }
+
+/* --- tables ------------------------------------------------------------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 2.5mm 0 5mm 0;
+  font-size: 9pt;
+  line-height: 1.42;
+  page-break-inside: auto;
+}
+
+/* Repeat the header row on every page the table spills onto. */
+thead { display: table-header-group; }
+tr    { page-break-inside: avoid; }
+
+th {
+  background: var(--accent-pale);
+  color: var(--navy);
+  font-weight: 700;
+  text-align: left;
+  border: 0.5pt solid var(--rule);
+  padding: 1.9mm 2.2mm;
+  font-size: 8.8pt;
+}
+
+td {
+  border: 0.5pt solid var(--rule-light);
+  border-left-color: var(--rule);
+  border-right-color: var(--rule);
+  padding: 1.7mm 2.2mm;
+  vertical-align: top;
+  /* long unbroken tokens (routes, ids) must never punch out of the cell */
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+tbody tr:nth-child(even) td { background: #fafcfd; }
+
+td code, th code {
+  font-size: 8.3pt;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+}
+
+/* --- code, diagrams, pseudocode ----------------------------------------- */
+
+pre {
+  font-family: var(--mono);
+  background: var(--code-bg);
+  border: 0.5pt solid var(--code-border);
+  border-left: 1.8pt solid var(--accent);
+  border-radius: 1.2mm;
+  padding: 2.6mm 3mm;
+  margin: 2.6mm 0 4.4mm 0;
+  white-space: pre;          /* never reflow: it would destroy the diagrams */
+  overflow: hidden;
+  line-height: 1.26;
+  color: #1c2b3a;
+  page-break-inside: avoid;  /* relaxed per-block by the generator if tall  */
+  font-variant-ligatures: none;
+}
+
+pre code {
+  font-family: var(--mono);
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* An architecture diagram reads as a figure, so it is centred and given air,
+   following the reference's treatment of its own system diagram. */
+pre.diagram {
+  background: #fff;
+  border: 0.5pt solid var(--rule);
+  border-left: 0.5pt solid var(--rule);
+  text-align: center;
+  padding: 4.5mm 3mm;
+  margin: 4mm 0 5.5mm 0;
+  line-height: 1.16;
+}
+
+pre.diagram code {
+  display: inline-block;
+  text-align: left;
+}
+
+/* Short pseudocode / formula blocks: lighter, closer to running text. */
+pre.formula {
+  background: #fbfcfd;
+  border: 0.5pt solid var(--rule-light);
+  border-left: 1.8pt solid var(--accent);
+  padding: 2.4mm 3mm;
+  line-height: 1.38;
+}
+
+/* Tall blocks are allowed to break rather than leave a huge white gap. */
+pre.breakable { page-break-inside: auto; }
+
+code {
+  font-family: var(--mono);
+  font-size: 8.9pt;
+  background: var(--code-bg);
+  border: 0.4pt solid var(--code-border);
+  border-radius: 0.8mm;
+  padding: 0.2mm 0.8mm;
+  color: var(--accent);
+  overflow-wrap: anywhere;
+}
+
+/* --- blockquote / callout ----------------------------------------------- */
+
+blockquote {
+  margin: 3mm 0 4mm 0;
+  padding: 2.4mm 3.4mm;
+  background: var(--accent-pale);
+  border-left: 1.8pt solid var(--accent);
+  color: var(--ink-soft);
+}
+
+blockquote p:last-child { margin-bottom: 0; }
+
+/* --- document front matter block (version/date/authors) ----------------- */
+
+.docmeta {
+  font-size: 9.4pt;
+  color: var(--ink-soft);
+  border-left: 1.8pt solid var(--rule);
+  padding-left: 3.4mm;
+  margin-bottom: 6mm;
+}
+
+.docmeta p { margin-bottom: 1.2mm; }
+
+/* Carries the document title into the running head on every page. */
+.doctitle-source {
+  string-set: doctitle content();
+  display: none;
+}

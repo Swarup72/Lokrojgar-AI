@@ -13,7 +13,15 @@ English ones.
 
 import pytest
 
-from app.extraction.field_extraction import extract_city, extract_experience, extract_field, extract_name, extract_pay
+from app.extraction.field_extraction import (
+    extract_business_name,
+    extract_business_type,
+    extract_city,
+    extract_experience,
+    extract_field,
+    extract_name,
+    extract_pay,
+)
 
 
 # --- name -------------------------------------------------------------------
@@ -210,6 +218,81 @@ def test_city_with_digits_is_unresolved():
     assert extract_city("I live in 400001").ok is False
 
 
+# --- businessName -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "transcript,expected",
+    [
+        ("माझ्या व्यवसायाचं नाव पाटील इलेक्ट्रीकल्स आहे", "पाटील इलेक्ट्रीकल्स"),
+        ("माझ्या दुकानाचे नाव साई समर्थ किराणा आहे", "साई समर्थ किराणा"),
+        ("मेरे व्यवसाय का नाम शर्मा फैब्रिकेशन है", "शर्मा फैब्रिकेशन"),
+        ("मेरी दुकान का नाम जनता स्टोर्स है", "जनता स्टोर्स"),
+        ("My business is Patil Electricals", "Patil Electricals"),
+        ("My business name is Sharma Fabrications", "Sharma Fabrications"),
+        ("My shop name is 7-Star Enterprises", "7-Star Enterprises"),
+        ("Patil Electricals", "Patil Electricals"),
+    ],
+)
+def test_business_name_extracts_cleanly(transcript, expected):
+    result = extract_business_name(transcript)
+    assert result.ok is True
+    assert result.value == expected
+
+
+@pytest.mark.parametrize(
+    "transcript,reason",
+    [
+        ("", "no_speech"),
+        ("माझ्या व्यवसायाचं नाव आहे", "no_speech"),
+        ("business name is", "no_speech"),
+        ("12345", "not_name_like"),
+    ],
+)
+def test_empty_or_invalid_business_name_is_unresolved(transcript, reason):
+    result = extract_business_name(transcript)
+    assert result.ok is False
+    assert result.value is None
+    assert result.reason == reason
+
+
+# --- businessType -----------------------------------------------------------
+
+
+@pytest.mark.parametrize(
+    "transcript,expected",
+    [
+        ("आमचं काम वायरिंग आणि इलेक्ट्रिकल रिपेअरिंग आहे", "वायरिंग आणि इलेक्ट्रिकल रिपेअरिंग"),
+        ("आम्ही काम करतो बांधकाम आणि गवंडी काम", "बांधकाम आणि गवंडी काम"),
+        ("हमारा काम बिजली मरम्मत और प्लंबिंग का है", "बिजली मरम्मत और प्लंबिंग"),
+        ("हम काम करते हैं वेल्डिंग और फैब्रिकेशन", "वेल्डिंग और फैब्रिकेशन"),
+        ("We do work of electrical repair and wiring", "electrical repair and wiring"),
+        ("Our work is construction and plumbing", "construction and plumbing"),
+        ("Electrical repair and wiring", "Electrical repair and wiring"),
+    ],
+)
+def test_business_type_extracts_cleanly(transcript, expected):
+    result = extract_business_type(transcript)
+    assert result.ok is True
+    assert result.value == expected
+
+
+@pytest.mark.parametrize(
+    "transcript,reason",
+    [
+        ("", "no_speech"),
+        ("आम्ही काम करतो", "no_speech"),
+        ("we do work of", "no_speech"),
+        ("12345", "not_work_like"),
+    ],
+)
+def test_empty_or_invalid_business_type_is_unresolved(transcript, reason):
+    result = extract_business_type(transcript)
+    assert result.ok is False
+    assert result.value is None
+    assert result.reason == reason
+
+
 # --- dispatch ---------------------------------------------------------------
 
 
@@ -231,5 +314,7 @@ def test_every_deterministic_field_returns_its_own_name():
         ("expectedPay", "मला 800 रुपये"),
         ("experienceYears", "5 वर्ष"),
         ("city", "पुणे"),
+        ("businessName", "माझ्या व्यवसायाचं नाव पाटील इलेक्ट्रीकल्स आहे"),
+        ("businessType", "आमचं काम वायरिंग आहे"),
     ]:
         assert extract_field(field, transcript).field == field

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, Link, useNavigate } from "react-router-dom";
-import { Phone, Lock, User, Building2 } from "lucide-react";
+import { Phone, Lock, User, Building2, UserPlus, Eye, EyeOff, Globe } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import { Card } from "../components/common/Card";
@@ -18,6 +18,7 @@ export function RegisterPage() {
   const [role, setRole] = useState(USER_ROLES.WORKER);
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fullName, setFullName] = useState("");
   const [businessName, setBusinessName] = useState("");
   const [businessType, setBusinessType] = useState("");
@@ -44,10 +45,6 @@ export function RegisterPage() {
       return;
     }
 
-    // The personal name is required for every account now - it is the
-    // canonical User.fullName, and the name an employer who gives no business
-    // name is displayed as. Business details are employer-only and optional;
-    // blank values are omitted entirely rather than sent as "".
     const payload = {
       phone: phone.trim(),
       password,
@@ -70,127 +67,187 @@ export function RegisterPage() {
   };
 
   return (
-    <div className="auth-page container">
-      <Card className="auth-card slide-up">
-        <h1 className="auth-title">{t("auth.register.title")}</h1>
+    <div className="auth-page page-animate">
+      <Card className="auth-card register-card visual-auth-card slide-up">
+        <div className="auth-icon icon-pulse">
+          <UserPlus size={28} />
+        </div>
+
+        <h1 className="auth-title">{t("registerTitle")}</h1>
+        <p className="auth-subtitle">{t("registerSubtitle")}</p>
 
         {error && <ErrorBanner error={error} />}
         {fieldError && <p className="auth-field-error">{fieldError}</p>}
 
         <form onSubmit={handleSubmit} noValidate>
-          <div className="auth-field">
-            <span>{t("auth.register.iAmA")}</span>
-            <div className="auth-role-toggle">
+          {/* Role Selection */}
+          <div className="form-group">
+            <label>
+              👤 <span>{t("accountType")}</span>
+            </label>
+            <div className="role-selection visual-role-selection">
               <button
                 type="button"
-                className={role === USER_ROLES.WORKER ? "active" : ""}
+                className={`role-option visual-role-option ${role === USER_ROLES.WORKER ? "active" : ""}`}
                 onClick={() => setRole(USER_ROLES.WORKER)}
               >
-                {t("auth.register.worker")}
+                <span className="role-big-icon">👷</span>
+                <span className="role-name">{t("worker")}</span>
+                <small>{t("findJobs")}</small>
               </button>
+
               <button
                 type="button"
-                className={role === USER_ROLES.EMPLOYER ? "active" : ""}
+                className={`role-option visual-role-option ${role === USER_ROLES.EMPLOYER ? "active" : ""}`}
                 onClick={() => setRole(USER_ROLES.EMPLOYER)}
               >
-                {t("auth.register.employer")}
+                <span className="role-big-icon">🏢</span>
+                <span className="role-name">{t("employer")}</span>
+                <small>{t("hireWorkers")}</small>
               </button>
             </div>
           </div>
 
-          <label className="auth-field">
-            <span>{t("auth.login.phone")}</span>
-            <div className="auth-input-wrap">
-              <Phone size={18} aria-hidden="true" />
+          {/* Full Name */}
+          <div className="form-group">
+            <label>
+              <User size={17} />
+              <span>{t("fullName")}</span>
+            </label>
+            <div className="input-wrapper visual-input">
+              <User size={20} aria-hidden="true" />
+              <input
+                type="text"
+                required
+                minLength={2}
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                placeholder={t("fullNamePlaceholder")}
+              />
+            </div>
+          </div>
+
+          {/* Mobile Number */}
+          <div className="form-group">
+            <label>
+              <Phone size={17} />
+              <span>{t("mobileNumber")}</span>
+            </label>
+            <div className="input-wrapper visual-input">
+              <Phone size={20} aria-hidden="true" />
               <input
                 type="tel"
                 inputMode="numeric"
                 autoComplete="tel"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
+                placeholder={t("mobileNumberPlaceholder")}
                 required
               />
             </div>
-          </label>
+          </div>
 
-          <label className="auth-field">
-            <span>{t("auth.login.password")}</span>
-            <div className="auth-input-wrap">
-              <Lock size={18} aria-hidden="true" />
+          {/* Password */}
+          <div className="form-group">
+            <label>
+              <Lock size={17} />
+              <span>{t("auth.login.password")}</span>
+            </label>
+            <div className="input-wrapper visual-input">
+              <Lock size={20} aria-hidden="true" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="new-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                placeholder={t("passwordPlaceholder")}
                 required
               />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
-          </label>
+          </div>
 
-          {/* Asked of every account, whichever role: this is the person's own
-              name, and for an employer with no business name it is the name
-              workers will see. */}
-          <label className="auth-field">
-            <span>{t("auth.register.fullName")}</span>
-            <div className="auth-input-wrap">
-              <User size={18} aria-hidden="true" />
-              <input type="text" required minLength={2} value={fullName} onChange={(event) => setFullName(event.target.value)} />
-            </div>
-          </label>
-
+          {/* Employer details if selected */}
           {role === USER_ROLES.EMPLOYER && (
             <>
-              <label className="auth-field">
-                <span>
-                  {t("auth.register.businessName")} <em>({t("common.optional")})</em>
-                </span>
-                <div className="auth-input-wrap">
-                  <Building2 size={18} aria-hidden="true" />
-                  {/* Optional by product decision - an employer may hire under
-                      their own name. Left blank, jobs are shown as posted by
-                      the person named above. */}
+              <div className="form-group">
+                <label>
+                  <Building2 size={17} />
+                  <span>
+                    {t("auth.register.businessName")}{" "}
+                    <em>({t("common.optional")})</em>
+                  </span>
+                </label>
+                <div className="input-wrapper visual-input">
+                  <Building2 size={20} aria-hidden="true" />
                   <input
                     type="text"
                     value={businessName}
                     onChange={(event) => setBusinessName(event.target.value)}
+                    placeholder={t("auth.register.businessNamePlaceholder")}
                   />
                 </div>
                 <small className="auth-field-hint">{t("auth.register.businessNameHint")}</small>
-              </label>
-              <label className="auth-field">
-                <span>
-                  {t("auth.register.businessType")} <em>({t("common.optional")})</em>
-                </span>
-                <div className="auth-input-wrap">
-                  <Building2 size={18} aria-hidden="true" />
+              </div>
+
+              <div className="form-group">
+                <label>
+                  <Building2 size={17} />
+                  <span>
+                    {t("auth.register.businessType")}{" "}
+                    <em>({t("common.optional")})</em>
+                  </span>
+                </label>
+                <div className="input-wrapper visual-input">
+                  <Building2 size={20} aria-hidden="true" />
                   <input
                     type="text"
                     value={businessType}
                     onChange={(event) => setBusinessType(event.target.value)}
+                    placeholder={t("businessTypePlaceholder")}
                   />
                 </div>
-              </label>
+              </div>
             </>
           )}
 
-          <label className="auth-field">
-            <span>{t("auth.register.preferredLanguage")}</span>
-            <select value={preferredLanguage} onChange={(event) => setPreferredLanguage(event.target.value)}>
-              {APP_LANGUAGES.map((lang) => (
-                <option key={lang} value={lang}>
-                  {LANGUAGE_LABELS[lang]}
-                </option>
-              ))}
-            </select>
-          </label>
+          {/* Preferred Language */}
+          <div className="form-group">
+            <label>
+              <Globe size={17} />
+              <span>{t("auth.register.preferredLanguage")}</span>
+            </label>
+            <div className="input-wrapper visual-input">
+              <select
+                value={preferredLanguage}
+                onChange={(event) => setPreferredLanguage(event.target.value)}
+                style={{ width: "100%", background: "transparent", border: "none", outline: "none", fontSize: "15px" }}
+              >
+                {APP_LANGUAGES.map((lang) => (
+                  <option key={lang} value={lang}>
+                    {LANGUAGE_LABELS[lang]}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
 
-          <Button type="submit" size="lg" disabled={submitting} style={{ width: "100%" }}>
-            {submitting ? t("common.loading") : t("auth.register.submit")}
+          <Button type="submit" size="lg" disabled={submitting} className="auth-btn animated-button" style={{ width: "100%", marginTop: 12 }}>
+            <UserPlus size={18} />
+            <span>{submitting ? t("common.loading") : t("createAccount")}</span>
           </Button>
         </form>
 
-        <p className="auth-switch">
-          {t("auth.register.haveAccount")} <Link to="/login">{t("auth.register.loginLink")}</Link>
+        <p className="auth-switch register-text">
+          {t("alreadyAccount")}{" "}
+          <Link to="/login">{t("login")}</Link>
         </p>
       </Card>
     </div>

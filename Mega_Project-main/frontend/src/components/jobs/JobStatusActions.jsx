@@ -11,17 +11,20 @@ import {
 } from "lucide-react";
 import * as jobsApi from "../../api/jobs";
 import { normalizeError } from "../../api/client";
+import { useLanguage } from "../../hooks/useLanguage";
+import { ErrorBanner } from "../common/ErrorBanner";
 import "./JobStatusActions.css";
 
 export function JobStatusActions({ job, onActionCompleted, compact = false }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [loadingAction, setLoadingAction] = useState(null);
   const [actionError, setActionError] = useState(null);
 
   if (!job) return null;
 
   const handleClose = async () => {
-    if (!window.confirm("Are you sure you want to mark this job as completed and close it?")) {
+    if (!window.confirm(t("jobActions.confirmClose"))) {
       return;
     }
     setLoadingAction("close");
@@ -30,14 +33,14 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
       await jobsApi.close(job._id);
       if (onActionCompleted) onActionCompleted("close");
     } catch (err) {
-      setActionError(normalizeError(err)?.message || "Failed to close job");
+      setActionError(normalizeError(err));
     } finally {
       setLoadingAction(null);
     }
   };
 
   const handleCancel = async () => {
-    if (!window.confirm("Are you sure you want to cancel this job?")) {
+    if (!window.confirm(t("jobActions.confirmCancel"))) {
       return;
     }
     setLoadingAction("cancel");
@@ -46,14 +49,14 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
       await jobsApi.cancel(job._id);
       if (onActionCompleted) onActionCompleted("cancel");
     } catch (err) {
-      setActionError(normalizeError(err)?.message || "Failed to cancel job");
+      setActionError(normalizeError(err));
     } finally {
       setLoadingAction(null);
     }
   };
 
   const handleReopen = async () => {
-    if (!window.confirm("Do you want to reopen this job for applications?")) {
+    if (!window.confirm(t("jobActions.confirmReopen"))) {
       return;
     }
     setLoadingAction("reopen");
@@ -62,14 +65,14 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
       await jobsApi.reopen(job._id);
       if (onActionCompleted) onActionCompleted("reopen");
     } catch (err) {
-      setActionError(normalizeError(err)?.message || "Failed to reopen job");
+      setActionError(normalizeError(err));
     } finally {
       setLoadingAction(null);
     }
   };
 
   const handleDelete = async () => {
-    if (!window.confirm("Are you sure you want to permanently delete this job?")) {
+    if (!window.confirm(t("jobActions.confirmDelete"))) {
       return;
     }
     setLoadingAction("delete");
@@ -78,7 +81,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
       await jobsApi.remove(job._id);
       if (onActionCompleted) onActionCompleted("delete");
     } catch (err) {
-      setActionError(normalizeError(err)?.message || "Failed to delete job");
+      setActionError(normalizeError(err));
     } finally {
       setLoadingAction(null);
     }
@@ -91,11 +94,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
 
   return (
     <div className={`job-status-actions ${compact ? "compact" : ""}`}>
-      {actionError && (
-        <div className="action-error-banner" role="alert">
-          {actionError}
-        </div>
-      )}
+      {actionError && <ErrorBanner error={actionError} />}
 
       <div className="job-status-actions-buttons">
         <button
@@ -103,7 +102,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
           className="btn btn-secondary"
           onClick={() => navigate(`/applicants/${job._id}`, { state: { job } })}
         >
-          <Users size={15} aria-hidden="true" /> Applicants
+          <Users size={15} aria-hidden="true" /> {t("nav.applicants")}
         </button>
 
         <button
@@ -113,7 +112,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
             navigate(`/jobs/${job._id}/recommended-workers`, { state: { job } })
           }
         >
-          <Sparkles size={15} aria-hidden="true" /> Recommended Workers
+          <Sparkles size={15} aria-hidden="true" /> {t("recommendedWorkers.title")}
         </button>
 
         {isEditable && (
@@ -122,7 +121,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
             className="btn btn-secondary"
             onClick={() => navigate(`/jobs/${job._id}/edit`, { state: { job } })}
           >
-            <Edit size={15} aria-hidden="true" /> Edit Job
+            <Edit size={15} aria-hidden="true" /> {t("jobs.form.editTitle")}
           </button>
         )}
 
@@ -135,7 +134,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
               disabled={loadingAction !== null}
             >
               <CheckCircle size={15} aria-hidden="true" />
-              {loadingAction === "close" ? "Closing..." : "Close Job"}
+              {loadingAction === "close" ? t("jobActions.closing") : t("employer.dashboard.actions.close")}
             </button>
 
             <button
@@ -145,7 +144,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
               disabled={loadingAction !== null}
             >
               <XCircle size={15} aria-hidden="true" />
-              {loadingAction === "cancel" ? "Cancelling..." : "Cancel Job"}
+              {loadingAction === "cancel" ? t("jobActions.cancelling") : t("jobActions.cancelJob")}
             </button>
           </>
         )}
@@ -158,7 +157,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
             disabled={loadingAction !== null}
           >
             <RotateCcw size={15} aria-hidden="true" />
-            {loadingAction === "reopen" ? "Reopening..." : "Reopen Job"}
+            {loadingAction === "reopen" ? t("jobActions.reopening") : t("jobActions.reopenJob")}
           </button>
         )}
 
@@ -170,7 +169,7 @@ export function JobStatusActions({ job, onActionCompleted, compact = false }) {
             disabled={loadingAction !== null}
           >
             <Trash2 size={15} aria-hidden="true" />
-            {loadingAction === "delete" ? "Deleting..." : "Delete"}
+            {loadingAction === "delete" ? t("jobActions.deleting") : t("jobActions.delete")}
           </button>
         )}
       </div>

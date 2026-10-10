@@ -22,9 +22,20 @@ let vite;
 let renderToStaticMarkup;
 let RatingStars;
 let MatchFactorsList;
+let LanguageProvider;
 let React;
 
 test.before(async () => {
+  // utils/storage.js reads localStorage directly (browser-only); these
+  // components are rendered here in Node, so stand one in. Empty storage means
+  // the provider falls back to its "en" default, which is what these
+  // assertions have always been written against.
+  globalThis.localStorage ??= {
+    _store: new Map(),
+    getItem(key) { return this._store.has(key) ? this._store.get(key) : null; },
+    setItem(key, value) { this._store.set(key, String(value)); },
+    removeItem(key) { this._store.delete(key); },
+  };
   const { createServer } = await import("vite");
   vite = await createServer({
     server: { middlewareMode: true, hmr: false, ws: false },
@@ -39,13 +50,20 @@ test.before(async () => {
   ({ MatchFactorsList } = await vite.ssrLoadModule(
     "/src/components/recommendations/MatchFactorsList.jsx"
   ));
+  // These components read their labels from the language dictionaries, so they
+  // must be rendered inside the provider the real app always wraps them in -
+  // the English dictionary is the default, so the assertions below are unchanged.
+  ({ LanguageProvider } = await vite.ssrLoadModule("/src/context/LanguageContext.jsx"));
 });
 
 test.after(async () => {
   await vite?.close();
 });
 
-const render = (component, props) => renderToStaticMarkup(React.createElement(component, props));
+const render = (component, props) =>
+  renderToStaticMarkup(
+    React.createElement(LanguageProvider, null, React.createElement(component, props))
+  );
 
 test("a never-rated worker shows words, never 0.0", () => {
   const html = render(RatingStars, { value: 0, count: 0 });

@@ -193,7 +193,7 @@
 
 .voice-mode-option:hover {
   border-color: var(--color-primary);
-  box-shadow: var(--shadow-sm);
+  box-shadow: var(--shadow-nav);
 }
 
 .voice-mode-option strong {

@@ -5,8 +5,12 @@ import {
   DEV_RATE_LIMIT_MAX,
   PROD_RATE_LIMIT_MAX,
   globalRateLimiter,
+  loginRateLimiter,
   resolveRateLimitMax,
+  resolveLoginRateLimitKey,
 } from "../src/middlewares/rateLimiter.middleware.js";
+import User from "../src/models/user.model.js";
+import { mock } from "node:test";
 
 // --- resolveRateLimitMax: which ceiling applies -----------------------------
 
@@ -66,8 +70,12 @@ test.after(() => {
 // The limiter keys on req.ip, whose exact form varies by stack; resetting
 // every plausible loopback key keeps the HTTP tests independent of each other.
 function resetRateLimit() {
-  for (const key of ["::1", "::ffff:127.0.0.1", "127.0.0.1"]) {
-    globalRateLimiter.resetKey(key);
+  for (const ip of ["::1", "::ffff:127.0.0.1", "127.0.0.1"]) {
+    globalRateLimiter.resetKey(ip);
+    loginRateLimiter.resetKey(ip);
+    for (const phone of ["9876543201", "9876543202", "9876543203", "9998887776", "9112233445"]) {
+      loginRateLimiter.resetKey(`${ip}_${phone}`);
+    }
   }
 }
 
@@ -205,4 +213,129 @@ test("the development default comfortably absorbs a realistic dev page load", as
     PROD_RATE_LIMIT_MAX / requestsPerPageLoad < 10,
     "production intentionally stays tight"
   );
+});
+
+// --- Login Rate Limiter Tests (Demo and Production Multi-User Support) -------
+
+test("resolveLoginRateLimitKey: development keys by IP + normalized phone number", () => {
+  const req1 = { ip: "127.0.0.1", body: { phone: "9876543210" } };
+  const req2 = { ip: "127.0.0.1", body: { phone: "+91 98765 43210" } };
+  const req3 = { ip: "127.0.0.1", body: { phone: "9123456780" } };
+  const reqNoPhone = { ip: "127.0.0.1", body: {} };
+
+  assert.strictEqual(
+    resolveLoginRateLimitKey(req1, { NODE_ENV: "development" }),
+    "127.0.0.1_9876543210"
+  );
+  assert.strictEqual(
+    resolveLoginRateLimitKey(req2, { NODE_ENV: "development" }),
+    "127.0.0.1_9876543210",
+    "normalized phone formats must share the same key"
+  );
+  assert.strictEqual(
+    resolveLoginRateLimitKey(req3, { NODE_ENV: "development" }),
+    "127.0.0.1_9123456780",
+    "different phone numbers must produce distinct keys on the same IP"
+  );
+  assert.strictEqual(
+    resolveLoginRateLimitKey(reqNoPhone, { NODE_ENV: "development" }),
+    "127.0.0.1",
+    "fallback to IP if phone is missing"
+  );
+});
+
+test("resolveLoginRateLimitKey: production keys strictly by IP for security", () => {
+  const req = { ip: "203.0.113.195", body: { phone: "9876543210" } };
+  assert.strictEqual(
+    resolveLoginRateLimitKey(req, { NODE_ENV: "production" }),
+    "203.0.113.195"
+  );
+});
+
+const postLogin = (phone, password = "wrongpassword") =>
+  fetch(`${baseUrl}/api/v1/auth/login`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Origin: ORIGIN,
+    },
+    body: JSON.stringify({ phone, password }),
+  });
+
+test("login endpoint allows multiple demo accounts from the same IP without cross-account lockout", async (t) => {
+  const userFindMock = mock.method(User, "findOne", async () => null);
+  t.after(() => {
+    userFindMock.mock.restore();
+    resetRateLimit();
+  });
+  resetRateLimit();
+
+  const userAPhone = "9876543201";
+  const userBPhone = "9876543202";
+  const userCPhone = "9876543203";
+
+  // Simulate 3 attempts for User A, 3 attempts for User B, 3 attempts for User C
+  for (let i = 0; i < 3; i++) {
+    const resA = await postLogin(userAPhone);
+    assert.notStrictEqual(resA.status, 429, `User A attempt ${i + 1} should not be 429`);
+
+    const resB = await postLogin(userBPhone);
+    assert.notStrictEqual(resB.status, 429, `User B attempt ${i + 1} should not be 429`);
+
+    const resC = await postLogin(userCPhone);
+    assert.notStrictEqual(resC.status, 429, `User C attempt ${i + 1} should not be 429`);
+  }
+});
+
+test("login endpoint still rate limits repeated failed attempts on the same phone number", async (t) => {
+  const userFindMock = mock.method(User, "findOne", async () => null);
+  t.after(() => {
+    userFindMock.mock.restore();
+    resetRateLimit();
+  });
+  resetRateLimit();
+
+  const targetPhone = "9998887776";
+
+  // Send 5 failed attempts (max is 5)
+  for (let i = 0; i < 5; i++) {
+    const res = await postLogin(targetPhone);
+    assert.notStrictEqual(res.status, 429, `Attempt ${i + 1} within quota`);
+  }
+
+  // 6th attempt should be blocked with 429
+  const blocked = await postLogin(targetPhone);
+  assert.strictEqual(blocked.status, 429, "6th attempt on the same account must be rate limited");
+  const body = await blocked.json();
+  assert.match(body.message, /too many login attempts/i);
+});
+
+test("login endpoint preflight does not consume login attempt quota", async (t) => {
+  const userFindMock = mock.method(User, "findOne", async () => null);
+  t.after(() => {
+    userFindMock.mock.restore();
+    resetRateLimit();
+  });
+  resetRateLimit();
+
+  const preflightLogin = () =>
+    fetch(`${baseUrl}/api/v1/auth/login`, {
+      method: "OPTIONS",
+      headers: {
+        Origin: ORIGIN,
+        "Access-Control-Request-Method": "POST",
+        "Access-Control-Request-Headers": "content-type",
+      },
+    });
+
+  // Issue 15 preflights
+  for (let i = 0; i < 15; i++) {
+    const res = await preflightLogin();
+    assert.ok(res.status < 400, "preflight must succeed");
+  }
+
+  // Next normal attempt should succeed without 429
+  const phone = "9112233445";
+  const res = await postLogin(phone);
+  assert.notStrictEqual(res.status, 429, "preflights must not consume login quota");
 });

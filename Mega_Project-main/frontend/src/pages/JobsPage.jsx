@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Briefcase } from "lucide-react";
 import * as jobsApi from "../api/jobs";
 import * as catalogApi from "../api/catalog";
 import { normalizeError } from "../api/client";
 import { useGeolocation } from "../hooks/useGeolocation";
+import { useLanguage } from "../hooks/useLanguage";
 import { JobCard } from "../components/jobs/JobCard";
 import { JobFilters } from "../components/jobs/JobFilters";
 import { Pagination } from "../components/common/Pagination";
@@ -13,10 +15,19 @@ import { ErrorBanner } from "../components/common/ErrorBanner";
 import "./JobsPage.css";
 
 export function JobsPage() {
+  const { t } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const initialQuery = searchParams.get("query");
+  const initialLocation = searchParams.get("location");
+
   const [mode, setMode] = useState("search");
-  const [filters, setFilters] = useState({ page: 1 });
+  const [filters, setFilters] = useState({
+    page: 1,
+    ...(initialQuery ? { query: initialQuery } : {}),
+    ...(initialLocation ? { city: initialLocation } : {}),
+  });
   const [categories, setCategories] = useState([]);
-  const [result, setResult] = useState(null); // search: {docs,...} | nearby: array
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { requestLocation, status: geoStatus } = useGeolocation();
@@ -74,8 +85,11 @@ export function JobsPage() {
   const jobs = mode === "search" ? result?.docs || [] : result || [];
 
   return (
-    <div className="container jobs-page">
-      <h1 className="jobs-page-title">Find Jobs</h1>
+    <div className="container jobs-page page-animate">
+      <div className="jobs-header">
+        <h1 className="jobs-page-title">{t("findJobs")}</h1>
+        <p className="jobs-header-desc">{t("homeDescription")}</p>
+      </div>
 
       <JobFilters
         mode={mode}
@@ -87,14 +101,26 @@ export function JobsPage() {
 
       {loading && (
         <div className="jobs-page-loading">
-          <Spinner label={mode === "nearby" && geoStatus === "requesting" ? "Getting your location..." : "Loading jobs..."} />
+          <Spinner
+            label={
+              mode === "nearby" && geoStatus === "requesting"
+                ? t("jobs.gettingLocation")
+                : t("jobs.loading")
+            }
+          />
         </div>
       )}
 
-      {!loading && error && <ErrorBanner error={error} onRetry={() => (mode === "search" ? loadSearch(filters) : loadNearby())} />}
+      {!loading && error && (
+        <ErrorBanner error={error} onRetry={() => (mode === "search" ? loadSearch(filters) : loadNearby())} />
+      )}
 
       {!loading && !error && jobs.length === 0 && (
-        <EmptyState icon={Briefcase} title="No jobs found" description="Try adjusting your filters or check back later." />
+        <EmptyState
+          icon={Briefcase}
+          title={t("jobs.search.noResults")}
+          description={t("jobs.search.noResultsDesc")}
+        />
       )}
 
       {!loading && !error && jobs.length > 0 && (

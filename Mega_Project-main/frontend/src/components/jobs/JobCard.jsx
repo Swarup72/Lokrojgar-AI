@@ -50,7 +50,7 @@ export function JobCard({ job, categoriesById, matchScore, matchFactors, explana
       </div>
       <div className="job-card-body">
         <div className="job-card-title-row">
-          <h2>{title || "Untitled job"}</h2>
+          <h2>{title || t("jobs.untitled")}</h2>
           <MatchScoreBadge score={matchScore} />
         </div>
         {postedBy && <h3>{postedBy}</h3>}

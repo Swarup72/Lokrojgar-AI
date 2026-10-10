@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Star } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 import "./RatingForm.css";
 
 // Mirrors MAX_REVIEW_LENGTH in backend2/src/validators/rating.validator.js.
@@ -9,6 +10,7 @@ export const MAX_REVIEW_LENGTH = 1000;
 
 /** @param {{onSubmit: (payload:{score:number, review?:string}) => Promise<void>, submitting: boolean}} props */
 export function RatingForm({ onSubmit, submitting }) {
+  const { t } = useLanguage();
   const [score, setScore] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [review, setReview] = useState("");
@@ -31,7 +33,7 @@ export function RatingForm({ onSubmit, submitting }) {
             onClick={() => setScore(value)}
             onMouseEnter={() => setHovered(value)}
             onMouseLeave={() => setHovered(0)}
-            aria-label={`${value} star${value > 1 ? "s" : ""}`}
+            aria-label={t("rating.starAria", { count: value })}
           >
             <Star size={22} className={value <= (hovered || score) ? "filled" : ""} aria-hidden="true" />
           </button>
@@ -40,12 +42,12 @@ export function RatingForm({ onSubmit, submitting }) {
       <textarea
         rows={2}
         maxLength={MAX_REVIEW_LENGTH}
-        placeholder="Leave a comment (optional)"
+        placeholder={t("rating.commentPlaceholder")}
         value={review}
         onChange={(event) => setReview(event.target.value)}
       />
       <button type="submit" className="btn btn-primary" disabled={score === 0 || submitting}>
-        {submitting ? "Submitting..." : "Submit rating"}
+        {submitting ? t("rating.submitting") : t("rating.submit")}
       </button>
     </form>
   );

@@ -1,25 +1,8 @@
+import { useLanguage } from "../../hooks/useLanguage";
+import { STATUS_KEYS } from "../../utils/enumLabels";
 import "./StatusPill.css";
 
-const LABELS = {
-  // Application statuses
-  applied: "Applied",
-  shortlisted: "Shortlisted",
-  accepted: "Accepted",
-  rejected: "Rejected",
-  completed: "Completed",
-  withdrawn: "Withdrawn",
-  // Job statuses
-  draft: "Draft",
-  open: "Open",
-  partially_assigned: "Partially assigned",
-  assigned: "Assigned",
-  cancelled: "Cancelled",
-  expired: "Expired",
-  // Worker availability
-  available: "Available",
-  busy: "Busy",
-  unavailable: "Unavailable",
-};
+
 
 const TONES = {
   applied: "info",
@@ -41,6 +24,10 @@ const TONES = {
 
 /** @param {{status: string}} props */
 export function StatusPill({ status }) {
+  const { t } = useLanguage();
   const tone = TONES[status] || "muted";
-  return <span className={`status-pill status-pill-${tone}`}>{LABELS[status] || status}</span>;
+  // An unmapped status falls back to the raw value rather than rendering blank,
+  // so a new backend enum is visible instead of invisible.
+  const label = STATUS_KEYS[status] ? t(STATUS_KEYS[status]) : status;
+  return <span className={`status-pill status-pill-${tone}`}>{label}</span>;
 }

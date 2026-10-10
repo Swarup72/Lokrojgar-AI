@@ -17,8 +17,8 @@
 }
 
 .rating-form-stars svg.filled {
-  color: #f59e0b;
-  fill: #f59e0b;
+  color: var(--color-warning);
+  fill: var(--color-warning);
 }
 
 .rating-form textarea {

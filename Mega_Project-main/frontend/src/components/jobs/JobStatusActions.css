@@ -19,9 +19,9 @@
 }
 
 .action-error-banner {
-  background: var(--color-danger-50, #fef2f2);
-  color: var(--color-danger, #dc2626);
-  border: 1px solid var(--color-danger-200, #fecaca);
+  background: var(--color-danger-bg-soft);
+  color: var(--color-danger, var(--color-danger));
+  border: 1px solid var(--color-danger-border);
   padding: 8px 12px;
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);

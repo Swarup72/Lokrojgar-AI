@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { AVAILABILITY_OPTIONS } from "../../utils/enums";
+import { useLanguage } from "../../hooks/useLanguage";
+import { AVAILABILITY_KEYS } from "../../utils/enumLabels";
 import "./AvailabilityToggle.css";
-
-const LABELS = { available: "Available", busy: "Busy", unavailable: "Unavailable" };
 
 /** @param {{availability: string, onChange: (value:string) => Promise<any>}} props */
 export function AvailabilityToggle({ availability, onChange }) {
+  const { t } = useLanguage();
   const [updating, setUpdating] = useState(false);
 
   const handleClick = async (value) => {
@@ -28,7 +29,7 @@ export function AvailabilityToggle({ availability, onChange }) {
           onClick={() => handleClick(option)}
           disabled={updating}
         >
-          {LABELS[option]}
+          {t(AVAILABILITY_KEYS[option])}
         </button>
       ))}
     </div>

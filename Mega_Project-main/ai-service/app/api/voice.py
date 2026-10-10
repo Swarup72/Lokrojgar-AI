@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from app.api.auth import verify_api_key
 from app.extraction.extractor import extract_profile_from_transcript
-from app.extraction.field_extraction import DETERMINISTIC_FIELDS, extract_field
+from app.extraction.field_extraction import DETERMINISTIC_FIELDS, LLM_FIELDS, extract_field
 from app.extraction.models import ExtractedProfile
 from app.sarvam.errors import AiServiceUnavailableError, SarvamProviderError
 from app.voice.transcription import transcribe_audio
@@ -28,7 +28,7 @@ class VoiceExtractionResponse(BaseModel):
 # The fields the GUIDED flow can capture by voice, one question at a time.
 # "skills" is the only one that reaches the language model - see
 # extract_voice_field below.
-GUIDED_VOICE_FIELDS = sorted(set(DETERMINISTIC_FIELDS) | {"skills"})
+GUIDED_VOICE_FIELDS = sorted(set(DETERMINISTIC_FIELDS) | set(LLM_FIELDS))
 
 
 class VoiceFieldResponse(BaseModel):
@@ -151,11 +151,15 @@ async def extract_voice_field(
     except ValueError as error:
         raise HTTPException(status_code=502, detail=str(error)) from error
 
-    if field == "skills":
+    if field in LLM_FIELDS:
         # THE one language-model call of a guided session. It reuses the existing
         # extraction provider rather than adding a second prompt or provider, and
         # only its `skills` list is taken - the caller resolves those phrases
         # against the real catalog, so nothing here can invent a skill id.
+        #
+        # "jobSkills" (employer, guided job posting) runs the same way: the
+        # skills an employer names for a job are the same catalog phrases a
+        # worker names for a profile, so the same extraction answers both.
         try:
             profile = await extract_profile_from_transcript(transcript)
         except (AiServiceUnavailableError, SarvamProviderError) as error:

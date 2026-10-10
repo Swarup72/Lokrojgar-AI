@@ -1,8 +1,9 @@
 import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { Mic, Search, User, FileText, Briefcase } from "lucide-react";
+import { Mic, Search, User, FileText, Briefcase, Sparkles, Inbox, ArrowRight } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useAsync } from "../hooks/useAsync";
+import { useLanguage } from "../hooks/useLanguage";
 import * as recommendationsApi from "../api/recommendations";
 import * as applicationsApi from "../api/applications";
 import { JobCard } from "../components/jobs/JobCard";
@@ -27,6 +28,7 @@ function computeProfileCompletion(profile) {
 
 export function WorkerDashboardPage() {
   const { user, workerProfile } = useAuth();
+  const { t } = useLanguage();
   const [appliedJobIds, setAppliedJobIds] = useState(new Set());
   const [applyError, setApplyError] = useState(null);
 
@@ -52,51 +54,78 @@ export function WorkerDashboardPage() {
   };
 
   return (
-    <div className="container worker-dashboard">
-      <h1>Hello, {workerProfile?.fullName || user?.phone}</h1>
+    <div className="container worker-dashboard page-animate">
+      <div className="worker-dashboard-header">
+        <h1>{t("dashboard.greeting", { name: workerProfile?.fullName || user?.phone })}</h1>
+        <p className="worker-dashboard-sub">{t("dashboard.workerSubtitle")}</p>
+      </div>
 
       {workerProfile && (
-        <div className="worker-dashboard-completion">
+        <Card className="worker-dashboard-completion-card">
+          <div className="completion-info">
+            <div className="completion-text">
+              <Sparkles size={18} className="completion-sparkle" />
+              <span>{t("dashboard.profileCompletion")}</span>
+            </div>
+            <strong>{completion}%</strong>
+          </div>
           <div className="worker-dashboard-completion-bar">
             <div style={{ width: `${completion}%` }} />
           </div>
-          <span>{completion}% profile complete</span>
-        </div>
+        </Card>
       )}
 
       <div className="worker-dashboard-actions">
-        <Link to="/voice-profile" className="btn btn-primary">
-          <Mic size={17} aria-hidden="true" /> Create Profile with Voice
+        <Link to="/voice-profile" className="btn btn-primary visual-action-btn animated-button">
+          <Mic size={18} aria-hidden="true" />
+          <span>{t("createProfileVoice")}</span>
         </Link>
-        <Link to="/jobs" className="btn btn-secondary">
-          <Search size={17} aria-hidden="true" /> Find Jobs
+        <Link to="/jobs" className="btn btn-secondary visual-action-btn">
+          <Search size={18} aria-hidden="true" />
+          <span>{t("findJobs")}</span>
         </Link>
-        <Link to="/profile" className="btn btn-secondary">
-          <User size={17} aria-hidden="true" /> View Profile
+        <Link to="/profile" className="btn btn-secondary visual-action-btn">
+          <User size={18} aria-hidden="true" />
+          <span>{t("profile")}</span>
         </Link>
-        <Link to="/applications" className="btn btn-secondary">
-          <FileText size={17} aria-hidden="true" /> My Applications
+        <Link to="/applications" className="btn btn-secondary visual-action-btn">
+          <FileText size={18} aria-hidden="true" />
+          <span>{t("worker.dashboard.myApplicationsAction")}</span>
+        </Link>
+        <Link to="/job-requests" className="btn btn-secondary visual-action-btn">
+          <Inbox size={18} aria-hidden="true" />
+          <span>{t("nav.jobRequests")}</span>
         </Link>
       </div>
 
       <section className="worker-dashboard-section">
-        <h2>Recommended Jobs</h2>
+        <div className="section-title-row">
+          <h2>{t("worker.dashboard.recommendedTitle")}</h2>
+          <Link to="/jobs" className="section-view-all">
+            <span>{t("viewAllJobs")}</span>
+            <ArrowRight size={16} />
+          </Link>
+        </div>
 
         {!workerProfile && (
           <EmptyState
             icon={Briefcase}
-            title="Create your profile to see recommendations"
-            description="We match you with jobs once your worker profile exists."
-            action={<Link to="/profile">Create profile</Link>}
+            title={t("createProfilePrompt")}
+            description={t("createProfilePromptDesc")}
+            action={<Link to="/profile">{t("createProfile")}</Link>}
           />
         )}
 
-        {workerProfile && loadingRecommended && <Spinner label="Finding jobs for you..." />}
+        {workerProfile && loadingRecommended && <Spinner label={t("findingJobs")} />}
         {workerProfile && recommendedError && <ErrorBanner error={recommendedError} />}
         {applyError && <ErrorBanner error={applyError} />}
 
         {workerProfile && !loadingRecommended && !recommendedError && (!recommended || recommended.length === 0) && (
-          <EmptyState icon={Briefcase} title="No recommended jobs found yet" description="Check back soon." />
+          <EmptyState
+            icon={Briefcase}
+            title={t("noRecommendedJobs")}
+            description={t("checkBackSoon")}
+          />
         )}
 
         {workerProfile && recommended?.length > 0 && (
@@ -110,7 +139,7 @@ export function WorkerDashboardPage() {
                 explanation={match.explanation}
                 onApply={() => handleApply(match.job._id)}
                 applyDisabled={appliedJobIds.has(match.job._id) || match.job.status !== "open"}
-                applyLabel={appliedJobIds.has(match.job._id) ? "Applied" : "Apply"}
+                applyLabel={appliedJobIds.has(match.job._id) ? t("common.applied") : t("common.apply")}
               />
             ))}
           </div>
@@ -118,18 +147,28 @@ export function WorkerDashboardPage() {
       </section>
 
       <section className="worker-dashboard-section">
-        <h2>Recent Applications</h2>
+        <div className="section-title-row">
+          <h2>{t("worker.dashboard.recentApplicationsTitle")}</h2>
+          <Link to="/applications" className="section-view-all">
+            <span>{t("common.viewAll")}</span>
+            <ArrowRight size={16} />
+          </Link>
+        </div>
 
-        {loadingApplications && <Spinner label="Loading applications..." />}
+        {loadingApplications && <Spinner label={t("loadingApplications")} />}
 
         {!loadingApplications && recentApplications.length === 0 && (
-          <EmptyState icon={FileText} title="No applications yet" description="Jobs you apply for will show up here." />
+          <EmptyState
+            icon={FileText}
+            title={t("noApplicationsYet")}
+            description={t("noApplicationsDesc")}
+          />
         )}
 
         {!loadingApplications && recentApplications.length > 0 && (
           <div className="worker-dashboard-applications">
             {recentApplications.map((application) => (
-              <Card key={application._id} className="worker-dashboard-application-card">
+              <Card key={application._id} className="worker-dashboard-application-card animated-card">
                 <div>
                   <h3>{application.jobId?.titleText || application.jobId?.title?.en || "Job"}</h3>
                   <p>₹{application.jobId?.payAmount} / {application.jobId?.payType}</p>

@@ -9,8 +9,10 @@ import { Spinner } from "../components/common/Spinner";
 import { ErrorBanner } from "../components/common/ErrorBanner";
 import { EmptyState } from "../components/common/EmptyState";
 import { JobForm } from "../components/jobs/JobForm";
+import { useLanguage } from "../hooks/useLanguage";
 
 export function EditJobPage() {
+  const { t } = useLanguage();
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -63,7 +65,7 @@ export function EditJobPage() {
 
       const updated = await jobsApi.update(id, payload);
       navigate(`/jobs/${id}`, {
-        state: { job: updated, message: "Job updated successfully!" },
+        state: { job: updated, message: t("jobs.form.successUpdate") },
       });
     } catch (err) {
       setError(normalizeError(err));
@@ -75,7 +77,7 @@ export function EditJobPage() {
   if (loading) {
     return (
       <div className="container" style={{ padding: "60px 0" }}>
-        <Spinner label="Loading job details..." />
+        <Spinner label={t("jobs.form.loadingJob")} />
       </div>
     );
   }
@@ -85,7 +87,7 @@ export function EditJobPage() {
       <div className="container" style={{ padding: "40px 0", maxWidth: 720 }}>
         <ErrorBanner error={error} onRetry={() => window.location.reload()} />
         <Link to="/employer-dashboard" className="btn btn-secondary" style={{ marginTop: 16 }}>
-          Back to Dashboard
+          {t("jobs.form.backToDashboard")}
         </Link>
       </div>
     );
@@ -96,9 +98,9 @@ export function EditJobPage() {
       <div className="container" style={{ padding: "60px 0" }}>
         <EmptyState
           icon={Briefcase}
-          title="Job not found"
-          description="The requested job could not be found."
-          action={<Link to="/employer-dashboard">Go to Employer Dashboard</Link>}
+          title={t("jobs.notFound")}
+          description={t("jobs.notFoundDesc")}
+          action={<Link to="/employer-dashboard">{t("jobs.form.goToDashboard")}</Link>}
         />
       </div>
     );
@@ -154,13 +156,11 @@ export function EditJobPage() {
           textDecoration: "none",
         }}
       >
-        <ArrowLeft size={16} aria-hidden="true" /> Back to Job Details
+        <ArrowLeft size={16} aria-hidden="true" /> {t("jobs.form.backToJob")}
       </Link>
 
-      <h1>Edit Job</h1>
-      <p style={{ color: "var(--color-muted)", marginBottom: 20 }}>
-        Update the requirements or details for this job.
-      </p>
+      <h1>{t("jobs.form.editTitle")}</h1>
+      <p style={{ color: "var(--color-muted)", marginBottom: 20 }}>{t("jobs.form.editSubtitle")}</p>
 
       {error && <ErrorBanner error={error} />}
 
@@ -168,7 +168,7 @@ export function EditJobPage() {
         <JobForm
           initialValues={initialValues}
           onSubmit={handleUpdate}
-          submitLabel="Save Changes"
+          submitLabel={t("common.saveChanges")}
           loading={saving}
           secondaryAction={
             <Button
@@ -177,7 +177,7 @@ export function EditJobPage() {
               onClick={() => navigate(`/jobs/${id}`)}
               disabled={saving}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
           }
         />

@@ -34,6 +34,7 @@ let jobs;
 let recommendations;
 let applications;
 let errorMessages;
+let en;
 let baseUrl;
 let requestCount = 0;
 const sockets = new Set();
@@ -74,6 +75,7 @@ before(async () => {
   recommendations = await vite.ssrLoadModule("/src/api/recommendations.js");
   applications = await vite.ssrLoadModule("/src/api/applications.js");
   errorMessages = await vite.ssrLoadModule("/src/utils/errorMessages.js");
+  en = (await vite.ssrLoadModule("/src/context/translations/en.js")).default;
 });
 
 after(async () => {
@@ -158,11 +160,19 @@ test("H-5: a refused connection is a network error, not a timeout", async () => 
 });
 
 test("H-5: friendly copy says 'took too long' for a timeout and keeps the existing copy otherwise", () => {
-  const { mapErrorToFriendlyMessage } = errorMessages;
-  assert.match(mapErrorToFriendlyMessage({ status: null, isNetworkError: true, isTimeout: true }), /took too long/);
-  assert.match(mapErrorToFriendlyMessage({ status: null, isNetworkError: true, isTimeout: true }, "voice"), /took too long/);
-  assert.match(mapErrorToFriendlyMessage({ status: null, isNetworkError: true, isTimeout: false }), /Unable to connect/);
-  assert.match(mapErrorToFriendlyMessage({ status: 503, isNetworkError: false, isTimeout: false }), /temporarily unavailable/);
+  // The mapper now returns a translation KEY so error copy can appear in the
+  // user's language; resolving it through the English dictionary asserts the
+  // same wording guarantee as before, and additionally proves the key exists.
+  const { mapErrorToMessageKey } = errorMessages;
+  const copy = (...args) => {
+    const key = mapErrorToMessageKey(...args);
+    assert.ok(key in en, `error key "${key}" is not defined in en.js`);
+    return en[key];
+  };
+  assert.match(copy({ status: null, isNetworkError: true, isTimeout: true }), /took too long/);
+  assert.match(copy({ status: null, isNetworkError: true, isTimeout: true }, "voice"), /took too long/);
+  assert.match(copy({ status: null, isNetworkError: true, isTimeout: false }), /Unable to connect/);
+  assert.match(copy({ status: 503, isNetworkError: false, isTimeout: false }), /temporarily unavailable/);
 });
 
 // --- 5. Which requests get which budget ------------------------------------

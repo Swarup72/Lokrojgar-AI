@@ -13,19 +13,14 @@ import { ErrorBanner } from "../components/common/ErrorBanner";
 import { EmptyState } from "../components/common/EmptyState";
 import "./ChatPage.css";
 
-// Polled only while a thread is open, and each poll asks only for messages
-// newer than the last one already shown - so the cost does not grow with the
-// length of the conversation.
 const POLL_INTERVAL_MS = 5000;
 const MAX_MESSAGE_LENGTH = 2000;
 
 export function ChatPage() {
   const { user } = useAuth();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const location = useLocation();
 
-  // A "Message" button elsewhere navigates here with the conversation it just
-  // opened, so the thread is selected without a second round trip.
   const [activeId, setActiveId] = useState(location.state?.conversationId || null);
   const [messages, setMessages] = useState([]);
   const [draft, setDraft] = useState("");
@@ -43,7 +38,6 @@ export function ChatPage() {
 
   const active = conversations?.find((conversation) => conversation._id === activeId) || null;
 
-  /** Fetches only what is new; `reset` reloads a thread from the start. */
   const pullMessages = useCallback(
     async (conversationId, { reset = false } = {}) => {
       if (!conversationId) return;
@@ -66,7 +60,6 @@ export function ChatPage() {
     [messages]
   );
 
-  // Opening a thread: load it, and tell the server its messages have been seen.
   useEffect(() => {
     if (!activeId) return;
     let cancelled = false;
@@ -89,12 +82,9 @@ export function ChatPage() {
     return () => {
       cancelled = true;
     };
-    // pullMessages is deliberately not a dependency: it changes with `messages`,
-    // which would restart the thread load on every new message.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeId]);
 
-  // Polling stops as soon as the thread closes or the page unmounts.
   useEffect(() => {
     if (!activeId) return undefined;
     const timer = setInterval(() => pullMessages(activeId), POLL_INTERVAL_MS);
@@ -129,25 +119,27 @@ export function ChatPage() {
   };
 
   return (
-    <div className="container chat-page">
-      <h1>
-        <MessageSquare size={22} aria-hidden="true" /> Messages
-      </h1>
+    <div className="container chat-page page-animate">
+      <div className="chat-header">
+        <h1>
+          <MessageSquare size={24} aria-hidden="true" /> <span>{t("nav.messages")}</span>
+        </h1>
+      </div>
 
-      {loading && <Spinner label="Loading your conversations..." />}
+      {loading && <Spinner label={t("loadingConversations")} />}
       {!loading && error && <ErrorBanner error={error} onRetry={refetchConversations} />}
 
       {!loading && !error && conversations?.length === 0 && (
         <EmptyState
           icon={MessageSquare}
-          title="No conversations yet"
-          description="Messaging opens once a job request or application has been accepted. You will be able to message the other person from that job."
+          title={t("noConversationsYet")}
+          description={t("noConversationsDesc")}
         />
       )}
 
       {!loading && !error && conversations?.length > 0 && (
         <div className="chat-layout">
-          <Card className="chat-list">
+          <Card className="chat-list animated-card">
             {conversations.map((conversation) => (
               <button
                 key={conversation._id}
@@ -156,7 +148,7 @@ export function ChatPage() {
                 onClick={() => setActiveId(conversation._id)}
               >
                 <span className="chat-list-name">
-                  {conversation.counterpartName || "Conversation"}
+                  {conversation.counterpartName || t("conversation")}
                   {conversation.unreadCount > 0 && (
                     <span className="chat-unread" aria-label={`${conversation.unreadCount} unread`}>
                       {conversation.unreadCount}
@@ -171,21 +163,21 @@ export function ChatPage() {
             ))}
           </Card>
 
-          <Card className="chat-thread">
-            {!active && <p className="chat-thread-hint">Choose a conversation to read it.</p>}
+          <Card className="chat-thread animated-card">
+            {!active && <p className="chat-thread-hint">{t("chooseConversationHint")}</p>}
 
             {active && (
               <>
                 <div className="chat-thread-head">
-                  <strong>{active.counterpartName || "Conversation"}</strong>
+                  <strong>{active.counterpartName || t("conversation")}</strong>
                   <span>{conversationTitle(active)}</span>
                 </div>
 
                 {messageError && <ErrorBanner error={messageError} />}
-                {loadingThread && <Spinner label="Loading messages..." />}
+                {loadingThread && <Spinner label={t("loadingMessages")} />}
 
                 {!loadingThread && messages.length === 0 && (
-                  <p className="chat-thread-hint">No messages yet. Say hello.</p>
+                  <p className="chat-thread-hint">{t("noMessagesYet")}</p>
                 )}
 
                 <ul className="chat-messages">
@@ -193,15 +185,13 @@ export function ChatPage() {
                     const mine = String(message.senderId) === String(user?._id);
                     return (
                       <li key={message._id} className={mine ? "mine" : "theirs"}>
-                        {/* Rendered as text by React - never dangerouslySetInnerHTML,
-                            so message content cannot inject markup. */}
                         <span className="chat-bubble">{message.text}</span>
                         <span className="chat-time">
                           {new Date(message.createdAt).toLocaleTimeString([], {
                             hour: "2-digit",
                             minute: "2-digit",
                           })}
-                          {mine && message.isRead ? " · Read" : ""}
+                          {mine && message.isRead ? ` · ${t("read")}` : ""}
                         </span>
                       </li>
                     );
@@ -214,12 +204,12 @@ export function ChatPage() {
                     type="text"
                     value={draft}
                     maxLength={MAX_MESSAGE_LENGTH}
-                    placeholder="Write a message..."
+                    placeholder={t("writeMessagePlaceholder")}
                     onChange={(event) => setDraft(event.target.value)}
-                    aria-label="Message"
+                    aria-label={t("message")}
                   />
-                  <button type="submit" className="btn btn-primary" disabled={!draft.trim() || sending}>
-                    <Send size={16} aria-hidden="true" /> {sending ? "Sending..." : "Send"}
+                  <button type="submit" className="btn btn-primary animated-button" disabled={!draft.trim() || sending}>
+                    <Send size={16} aria-hidden="true" /> <span>{sending ? t("sending") : t("chat.send")}</span>
                   </button>
                 </form>
               </>

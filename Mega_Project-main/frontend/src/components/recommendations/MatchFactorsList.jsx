@@ -1,5 +1,6 @@
 import { Check, Minus } from "lucide-react";
 import { MATCH_FACTOR_ORDER } from "../../utils/enums";
+import { useLanguage } from "../../hooks/useLanguage";
 import "./MatchFactorsList.css";
 
 /**
@@ -12,13 +13,13 @@ import "./MatchFactorsList.css";
  * stars (RatingStars) are the canonical reputation; this row only says whether
  * reputation could be used as a matching signal for this pair.
  */
-const LABELS = {
-  skill: "Skill",
-  location: "Location",
-  availability: "Availability",
-  pay: "Pay",
-  rating: "Reputation fit",
-  relevance: "Relevance",
+const LABEL_KEYS = {
+  skill: "match.skill",
+  location: "common.location",
+  availability: "voice.guided.availability.label",
+  pay: "match.pay",
+  rating: "match.reputationFit",
+  relevance: "match.relevance",
 };
 
 /**
@@ -32,6 +33,7 @@ const LABELS = {
  * @param {{matchFactors: Record<string, number|null>}} props
  */
 export function MatchFactorsList({ matchFactors, explanation }) {
+  const { t } = useLanguage();
   if (!matchFactors) return null;
 
   return (
@@ -41,13 +43,14 @@ export function MatchFactorsList({ matchFactors, explanation }) {
           const factorVal = matchFactors[factor];
           const available = factorVal !== null && factorVal !== undefined;
           const factorExp = explanation?.factors?.find((f) => f.factor === factor);
+          const label = t(LABEL_KEYS[factor]);
           const tooltip =
             factorExp?.summary ||
             (available
-              ? `${LABELS[factor]}: ${Math.round(factorVal)}% match on this factor`
+              ? t("match.tooltipAvailable", { factor: label, percent: Math.round(factorVal) })
               : factor === "rating"
-                ? "Not rated yet, so reputation was not used as a matching signal"
-                : `${LABELS[factor]}: Not available for this pair`);
+                ? t("match.notRatedSignal")
+                : t("match.tooltipUnavailable", { factor: label }));
 
           return (
             <li
@@ -57,7 +60,7 @@ export function MatchFactorsList({ matchFactors, explanation }) {
             >
               {available ? <Check size={13} aria-hidden="true" /> : <Minus size={13} aria-hidden="true" />}
               <span>
-                {LABELS[factor]}
+                {label}
                 {available && typeof factorVal === "number" ? ` (${Math.round(factorVal)}%)` : ""}
               </span>
             </li>

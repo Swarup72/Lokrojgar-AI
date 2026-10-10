@@ -21,7 +21,7 @@ export function ApplicantsPage() {
   const { jobId } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   const [job, setJob] = useState(location.state?.job || null);
   const [ratedApplicationIds, setRatedApplicationIds] = useState(new Set());
@@ -68,10 +68,6 @@ export function ApplicantsPage() {
     }
   };
 
-  /**
-   * Opens the chat for this hire. The server authorizes it from the accepted
-   * application, so this only succeeds for a worker actually hired on this job.
-   */
   const openChat = async (application) => {
     setChatBusyId(application._id);
     setActionError(null);
@@ -96,7 +92,7 @@ export function ApplicantsPage() {
       disabled={chatBusyId === application._id}
     >
       <MessageSquare size={15} aria-hidden="true" />{" "}
-      {chatBusyId === application._id ? "Opening..." : "Message"}
+      {chatBusyId === application._id ? t("common.loading") : t("message")}
     </button>
   );
 
@@ -106,12 +102,9 @@ export function ApplicantsPage() {
       await ratingsApi.submit({ jobId: job._id, toUserId: application.workerId.userId._id, ...payload });
       setRatedApplicationIds((prev) => new Set(prev).add(application._id));
       setRatingApplicationId(null);
-      refetch(); // picks up the worker's updated ratingAvg/ratingCount
+      refetch();
     } catch (err) {
       const normalized = normalizeError(err);
-      // A 409 means this worker was already rated for this job (possibly in
-      // an earlier session) - treat it the same as a successful rating
-      // rather than showing a confusing "conflict" error.
       if (normalized.status === 409) {
         setRatedApplicationIds((prev) => new Set(prev).add(application._id));
         setRatingApplicationId(null);
@@ -128,67 +121,65 @@ export function ApplicantsPage() {
 
     if (application.status === "applied") {
       return (
-        <>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button type="button" className="btn btn-secondary" onClick={() => runAction(() => applicationsApi.shortlist(application._id))}>
-            Shortlist
+            {t("applicants.actionShortlist")}
           </button>
           <button type="button" className="btn btn-success" onClick={() => runAction(() => applicationsApi.setStatus(application._id, "accepted"))}>
-            <CheckCircle size={15} aria-hidden="true" /> Accept
+            <CheckCircle size={15} aria-hidden="true" /> {t("accept")}
           </button>
           <button type="button" className="btn btn-danger" onClick={() => runAction(() => applicationsApi.setStatus(application._id, "rejected"))}>
-            <XCircle size={15} aria-hidden="true" /> Reject
+            <XCircle size={15} aria-hidden="true" /> {t("applicants.actionReject")}
           </button>
-        </>
+        </div>
       );
     }
 
     if (application.status === "shortlisted") {
       return (
-        <>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <button type="button" className="btn btn-success" onClick={() => runAction(() => applicationsApi.setStatus(application._id, "accepted"))}>
-            <CheckCircle size={15} aria-hidden="true" /> Accept
+            <CheckCircle size={15} aria-hidden="true" /> {t("accept")}
           </button>
           <button type="button" className="btn btn-danger" onClick={() => runAction(() => applicationsApi.setStatus(application._id, "rejected"))}>
-            <XCircle size={15} aria-hidden="true" /> Reject
+            <XCircle size={15} aria-hidden="true" /> {t("applicants.actionReject")}
           </button>
-        </>
+        </div>
       );
     }
 
     if (application.status === "accepted") {
       return (
-        <>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {chatButton(application)}
           <button type="button" className="btn btn-secondary" onClick={() => runAction(() => applicationsApi.complete(application._id))}>
-            Mark Complete
+            {t("markComplete")}
           </button>
-        </>
+        </div>
       );
     }
 
-    // An employer-initiated request the worker has not answered yet. There is
-    // deliberately no action here: only the worker can answer it.
     if (application.status === "invited") {
-      return <span className="applicants-rate-hint">Job request sent — waiting for their answer</span>;
+      return <span className="applicants-rate-hint">{t("requestSentWaiting")}</span>;
     }
 
     if (application.status === "declined") {
-      return <span className="applicants-rate-hint">This worker declined your job request</span>;
+      return <span className="applicants-rate-hint">{t("workerDeclined")}</span>;
     }
 
     if (application.status === "completed") {
       if (alreadyRated) {
         return (
-          <>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
             {chatButton(application)}
-            <span className="applicants-rated-note">You've rated this worker.</span>
-          </>
+            <span className="applicants-rated-note">{t("youRatedWorker")}</span>
+          </div>
         );
       }
       if (job?.status !== "completed") {
         return (
           <span className="applicants-rate-hint">
-            <Lock size={13} aria-hidden="true" /> Close the job to enable rating
+            <Lock size={13} aria-hidden="true" /> {t("closeJobToRate")}
           </span>
         );
       }
@@ -197,7 +188,7 @@ export function ApplicantsPage() {
       }
       return (
         <button type="button" className="btn btn-secondary" onClick={() => setRatingApplicationId(application._id)}>
-          <Star size={15} aria-hidden="true" /> Rate Worker
+          <Star size={15} aria-hidden="true" /> {t("rateWorker")}
         </button>
       );
     }
@@ -206,24 +197,24 @@ export function ApplicantsPage() {
   };
 
   return (
-    <div className="container applicants-page">
+    <div className="container applicants-page page-animate">
       <button type="button" className="applicants-back" onClick={() => navigate(-1)}>
-        <ArrowLeft size={16} aria-hidden="true" /> Back
+        <ArrowLeft size={16} aria-hidden="true" /> <span>{t("common.back")}</span>
       </button>
 
       <div className="applicants-header">
         <div>
           <h1>
-            <Users size={22} aria-hidden="true" /> Applicants
+            <Users size={24} aria-hidden="true" /> <span>{t("applicants")}</span>
           </h1>
-          {title && <p className="applicants-subtitle">For: {title}</p>}
+          {title && <p className="applicants-subtitle">{t("forJob")} {title}</p>}
         </div>
         {job && (
           <div className="applicants-header-side">
             <StatusPill status={job.status} />
             {job.status !== "completed" && job.status !== "cancelled" && (
               <button type="button" className="btn btn-secondary" onClick={handleCloseJob} disabled={closingJob}>
-                {closingJob ? "Closing..." : "Close Job"}
+                {closingJob ? t("common.loading") : t("employer.dashboard.actions.close")}
               </button>
             )}
           </div>
@@ -231,11 +222,15 @@ export function ApplicantsPage() {
       </div>
 
       {actionError && <ErrorBanner error={actionError} />}
-      {loading && <Spinner label="Loading applicants..." />}
+      {loading && <Spinner label={t("loadingApplicants")} />}
       {!loading && error && <ErrorBanner error={error} onRetry={refetch} />}
 
       {!loading && !error && applications?.length === 0 && (
-        <EmptyState icon={Users} title="No applicants yet" description="Applicants will appear here once workers apply." />
+        <EmptyState
+          icon={Users}
+          title={t("noApplicantsYet")}
+          description={t("noApplicantsDesc")}
+        />
       )}
 
       {!loading && !error && applications?.length > 0 && (
@@ -247,10 +242,12 @@ export function ApplicantsPage() {
               matchScore={application.matchScore}
               matchFactors={application.matchFactors}
               actions={
-                <>
-                  <StatusPill status={application.status} />
+                <div style={{ display: "flex", flexDirection: "column", gap: 10, width: "100%", marginTop: 8 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <StatusPill status={application.status} />
+                  </div>
                   {renderActions(application)}
-                </>
+                </div>
               }
             />
           ))}

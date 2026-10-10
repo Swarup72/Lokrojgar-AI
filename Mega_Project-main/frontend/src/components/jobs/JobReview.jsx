@@ -13,6 +13,7 @@ import {
   FileEdit,
 } from "lucide-react";
 import * as catalogApi from "../../api/catalog";
+import { PAY_TYPE_KEYS, SHIFT_TYPE_KEYS } from "../../utils/enumLabels";
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { LANGUAGE_LABELS } from "../../utils/enums";
@@ -28,7 +29,7 @@ export function JobReview({
   publishing = false,
   savingDraft = false,
 }) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [categoryName, setCategoryName] = useState("");
   const [skillNames, setSkillNames] = useState([]);
 
@@ -51,23 +52,17 @@ export function JobReview({
     <div className="job-review-container">
       <div className="job-review-header">
         <button type="button" onClick={onBack} className="job-review-back-btn">
-          <ArrowLeft size={16} aria-hidden="true" /> Edit Details
+          <ArrowLeft size={16} aria-hidden="true" /> {t("jobs.review.editDetails")}
         </button>
-        <h2>Review Job Before Publishing</h2>
-        <p className="job-review-subtitle">
-          Please review the job details below. When published, LokRozgar AI will automatically
-          translate the title and description into Marathi, Hindi, and English.
-        </p>
+        <h2>{t("jobs.review.title")}</h2>
+        <p className="job-review-subtitle">{t("jobs.review.subtitle")}</p>
       </div>
 
       <div className="job-review-ai-notice">
         <Sparkles size={18} aria-hidden="true" />
         <div>
-          <strong>AI Multilingual Translation Active</strong>
-          <p>
-            Your post written in <em>{LANGUAGE_LABELS[jobData.originalLanguage] || jobData.originalLanguage}</em>{" "}
-            will be translated so local workers speaking any language can find and apply for it.
-          </p>
+          <strong>{t("jobs.review.aiNoticeTitle")}</strong>
+          <p>{t("jobs.review.aiNoticeBody", { language: LANGUAGE_LABELS[jobData.originalLanguage] || jobData.originalLanguage })}</p>
         </div>
       </div>
 
@@ -81,17 +76,17 @@ export function JobReview({
           <div className="job-review-item">
             <Briefcase size={16} aria-hidden="true" />
             <div>
-              <span className="job-review-item-label">Category</span>
-              <span className="job-review-item-value">{categoryName || "Selected Category"}</span>
+              <span className="job-review-item-label">{t("jobs.review.category")}</span>
+              <span className="job-review-item-value">{categoryName || t("jobs.review.selectedCategory")}</span>
             </div>
           </div>
 
           <div className="job-review-item">
             <Wallet size={16} aria-hidden="true" />
             <div>
-              <span className="job-review-item-label">Pay Offer</span>
+              <span className="job-review-item-label">{t("jobs.review.payOffer")}</span>
               <span className="job-review-item-value">
-                ₹{jobData.payAmount} / {jobData.payType}
+                ₹{jobData.payAmount} / {t(PAY_TYPE_KEYS[jobData.payType] ?? jobData.payType)}
               </span>
             </div>
           </div>
@@ -99,15 +94,15 @@ export function JobReview({
           <div className="job-review-item">
             <Users size={16} aria-hidden="true" />
             <div>
-              <span className="job-review-item-label">Open Positions</span>
-              <span className="job-review-item-value">{jobData.requiredWorkers} worker(s) needed</span>
+              <span className="job-review-item-label">{t("jobs.review.openPositions")}</span>
+              <span className="job-review-item-value">{t("jobs.review.workersNeeded", { count: jobData.requiredWorkers })}</span>
             </div>
           </div>
 
           <div className="job-review-item">
             <Calendar size={16} aria-hidden="true" />
             <div>
-              <span className="job-review-item-label">Start Date</span>
+              <span className="job-review-item-label">{t("jobs.review.startDate")}</span>
               <span className="job-review-item-value">
                 {new Date(jobData.startDate).toLocaleDateString()}
               </span>
@@ -118,7 +113,7 @@ export function JobReview({
             <div className="job-review-item">
               <Calendar size={16} aria-hidden="true" />
               <div>
-                <span className="job-review-item-label">Application Deadline</span>
+                <span className="job-review-item-label">{t("jobs.review.deadline")}</span>
                 <span className="job-review-item-value">
                   {new Date(jobData.applicationDeadline).toLocaleDateString()}
                 </span>
@@ -129,9 +124,9 @@ export function JobReview({
           <div className="job-review-item">
             <Clock size={16} aria-hidden="true" />
             <div>
-              <span className="job-review-item-label">Shift</span>
-              <span className="job-review-item-value" style={{ textTransform: "capitalize" }}>
-                {jobData.shiftType}
+              <span className="job-review-item-label">{t("jobs.form.shiftLabel")}</span>
+              <span className="job-review-item-value">
+                {t(SHIFT_TYPE_KEYS[jobData.shiftType] ?? jobData.shiftType)}
                 {jobData.startTime && jobData.endTime
                   ? ` (${jobData.startTime} - ${jobData.endTime})`
                   : ""}
@@ -142,10 +137,10 @@ export function JobReview({
           <div className="job-review-item">
             <MapPin size={16} aria-hidden="true" />
             <div>
-              <span className="job-review-item-label">Location</span>
+              <span className="job-review-item-label">{t("common.location")}</span>
               <span className="job-review-item-value">
                 {jobData.city ? `${jobData.city} · ` : ""}
-                {jobData.address || "Location set on map"}
+                {jobData.address || t("jobs.review.locationOnMap")}
               </span>
             </div>
           </div>
@@ -153,7 +148,7 @@ export function JobReview({
           <div className="job-review-item">
             <Globe size={16} aria-hidden="true" />
             <div>
-              <span className="job-review-item-label">Source Language</span>
+              <span className="job-review-item-label">{t("jobs.review.sourceLanguage")}</span>
               <span className="job-review-item-value">
                 {LANGUAGE_LABELS[jobData.originalLanguage] || jobData.originalLanguage}
               </span>
@@ -163,7 +158,7 @@ export function JobReview({
 
         {skillNames.length > 0 && (
           <div className="job-review-skills">
-            <span className="job-review-item-label">Skills Required</span>
+            <span className="job-review-item-label">{t("jobs.review.skillsRequired")}</span>
             <div className="job-review-skill-chips">
               {skillNames.map((skill, idx) => (
                 <span key={idx} className="job-review-chip">
@@ -176,8 +171,8 @@ export function JobReview({
 
         {jobData.experienceRequired > 0 && (
           <div style={{ marginTop: 12 }}>
-            <span className="job-review-item-label">Experience Required:</span>{" "}
-            <strong>{jobData.experienceRequired} year(s)</strong>
+            <span className="job-review-item-label">{t("jobs.review.experienceRequired")}</span>{" "}
+            <strong>{t("jobs.review.years", { count: jobData.experienceRequired })}</strong>
           </div>
         )}
 
@@ -188,7 +183,7 @@ export function JobReview({
             onClick={onBack}
             disabled={publishing || savingDraft}
           >
-            <FileEdit size={16} aria-hidden="true" /> Back to Edit
+            <FileEdit size={16} aria-hidden="true" /> {t("jobs.review.backToEdit")}
           </Button>
 
           {onSaveDraft && (
@@ -198,7 +193,7 @@ export function JobReview({
               onClick={onSaveDraft}
               disabled={publishing || savingDraft}
             >
-              {savingDraft ? "Saving Draft..." : "Save as Draft"}
+              {savingDraft ? t("jobs.review.savingDraft") : t("jobs.form.saveDraft")}
             </Button>
           )}
 
@@ -210,7 +205,7 @@ export function JobReview({
             disabled={publishing || savingDraft}
           >
             <CheckCircle2 size={16} aria-hidden="true" />
-            {publishing ? "Publishing & Translating..." : "Publish Job Now"}
+            {publishing ? t("jobs.review.publishing") : t("jobs.form.publish")}
           </Button>
         </div>
       </Card>

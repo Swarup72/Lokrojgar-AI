@@ -49,7 +49,7 @@ export function AppRoutes() {
         <Route
           path="/voice-profile"
           element={
-            <ProtectedRoute allowedRoles={[USER_ROLES.WORKER]}>
+            <ProtectedRoute allowedRoles={[USER_ROLES.WORKER, USER_ROLES.EMPLOYER]}>
               <VoiceProfilePage />
             </ProtectedRoute>
           }

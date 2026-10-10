@@ -19,7 +19,7 @@ import { EmptyState } from "../components/common/EmptyState";
 import "./ApplicationsPage.css";
 
 export function ApplicationsPage() {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const navigate = useNavigate();
   const [withdrawingId, setWithdrawingId] = useState(null);
   const [withdrawError, setWithdrawError] = useState(null);
@@ -46,13 +46,6 @@ export function ApplicationsPage() {
     }
   };
 
-
-  /**
-   * The employer's contact details, which the server releases only once this
-   * application has been accepted. Fetched on demand rather than with the list,
-   * so a worker's application list does not pull contact data for every
-   * employer they have ever applied to.
-   */
   const loadEmployerContact = async (application) => {
     setContactBusyId(application._id);
     setRatingError(null);
@@ -66,7 +59,6 @@ export function ApplicationsPage() {
     }
   };
 
-  /** Opens (or reopens) the chat for this job and goes to it. */
   const openChat = async (application) => {
     setChatBusyId(application._id);
     setRatingError(null);
@@ -80,12 +72,6 @@ export function ApplicationsPage() {
     }
   };
 
-  /**
-   * What the worker can see and do once the relationship is accepted. Before
-   * acceptance they already have the job's own location from the job itself;
-   * this adds the employer's contact details and chat, which exist only because
-   * a hiring relationship now does.
-   */
   const renderAcceptedExtras = (application) => {
     if (!["accepted", "completed"].includes(application.status)) return null;
     const contact = contactByApplication[application._id];
@@ -94,21 +80,20 @@ export function ApplicationsPage() {
       <div className="application-accepted-extras">
         <p className="application-next-step">
           {application.status === "accepted"
-            ? "You have this job. Contact the employer to agree when to start."
-            : "This work is marked finished. Rating opens once the employer closes the job."}
+            ? t("acceptedJobNextStep")
+            : t("completedJobNextStep")}
         </p>
 
-        {/* The JOB site - distinct from the employer's own location below. */}
         <MapLink
           location={application.jobId?.location}
           label={application.jobId?.address || application.jobId?.city}
-          kind="Job location"
+          kind={t("jobLocation")}
         />
 
         <div className="application-contact-row">
           {contact ? (
             <div className="application-contact">
-              <strong>{contact.employerName || "Employer"}</strong>
+              <strong>{contact.employerName || t("employer")}</strong>
               {contact.phone && (
                 <a href={`tel:${contact.phone}`} className="application-contact-phone">
                   <Phone size={14} aria-hidden="true" /> {contact.phone}
@@ -118,7 +103,7 @@ export function ApplicationsPage() {
                 <MapLink
                   location={contact.employerLocation}
                   label={contact.city || contact.village}
-                  kind="Employer location"
+                  kind={t("employerLocation")}
                 />
               )}
             </div>
@@ -130,7 +115,7 @@ export function ApplicationsPage() {
               disabled={contactBusyId === application._id}
             >
               <Phone size={15} aria-hidden="true" />{" "}
-              {contactBusyId === application._id ? "Loading..." : "Show employer contact"}
+              {contactBusyId === application._id ? t("common.loading") : t("showEmployerContact")}
             </button>
           )}
 
@@ -141,7 +126,7 @@ export function ApplicationsPage() {
             disabled={chatBusyId === application._id}
           >
             <MessageSquare size={15} aria-hidden="true" />{" "}
-            {chatBusyId === application._id ? "Opening..." : "Message employer"}
+            {chatBusyId === application._id ? t("common.loading") : t("messageEmployer")}
           </button>
         </div>
       </div>
@@ -153,13 +138,6 @@ export function ApplicationsPage() {
     setRatingApplicationId(null);
   };
 
-  /**
-   * GET /applications/mine populates `jobId` one level only, so the job's
-   * `employerId` arrives as an EmployerProfile id - not the employer's User
-   * id, which is what POST /ratings needs. GET /jobs/:jobId is public and
-   * populates `employerId`, so the id is resolved from there on demand
-   * rather than on every row (and with no backend change).
-   */
   const openRatingForm = async (application) => {
     setRatingError(null);
     if (application.employerUserId) {
@@ -171,10 +149,9 @@ export function ApplicationsPage() {
       const job = await jobsApi.getById(application.jobId._id);
       const employerUserId = job?.employerId?.userId;
       if (!employerUserId) {
-        setRatingError({ message: "This employer's profile could not be loaded, so rating is unavailable." });
+        setRatingError({ message: t("employerProfileUnavailable") });
         return;
       }
-      // Cached on the row so reopening the form does not refetch the job.
       application.employerUserId = employerUserId;
       setRatingApplicationId(application._id);
     } catch (err) {
@@ -197,9 +174,6 @@ export function ApplicationsPage() {
       refetch();
     } catch (err) {
       const normalized = normalizeError(err);
-      // 409 means this employer was already rated for this job, possibly in
-      // an earlier session - the same outcome as a successful rating, not an
-      // error worth surfacing.
       if (normalized.status === 409) {
         markRated(application._id);
       } else {
@@ -211,19 +185,14 @@ export function ApplicationsPage() {
   };
 
   const renderRateEmployer = (application) => {
-    // Ratings require Job.status === "completed" server-side, and
-    // PATCH /applications/:id/complete deliberately does NOT close the job -
-    // only the employer's "Close Job" does. So an application can be
-    // completed while the job is not yet rateable, and saying so is far
-    // clearer than letting the submit fail with a 400.
     if (application.status !== "completed") return null;
     if (ratedApplicationIds.has(application._id)) {
-      return <span className="application-rated-note">You've rated this employer.</span>;
+      return <span className="application-rated-note">{t("youRatedEmployer")}</span>;
     }
     if (application.jobId?.status !== "completed") {
       return (
         <span className="application-rate-hint">
-          <Lock size={13} aria-hidden="true" /> Rating opens once the employer closes this job
+          <Lock size={13} aria-hidden="true" /> {t("ratingOpensWhenClosed")}
         </span>
       );
     }
@@ -240,22 +209,25 @@ export function ApplicationsPage() {
         disabled={resolvingEmployerId === application._id}
       >
         <Star size={15} aria-hidden="true" />{" "}
-        {resolvingEmployerId === application._id ? "Loading..." : "Rate Employer"}
+        {resolvingEmployerId === application._id ? t("common.loading") : t("rateEmployer")}
       </button>
     );
   };
 
   return (
-    <div className="container applications-page">
-      <h1>My Applications</h1>
+    <div className="container applications-page page-animate">
+      <div className="applications-header">
+        <h1>{t("nav.applications")}</h1>
+        <p className="applications-sub">{t("myApplicationsDesc")}</p>
+      </div>
 
       {withdrawError && <ErrorBanner error={withdrawError} />}
       {ratingError && <ErrorBanner error={ratingError} />}
-      {loading && <Spinner label="Loading your applications..." />}
+      {loading && <Spinner label={t("loadingApplications")} />}
       {!loading && error && <ErrorBanner error={error} onRetry={refetch} />}
 
       {!loading && !error && applications?.length === 0 && (
-        <EmptyState icon={FileText} title="No applications yet" description="Jobs you apply for will show up here." />
+        <EmptyState icon={FileText} title={t("noApplicationsYet")} description={t("noApplicationsDesc")} />
       )}
 
       {!loading && !error && applications?.length > 0 && (
@@ -266,7 +238,7 @@ export function ApplicationsPage() {
             const canWithdraw = ["applied", "shortlisted"].includes(application.status);
             const isWithdrawing = withdrawingId === application._id;
             return (
-              <Card key={application._id} className="application-card">
+              <Card key={application._id} className="application-card animated-card">
                 <div className="application-card-main">
                   <h3>{title || "Job"}</h3>
                   <p>
@@ -274,7 +246,7 @@ export function ApplicationsPage() {
                     {job?.city ? ` · ${job.city}` : ""}
                   </p>
                   <p className="application-card-date">
-                    Applied {new Date(application.appliedAt || application.createdAt).toLocaleDateString()}
+                    {t("common.applied")} {new Date(application.appliedAt || application.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="application-card-side">
@@ -286,7 +258,7 @@ export function ApplicationsPage() {
                       onClick={() => handleWithdraw(application._id)}
                       disabled={isWithdrawing}
                     >
-                      {isWithdrawing ? "Withdrawing..." : "Withdraw"}
+                      {isWithdrawing ? t("withdrawing") : t("withdraw")}
                     </button>
                   )}
                   {renderRateEmployer(application)}

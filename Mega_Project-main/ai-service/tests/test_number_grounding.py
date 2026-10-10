@@ -303,3 +303,33 @@ def test_plain_digits_are_unaffected_by_the_grouping_rule():
         ("मला 800 रुपये पाहिजे.", 800),
     ]:
         assert is_grounded(value, transcript), transcript
+
+
+# --- trailing punctuation ---------------------------------------------------
+#
+# Found end to end: a wage spoken as "eight hundred rupees" was transcribed
+# "₹800," and grounded to NOTHING, so the guided pay step reported
+# "no number found" on a perfectly clear answer. The trailing comma was being
+# read as digit grouping, which made "800," split into ["800", ""].
+
+
+def test_a_trailing_comma_does_not_hide_the_number():
+    assert grounded_numbers("₹800,") == {800.0}
+    assert grounded_numbers("800,") == {800.0}
+
+
+def test_several_numbers_each_followed_by_a_comma():
+    assert grounded_numbers("700, and 900,") == {700.0, 900.0}
+
+
+def test_the_malformed_digit_guard_is_unchanged_by_that():
+    # The frozen guarantee: "2,7,7" is not 277, and must still ground to
+    # nothing after the trailing-comma fix.
+    assert grounded_numbers("2,7,7") == set()
+    assert grounded_numbers("पगार 2,7,7 रुपये") == set()
+    assert grounded_numbers("1,2") == set()
+
+
+def test_real_digit_grouping_still_works():
+    assert 15000.0 in grounded_numbers("15,000")
+    assert 150000.0 in grounded_numbers("1,50,000")

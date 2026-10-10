@@ -2,6 +2,8 @@ import fs from "fs";
 import VoiceProfile from "../models/voiceProfile.model.js";
 import WorkerProfile from "../models/workerProfile.model.js";
 import WorkerSkill from "../models/workerSkill.model.js";
+import User from "../models/user.model.js";
+import EmployerProfile from "../models/employerProfile.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -117,24 +119,56 @@ const isSuppliedText = (value) => typeof value === "string" && value.trim().leng
 export const confirmAndApplyToProfile = asyncHandler(async (req, res) => {
   // confirmedFields defaults to {} so a request that omits it is a clean 404/no-op
   // rather than a TypeError surfacing as a 500.
-  const { voiceProfileId, confirmedFields = {} } = req.body;
+  const { voiceProfileId, confirmedFields = {}, role = "worker" } = req.body;
 
+  if (role === "employer") {
+    const employerProfile = await EmployerProfile.findOne({ userId: req.user._id });
+    if (!employerProfile) throw new ApiError(404, "Employer profile not found");
+
+    const voiceProfile = await VoiceProfile.findOne({
+      _id: voiceProfileId,
+      employerId: employerProfile._id,
+    });
+    if (!voiceProfile) throw new ApiError(404, "Voice profile not found");
+
+    if (isSuppliedText(confirmedFields.fullName)) {
+      await User.updateOne({ _id: req.user._id }, { fullName: confirmedFields.fullName });
+    }
+    if (isSuppliedText(confirmedFields.businessName)) employerProfile.businessName = confirmedFields.businessName;
+    if (isSuppliedText(confirmedFields.businessType)) employerProfile.businessType = confirmedFields.businessType;
+    if (isSuppliedText(confirmedFields.city)) employerProfile.city = confirmedFields.city;
+    if (isSuppliedText(confirmedFields.village)) employerProfile.village = confirmedFields.village;
+    if (isSuppliedText(confirmedFields.bio)) {
+      employerProfile.bio = {
+        ...employerProfile.bio,
+        [voiceProfile.language || "mr"]: confirmedFields.bio,
+      };
+    }
+
+    await employerProfile.save();
+
+    if (voiceProfile.status !== "committed") {
+      voiceProfile.status = "committed";
+      voiceProfile.committedAt = new Date();
+      await voiceProfile.save();
+    }
+
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          employerProfile,
+          fullName: confirmedFields.fullName || null,
+        },
+        "Employer profile updated from voice input"
+      )
+    );
+  }
+
+  // Worker confirmation path
   const workerProfile = await WorkerProfile.findOne({ userId: req.user._id });
   if (!workerProfile) throw new ApiError(404, "Worker profile not found");
 
-  // OWNERSHIP. The worker is derived from req.user and the VoiceProfile is
-  // looked up with workerId as part of the FILTER, following the same
-  // convention the rest of the codebase uses for owned resources (e.g.
-  // Job.findOne({ _id, employerId }) in job.controller.js). Nothing about who
-  // owns this document is taken from the request body.
-  //
-  // Previously this was VoiceProfile.findById(voiceProfileId) with no check at
-  // all, so one worker could pass another worker's id: the write still landed
-  // on their own profile, but the other worker's `language` and `transcript`
-  // were read, and that transcript was fed into skill resolution as context.
-  //
-  // 404 rather than 403, deliberately: whether someone else's voice profile
-  // exists is not information this caller is entitled to.
   const voiceProfile = await VoiceProfile.findOne({
     _id: voiceProfileId,
     workerId: workerProfile._id,
@@ -220,39 +254,64 @@ export const confirmAndApplyToProfile = asyncHandler(async (req, res) => {
 // GUIDED VOICE PROFILE
 //
 // One question at a time, answers accumulated in a server-side DRAFT, and
-// nothing applied to the canonical WorkerProfile until the worker confirms.
+// nothing applied to the canonical Profile until the user confirms.
 //
 // The draft is a VoiceProfile document with mode: "guided" and
 // status: "draft" - not a new collection. It is scoped to the authenticated
-// worker on every read and write: the worker profile is resolved from req.user
-// and workerId is part of the query FILTER, never taken from the body. That is
-// the same rule the confirm path uses.
-//
-// The guided flow does NOT get its own commit path. It finishes through the same
-// confirmAndApplyToProfile above, so both flows converge on one canonical
-// persistence behaviour: additive merge, 0 is a real value, null/blank never
-// overwrite, and WorkerSkill rows are upserted against the real catalog.
+// user on every read and write: the profile is resolved from req.user
+// and workerId / employerId is part of the query FILTER, never taken from the body.
 // =============================================================================
 
-// The steps, in order. Voice steps are transcribed; tap steps never record
-// audio at all - a three-option enum is faster and more reliable to tap than to
-// say, and speaking one would cost a transcription that can be misheard.
+// Worker steps
 export const GUIDED_VOICE_STEPS = ["fullName", "expectedPay", "experienceYears", "skills", "city"];
 export const GUIDED_TAP_STEPS = ["languages", "availability"];
 export const GUIDED_STEPS = [...GUIDED_VOICE_STEPS, ...GUIDED_TAP_STEPS];
+export const GUIDED_OPTIONAL_STEPS = new Set(["expectedPay", "experienceYears", "skills", "city", "languages", "availability"]);
 
-// Steps a worker may finish without answering. Name is required because a
-// profile with no name is not usable; the rest can be filled in later.
-const GUIDED_OPTIONAL_STEPS = new Set(["expectedPay", "experienceYears", "skills", "city", "languages", "availability"]);
+// Employer steps: personal name, business name (optional), business type, location
+export const GUIDED_EMPLOYER_VOICE_STEPS = ["fullName", "businessName", "businessType", "city"];
+export const GUIDED_EMPLOYER_TAP_STEPS = [];
+export const GUIDED_EMPLOYER_STEPS = [...GUIDED_EMPLOYER_VOICE_STEPS];
+export const GUIDED_EMPLOYER_OPTIONAL_STEPS = new Set(["businessName", "businessType", "city"]);
 
 /**
- * The worker's guided draft for this spoken language, created on first use.
+ * The user's guided draft for this spoken language and role, created on first use.
  *
  * Ownership is established here, once, from req.user - every guided handler goes
  * through this function, so no handler can accidentally operate on someone
  * else's draft.
  */
-const loadGuidedDraft = async (userId, language, { create = false } = {}) => {
+const loadGuidedDraft = async (userId, language, { create = false, role = "worker" } = {}) => {
+  if (role === "employer") {
+    let employerProfile = await EmployerProfile.findOne({ userId });
+    if (!employerProfile && create) {
+      employerProfile = await EmployerProfile.create({ userId });
+    }
+    if (!employerProfile) throw new ApiError(404, "Employer profile not found");
+
+    const filter = { employerId: employerProfile._id, language, mode: "guided", profileType: "employer" };
+    let draft = await VoiceProfile.findOne(filter);
+
+    if (!draft && create) {
+      try {
+        draft = await VoiceProfile.create({
+          ...filter,
+          status: "draft",
+          draftFields: {},
+          completedSteps: [],
+        });
+      } catch (error) {
+        if (error.code === 11000) {
+          draft = await VoiceProfile.findOne(filter);
+        } else {
+          throw error;
+        }
+      }
+    }
+
+    return { profile: employerProfile, employerProfile, draft, profileType: "employer" };
+  }
+
   const workerProfile = await WorkerProfile.findOne({ userId });
   if (!workerProfile) throw new ApiError(404, "Worker profile not found");
 
@@ -263,16 +322,12 @@ const loadGuidedDraft = async (userId, language, { create = false } = {}) => {
     try {
       draft = await VoiceProfile.create({
         ...filter,
+        profileType: "worker",
         status: "draft",
         draftFields: {},
         completedSteps: [],
-        // No transcript yet, and no audio: recordings are transcribed and
-        // deleted, exactly as in the quick flow.
       });
     } catch (error) {
-      // Two parallel "start" requests can both miss the findOne; the unique
-      // { workerId, language, mode } index decides, and losing that race simply
-      // means the draft now exists.
       if (error.code === 11000) {
         draft = await VoiceProfile.findOne(filter);
       } else {
@@ -281,23 +336,27 @@ const loadGuidedDraft = async (userId, language, { create = false } = {}) => {
     }
   }
 
-  return { workerProfile, draft };
+  return { profile: workerProfile, workerProfile, draft, profileType: "worker" };
 };
 
 /**
- * POST /voice-profile/guided/start   { language }
+ * POST /voice-profile/guided/start   { language, role }
  *
- * Starts or RESUMES the guided session. Resuming is the point: a worker who
- * answered three steps and closed the browser comes back to those three answers
+ * Starts or RESUMES the guided session. Resuming is the point: a worker/employer who
+ * answered steps and closed the browser comes back to those answers
  * instead of starting over.
  */
 export const startGuidedSession = asyncHandler(async (req, res) => {
-  const { language = "mr" } = req.body ?? {};
+  const { language = "mr", role = "worker" } = req.body ?? {};
   if (!["mr", "hi", "en"].includes(language)) {
     throw new ApiError(400, "Language must be mr, hi or en");
   }
+  if (!["worker", "employer"].includes(role)) {
+    throw new ApiError(400, "Role must be worker or employer");
+  }
 
-  const { draft } = await loadGuidedDraft(req.user._id, language, { create: true });
+  const { draft } = await loadGuidedDraft(req.user._id, language, { create: true, role });
+  const isEmployer = role === "employer";
 
   return res.status(200).json(
     new ApiResponse(
@@ -307,9 +366,11 @@ export const startGuidedSession = asyncHandler(async (req, res) => {
         language: draft.language,
         mode: draft.mode,
         status: draft.status,
-        steps: GUIDED_STEPS,
-        voiceSteps: GUIDED_VOICE_STEPS,
-        tapSteps: GUIDED_TAP_STEPS,
+        role,
+        profileType: draft.profileType || role,
+        steps: isEmployer ? GUIDED_EMPLOYER_STEPS : GUIDED_STEPS,
+        voiceSteps: isEmployer ? GUIDED_EMPLOYER_VOICE_STEPS : GUIDED_VOICE_STEPS,
+        tapSteps: isEmployer ? GUIDED_EMPLOYER_TAP_STEPS : GUIDED_TAP_STEPS,
         draftFields: draft.draftFields || {},
         completedSteps: draft.completedSteps || [],
       },
@@ -319,18 +380,22 @@ export const startGuidedSession = asyncHandler(async (req, res) => {
 });
 
 /**
- * GET /voice-profile/guided/draft?language=mr
+ * GET /voice-profile/guided/draft?language=mr&role=worker
  *
  * The current draft, or null when there is none. Used on page load to offer a
  * resume rather than silently discarding earlier answers.
  */
 export const getGuidedDraft = asyncHandler(async (req, res) => {
   const language = req.query?.language || "mr";
+  const role = req.query?.role || "worker";
   if (!["mr", "hi", "en"].includes(language)) {
     throw new ApiError(400, "Language must be mr, hi or en");
   }
+  if (!["worker", "employer"].includes(role)) {
+    throw new ApiError(400, "Role must be worker or employer");
+  }
 
-  const { draft } = await loadGuidedDraft(req.user._id, language);
+  const { draft } = await loadGuidedDraft(req.user._id, language, { role });
 
   if (!draft) {
     return res.status(200).json(new ApiResponse(200, null, "No guided draft in progress"));
@@ -343,6 +408,8 @@ export const getGuidedDraft = asyncHandler(async (req, res) => {
         voiceProfileId: draft._id,
         language: draft.language,
         status: draft.status,
+        role,
+        profileType: draft.profileType || role,
         draftFields: draft.draftFields || {},
         completedSteps: draft.completedSteps || [],
       },
@@ -357,7 +424,7 @@ const saveDraftStep = async (draft, field, value, { transcript = null } = {}) =>
   const completedSteps = new Set(draft.completedSteps || []);
 
   if (value === null || value === undefined) {
-    // A retry that failed must not destroy the answer the worker already had.
+    // A retry that failed must not destroy the answer the user already had.
     // Leaving the previous value alone is the whole reason a retry is safe.
     if (!(field in draftFields)) draftFields[field] = null;
   } else {
@@ -376,17 +443,17 @@ const saveDraftStep = async (draft, field, value, { transcript = null } = {}) =>
 };
 
 /**
- * POST /voice-profile/guided/step   multipart: audio, language, field
+ * POST /voice-profile/guided/step   multipart: audio, language, field, role
  *
  * One voice step. Transcribes the recording, extracts THAT field only, and
  * records it on the draft. The recording is deleted immediately afterwards.
  *
  * A field the extractor could not resolve is NOT an error: it comes back with
- * ok=false and a reason so the worker can say it again, and any previous answer
+ * ok=false and a reason so the user can say it again, and any previous answer
  * for that field survives.
  */
 export const submitGuidedVoiceStep = asyncHandler(async (req, res) => {
-  const { language = "mr", field } = req.body ?? {};
+  const { language = "mr", field, role = "worker" } = req.body ?? {};
 
   if (!req.file) throw new ApiError(400, "Audio file is required");
 
@@ -394,13 +461,18 @@ export const submitGuidedVoiceStep = asyncHandler(async (req, res) => {
     if (req.file?.path && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
   };
 
-  if (!GUIDED_VOICE_STEPS.includes(field)) {
+  const allowedVoiceSteps = role === "employer" ? GUIDED_EMPLOYER_VOICE_STEPS : GUIDED_VOICE_STEPS;
+  if (!allowedVoiceSteps.includes(field)) {
     cleanUp();
-    throw new ApiError(400, `Field must be one of: ${GUIDED_VOICE_STEPS.join(", ")}`);
+    throw new ApiError(400, `Field must be one of: ${allowedVoiceSteps.join(", ")}`);
   }
   if (!["mr", "hi", "en"].includes(language)) {
     cleanUp();
     throw new ApiError(400, "Language must be mr, hi or en");
+  }
+  if (!["worker", "employer"].includes(role)) {
+    cleanUp();
+    throw new ApiError(400, "Role must be worker or employer");
   }
   // Same guard as the quick flow: strictly === 0, because an unknown size is
   // not the same as an empty one.
@@ -409,7 +481,7 @@ export const submitGuidedVoiceStep = asyncHandler(async (req, res) => {
     throw new ApiError(400, "The recording is empty. Please record again and speak for a few seconds.");
   }
 
-  const { draft } = await loadGuidedDraft(req.user._id, language, { create: true });
+  const { draft } = await loadGuidedDraft(req.user._id, language, { create: true, role });
 
   let result;
   try {
@@ -450,23 +522,25 @@ export const submitGuidedVoiceStep = asyncHandler(async (req, res) => {
 });
 
 /**
- * PATCH /voice-profile/guided/step   { language, field, value }
+ * PATCH /voice-profile/guided/step   { language, field, value, role }
  *
- * The non-voice path: the tap-only steps (languages, availability) and any
- * manual correction the worker makes on the review screen. No audio, no AI call.
+ * The non-voice path: tap-only steps and manual corrections on review screen.
  */
 export const setGuidedDraftField = asyncHandler(async (req, res) => {
-  const { language = "mr", field, value } = req.body ?? {};
+  const { language = "mr", field, value, role = "worker" } = req.body ?? {};
 
-  if (!GUIDED_STEPS.includes(field)) {
-    throw new ApiError(400, `Field must be one of: ${GUIDED_STEPS.join(", ")}`);
+  const allowedSteps = role === "employer" ? GUIDED_EMPLOYER_STEPS : GUIDED_STEPS;
+  if (!allowedSteps.includes(field)) {
+    throw new ApiError(400, `Field must be one of: ${allowedSteps.join(", ")}`);
   }
   if (!["mr", "hi", "en"].includes(language)) {
     throw new ApiError(400, "Language must be mr, hi or en");
   }
+  if (!["worker", "employer"].includes(role)) {
+    throw new ApiError(400, "Role must be worker or employer");
+  }
 
-  // Validated here rather than trusted: these values go on to the worker's
-  // canonical profile, and the enums must match the WorkerProfile schema.
+  // Validated here rather than trusted: these values go on to the profile
   if (field === "languages") {
     if (!Array.isArray(value) || value.some((entry) => !["mr", "hi", "en"].includes(entry))) {
       throw new ApiError(400, "Languages must be an array of mr, hi or en");
@@ -484,7 +558,7 @@ export const setGuidedDraftField = asyncHandler(async (req, res) => {
     }
   }
 
-  const { draft } = await loadGuidedDraft(req.user._id, language, { create: true });
+  const { draft } = await loadGuidedDraft(req.user._id, language, { create: true, role });
   await saveDraftStep(draft, field, value);
 
   return res.status(200).json(
@@ -503,16 +577,19 @@ export const setGuidedDraftField = asyncHandler(async (req, res) => {
 });
 
 /**
- * DELETE /voice-profile/guided/draft   { language }
+ * DELETE /voice-profile/guided/draft   { language, role }
  *
- * Abandon the session deliberately. Deletes only the DRAFT - the worker's
- * canonical profile is untouched, because the draft never wrote to it.
+ * Abandon the session deliberately. Deletes only the DRAFT - the canonical profile is untouched.
  */
 export const discardGuidedDraft = asyncHandler(async (req, res) => {
-  const { language = "mr" } = req.body ?? {};
-  const { workerProfile } = await loadGuidedDraft(req.user._id, language);
-
-  await VoiceProfile.deleteOne({ workerId: workerProfile._id, language, mode: "guided", status: "draft" });
+  const { language = "mr", role = "worker" } = req.body ?? {};
+  if (role === "employer") {
+    const { employerProfile } = await loadGuidedDraft(req.user._id, language, { role: "employer" });
+    await VoiceProfile.deleteOne({ employerId: employerProfile._id, language, mode: "guided", status: "draft" });
+  } else {
+    const { workerProfile } = await loadGuidedDraft(req.user._id, language, { role: "worker" });
+    await VoiceProfile.deleteOne({ workerId: workerProfile._id, language, mode: "guided", status: "draft" });
+  }
 
   return res.status(200).json(new ApiResponse(200, {}, "Guided draft discarded"));
 });

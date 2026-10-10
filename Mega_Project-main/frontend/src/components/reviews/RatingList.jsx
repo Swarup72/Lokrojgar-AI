@@ -1,4 +1,5 @@
 import { useAsync } from "../../hooks/useAsync";
+import { useLanguage } from "../../hooks/useLanguage";
 import * as ratingsApi from "../../api/ratings";
 import { RatingStars } from "../common/RatingStars";
 import { Spinner } from "../common/Spinner";
@@ -19,9 +20,10 @@ import "./RatingList.css";
  * @param {{userId: string, ratingAvg?: number, ratingCount?: number}} props
  */
 export function RatingList({ userId, ratingAvg, ratingCount }) {
+  const { t } = useLanguage();
   const { data: ratings, loading, error } = useAsync(() => ratingsApi.getForUser(userId), { deps: [userId] });
 
-  if (loading) return <Spinner label="Loading reviews..." />;
+  if (loading) return <Spinner label={t("rating.loadingReviews")} />;
   if (error) return <ErrorBanner error={error} />;
 
   return (
@@ -34,7 +36,7 @@ export function RatingList({ userId, ratingAvg, ratingCount }) {
         count={typeof ratingCount === "number" ? ratingCount : ratings.length}
       />
 
-      {ratings.length === 0 && <p className="rating-list-empty">No reviews yet.</p>}
+      {ratings.length === 0 && <p className="rating-list-empty">{t("rating.noReviews")}</p>}
 
       <ul className="rating-list-items">
         {ratings.map((rating) => (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Navigate, Link, useLocation, useNavigate } from "react-router-dom";
-import { Phone, Lock } from "lucide-react";
+import { Phone, Lock, LogIn, Eye, EyeOff, Smartphone } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import { Card } from "../components/common/Card";
@@ -17,6 +17,7 @@ export function LoginPage() {
 
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [fieldError, setFieldError] = useState(null);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -47,50 +48,77 @@ export function LoginPage() {
   };
 
   return (
-    <div className="auth-page container">
-      <Card className="auth-card slide-up">
-        <h1 className="auth-title">{t("auth.login.title")}</h1>
+    <div className="auth-page page-animate">
+      <Card className="auth-card visual-auth-card slide-up">
+        <div className="auth-icon icon-pulse">
+          <LogIn size={28} />
+        </div>
+
+        <h1 className="auth-title">{t("welcomeBack")}</h1>
+        <p className="auth-subtitle">{t("loginSubtitle")}</p>
 
         {error && <ErrorBanner error={error} />}
         {fieldError && <p className="auth-field-error">{fieldError}</p>}
 
         <form onSubmit={handleSubmit} noValidate>
-          <label className="auth-field">
-            <span>{t("auth.login.phone")}</span>
-            <div className="auth-input-wrap">
-              <Phone size={18} aria-hidden="true" />
+          <div className="form-group">
+            <label>
+              <Smartphone size={17} />
+              <span>{t("mobileNumber")}</span>
+            </label>
+            <div className="input-wrapper visual-input">
+              <Phone size={20} aria-hidden="true" />
               <input
                 type="tel"
                 inputMode="numeric"
                 autoComplete="tel"
                 value={phone}
                 onChange={(event) => setPhone(event.target.value)}
+                placeholder={t("mobileNumberPlaceholder")}
                 required
               />
             </div>
-          </label>
+          </div>
 
-          <label className="auth-field">
-            <span>{t("auth.login.password")}</span>
-            <div className="auth-input-wrap">
-              <Lock size={18} aria-hidden="true" />
+          <div className="form-group">
+            <label>
+              <Lock size={17} />
+              <span>{t("auth.login.password")}</span>
+            </label>
+            <div className="input-wrapper visual-input">
+              <Lock size={20} aria-hidden="true" />
               <input
-                type="password"
+                type={showPassword ? "text" : "password"}
                 autoComplete="current-password"
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
+                placeholder={t("passwordPlaceholder")}
                 required
               />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? t("auth.hidePassword") : t("auth.showPassword")}
+              >
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
             </div>
-          </label>
+          </div>
 
-          <Button type="submit" size="lg" disabled={submitting} style={{ width: "100%" }}>
-            {submitting ? t("common.loading") : t("auth.login.submit")}
+          <Button type="submit" size="lg" disabled={submitting} className="auth-btn animated-button" style={{ width: "100%", marginTop: 8 }}>
+            <LogIn size={18} />
+            <span>{submitting ? t("common.loading") : t("login")}</span>
           </Button>
         </form>
 
-        <p className="auth-switch">
-          {t("auth.login.noAccount")} <Link to="/register">{t("auth.login.registerLink")}</Link>
+        <div className="auth-divider">
+          <span>{t("or")}</span>
+        </div>
+
+        <p className="auth-switch register-text">
+          {t("noAccount")}{" "}
+          <Link to="/register">{t("createAccount")}</Link>
         </p>
       </Card>
     </div>

@@ -1,7 +1,15 @@
 .venv/
+_db_backups/
 __pycache__/
 *.pyc
 .env
 .DS_Store
 .pytest_cache/
 .vscode/
+
+# Documentation generation environment
+Mega_Project-main/docs/.venv-docs/
+
+# Intermediate documentation HTML
+Mega_Project-main/docs/_SYSTEM_DOCUMENTATION.html
+Mega_Project-main/docs/_API_DOCUMENTATION.html

@@ -1,5 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Search, User, FileText, PlusCircle, LogOut, Inbox, MessageSquare } from "lucide-react";
+import {
+  Home,
+  Briefcase,
+  LayoutDashboard,
+  Search,
+  User,
+  FileText,
+  PlusCircle,
+  LogOut,
+  LogIn,
+  UserPlus,
+  Inbox,
+  MessageSquare,
+} from "lucide-react";
 import { useAuth } from "../../hooks/useAuth";
 import { useLanguage } from "../../hooks/useLanguage";
 import { LanguageSwitcher } from "../common/LanguageSwitcher";
@@ -21,46 +34,47 @@ export function Navbar() {
   };
 
   return (
-    <header className="navbar">
+    <header className="navbar visual-navbar">
       <div className="navbar-inner container">
-        <Link to="/" className="navbar-logo">
+        <Link to="/" className="navbar-logo visual-logo">
           <span className="navbar-logo-icon" aria-hidden="true">
             👷
           </span>
           <span className="navbar-logo-text">
-            LOKROZGAR<span className="navbar-logo-ai">AI</span>
+            LOKROZGAR <span className="navbar-logo-ai">AI</span>
           </span>
         </Link>
 
-        <nav className="navbar-links" aria-label="Main">
-          <Link to="/jobs" className="navbar-link">
-            <Search size={17} aria-hidden="true" />
-            <span>{t("nav.jobs")}</span>
+        <nav className="navbar-links visual-nav-links" aria-label={t("nav.mainAria")}>
+          <Link to="/" className="navbar-link nav-item">
+            <Home size={17} aria-hidden="true" />
+            <span>{t("home")}</span>
+          </Link>
+
+          <Link to="/jobs" className="navbar-link nav-item">
+            <Briefcase size={17} aria-hidden="true" />
+            <span>{t("findJobs")}</span>
           </Link>
 
           {isWorker && (
             <>
-              <Link to="/worker-dashboard" className="navbar-link">
+              <Link to="/worker-dashboard" className="navbar-link nav-item">
                 <LayoutDashboard size={17} aria-hidden="true" />
-                <span>{t("nav.dashboard")}</span>
+                <span>{t("dashboard")}</span>
               </Link>
-              <Link to="/applications" className="navbar-link">
+              <Link to="/applications" className="navbar-link nav-item">
                 <FileText size={17} aria-hidden="true" />
                 <span>{t("nav.applications")}</span>
               </Link>
-              {/* Separate from applications because the worker is the one who
-                  has to answer here. */}
-              <Link to="/job-requests" className="navbar-link">
+              <Link to="/job-requests" className="navbar-link nav-item">
                 <Inbox size={17} aria-hidden="true" />
                 <span>{t("nav.jobRequests")}</span>
               </Link>
             </>
           )}
 
-          {/* Shown to any signed-in account: chat is authorized per
-              conversation, so a dual-role user needs one entry point. */}
           {isAuthenticated && (
-            <Link to="/messages" className="navbar-link">
+            <Link to="/messages" className="navbar-link nav-item">
               <MessageSquare size={17} aria-hidden="true" />
               <span>{t("nav.messages")}</span>
             </Link>
@@ -68,21 +82,21 @@ export function Navbar() {
 
           {isEmployer && (
             <>
-              <Link to="/employer-dashboard" className="navbar-link">
+              <Link to="/employer-dashboard" className="navbar-link nav-item">
                 <LayoutDashboard size={17} aria-hidden="true" />
-                <span>{t("nav.dashboard")}</span>
+                <span>{t("dashboard")}</span>
               </Link>
-              <Link to="/post-job" className="navbar-link">
+              <Link to="/post-job" className="navbar-link nav-item">
                 <PlusCircle size={17} aria-hidden="true" />
-                <span>{t("nav.postJob")}</span>
+                <span>{t("postJob")}</span>
               </Link>
             </>
           )}
 
           {isAuthenticated && (
-            <Link to="/profile" className="navbar-link">
+            <Link to="/profile" className="navbar-link nav-item">
               <User size={17} aria-hidden="true" />
-              <span>{t("nav.profile")}</span>
+              <span>{t("profile")}</span>
             </Link>
           )}
         </nav>
@@ -92,17 +106,19 @@ export function Navbar() {
           {isAuthenticated ? (
             <button type="button" className="nav-logout-btn" onClick={handleLogout}>
               <LogOut size={16} aria-hidden="true" />
-              <span>{t("nav.logout")}</span>
+              <span>{t("logout")}</span>
             </button>
           ) : (
-            <>
+            <div className="nav-auth-actions">
               <Link to="/login" className="nav-login-btn">
-                {t("nav.login")}
+                <LogIn size={16} aria-hidden="true" />
+                <span>{t("login")}</span>
               </Link>
               <Link to="/register" className="nav-register-btn">
-                {t("nav.register")}
+                <UserPlus size={16} aria-hidden="true" />
+                <span>{t("register")}</span>
               </Link>
-            </>
+            </div>
           )}
         </div>
       </div>
