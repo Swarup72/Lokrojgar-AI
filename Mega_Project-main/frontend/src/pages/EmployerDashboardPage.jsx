@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { PlusCircle, Briefcase, Eye, Users } from "lucide-react";
+import { PlusCircle, Briefcase, Eye } from "lucide-react";
 import { useAuth } from "../hooks/useAuth";
 import { useAsync } from "../hooks/useAsync";
 import { PAY_TYPE_KEYS } from "../utils/enumLabels";
@@ -172,14 +172,11 @@ export function EmployerDashboardPage() {
                     >
                       <Eye size={15} aria-hidden="true" /> <span>{t("common.viewDetails")}</span>
                     </button>
-                    <Link
-                      to={`/jobs/${job._id}/applicants`}
-                      state={{ job }}
-                      className="btn btn-secondary"
-                      style={{ padding: "8px 14px", fontSize: "var(--text-xs)", display: "inline-flex", alignItems: "center", gap: 6, textDecoration: "none" }}
-                    >
-                      <Users size={15} aria-hidden="true" /> <span>{t("applicants")}</span>
-                    </Link>
+                    {/* The Applicants action lives in <JobStatusActions> below,
+                        alongside the other per-job actions. The duplicate that
+                        used to sit here pointed at /jobs/:id/applicants, which
+                        is not a registered route - the real one is
+                        /applicants/:jobId - so it rendered the Not Found page. */}
                     <JobStatusActions job={job} onActionCompleted={refetchJobs} compact />
                   </div>
                 </Card>

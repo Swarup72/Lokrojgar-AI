@@ -58,18 +58,51 @@
   align-items: center;
   gap: 6px;
   flex: 1;
-  justify-content: center;
+  /* A flex item defaults to min-width:auto, which refuses to shrink below its
+     content. `overflow-x: auto` then never engages: instead of scrolling, the
+     row forced the PAGE wider - measured in Chrome at 390px, the navbar ran to
+     x=442 and every screen scrolled sideways by 70px. min-width:0 is what lets
+     the row shrink so its own scroll container does the work. */
+  min-width: 0;
+  /* `safe` matters: with plain `center`, a flex row that overflows spills in
+     BOTH directions, and the items before the centre cannot be scrolled back
+     to - they are simply clipped off the left edge. `safe` falls back to
+     flex-start the moment the content no longer fits, which keeps every
+     navigation item reachable. */
+  justify-content: safe center;
   overflow-x: auto;
+  /* An always-visible thin track, so it is apparent the row scrolls rather
+     than that the labels have been cut off. Keyboard users do not need it:
+     every item is a focusable link, and tabbing scrolls it into view. */
+  scrollbar-width: thin;
+  scroll-padding-inline: 12px;
+}
+
+.navbar-links::-webkit-scrollbar {
+  height: 4px;
+}
+
+.navbar-links::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-pill);
 }
 
 .navbar-link {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   color: var(--color-text-2);
   font-size: var(--text-sm);
   font-weight: 600;
-  min-height: 40px;
+  /* The project's own minimum, applied in both axes. Measured at 41x40,
+     these sat under it - and below 900px the labels are visually hidden, so
+     the link shrinks to its icon and the width matters as much as the
+     height. Typography, spacing, colour and order are unchanged: only the
+     hit area grows, and the 6px gap between links keeps the targets from
+     touching. */
+  min-height: var(--touch-target-min);
+  min-width: var(--touch-target-min);
   padding: 0 12px;
   border-radius: var(--radius-sm);
   white-space: nowrap;
@@ -156,16 +189,49 @@
   }
 
   .navbar-link span {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
   }
 }
 
 @media (max-width: 600px) {
+  /* On a phone the logo, the nav row and the auth actions cannot share one
+     line: after padding and gaps the nav row was left ~16px of space holding
+     ~88px of items, so it was scrollable in theory and unusable in practice.
+     Giving it its own full-width row keeps every destination reachable. */
+  .navbar-inner {
+    flex-wrap: wrap;
+    padding: 8px 12px;
+    gap: 6px 12px;
+  }
+
+  .navbar-links {
+    order: 3;
+    flex-basis: 100%;
+    justify-content: safe flex-start;
+    padding-bottom: 2px;
+  }
+
   .navbar-logo-text {
     display: none;
   }
 
   .nav-auth-actions span {
-    display: none;
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    border: 0;
   }
 }

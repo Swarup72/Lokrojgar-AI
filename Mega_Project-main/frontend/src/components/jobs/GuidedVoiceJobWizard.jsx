@@ -300,7 +300,7 @@ export function GuidedVoiceJobWizard({ spokenLanguage, onComplete, onExit }) {
       )}
 
       {field === "jobShiftType" && (
-        <div className="guided-chip-group">
+        <div className="guided-chips">
           {SHIFT_TYPES.map((option) => (
             <button
               type="button"
@@ -317,7 +317,7 @@ export function GuidedVoiceJobWizard({ spokenLanguage, onComplete, onExit }) {
       {/* The pay-type step is spoken, but an employer whose frequency was not
           understood can tap it rather than repeating themselves indefinitely. */}
       {field === "jobPayType" && lastResult && !lastResult.ok && (
-        <div className="guided-chip-group">
+        <div className="guided-chips">
           {PAY_TYPES.map((option) => (
             <button
               type="button"

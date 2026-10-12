@@ -33,12 +33,30 @@ function normalizeText(text) {
 // voice transcription or the extraction LLM might produce, mapped to a
 // catalog Skill's canonical English name. Only skills that actually exist
 // in the seeded catalog today are represented here - there is no entry
-// for a trade with no matching catalog Skill (e.g. "electrician" - the
-// current catalog has no Electrician/Electrical skill at all), so that
-// case correctly stays unresolved rather than being force-matched to an
-// unrelated skill. Extend this table as the real catalog grows - anything
-// NOT covered here still gets a chance via Stage 2 semantic resolution.
+// for a trade with no matching catalog Skill, so that case correctly stays
+// unresolved rather than being force-matched to an unrelated skill. Extend
+// this table as the real catalog grows - anything NOT covered here still
+// gets a chance via Stage 2 semantic resolution.
+//
+// (This comment previously said the catalog had no Electrician skill. It
+// does now - src/seeds/skillCatalog.js seeds the Electrician trade and its
+// five sub-skills - so the entries below map the spoken variants onto it.)
 const SKILL_ALIASES = {
+  // Electrician. The catalog stores one Devanagari spelling for both mr and
+  // hi ("इलेक्ट्रिशियन"), but Hindi is commonly written "इलेक्ट्रीशियन" and
+  // spoken as "बिजली मिस्त्री" - neither matched the catalog name, so a Hindi
+  // employer describing exactly this job got no suggestion at all.
+  electrician: "Electrician",
+  electricians: "Electrician",
+  electrical: "Electrician",
+  wireman: "Electrician",
+  "इलेक्ट्रीशियन": "Electrician",
+  "इलेक्ट्रिशियन": "Electrician",
+  "बिजली मिस्त्री": "Electrician",
+  "बिजलीवाला": "Electrician",
+  "वायरमन": "Electrician",
+  "विजेची कामे": "Electrician",
+
   plumber: "Plumbing",
   plumbers: "Plumbing",
   "प्लंबर": "Plumbing",
@@ -255,3 +273,89 @@ export const _internal = {
   SEMANTIC_CONFIDENCE_THRESHOLD,
   SKILL_ALIASES,
 };
+
+/**
+ * Suggest catalog skills mentioned in a job's title and description.
+ *
+ * This is the Add Job form's replacement for showing every skill in a
+ * category as a chip grid. It is DETERMINISTIC and makes no AI call: an
+ * employer typing a title is a synchronous interaction, and a 10-17s local
+ * LLM round trip per keystroke-blur is not one.
+ *
+ * It differs from resolveDeterministic() above only in how it reads the
+ * input. That function matches a LIST of already-separated skill phrases
+ * against catalog names exactly. This one searches free prose, so it asks
+ * the opposite question: which catalog names appear inside this sentence?
+ *
+ * Everything returned is a real catalog document - the ids come from the
+ * documents themselves, so a suggestion can never be an invented skill.
+ * Suggestions are exactly that: the caller presents them unconfirmed, and
+ * the employer removes or adds to them before anything is published.
+ *
+ * @param {string} text - title and description, concatenated by the caller
+ * @param {object[]} docs - candidate Skill documents (optionally pre-filtered
+ *   to a category by the caller)
+ * @param {number} limit - most suggestions to return
+ * @returns {{id:string, canonicalName:string, matched:string}[]}
+ */
+export function suggestSkillsFromText(text, docs, limit = 8) {
+  if (typeof text !== "string" || !text.trim() || !Array.isArray(docs)) return [];
+
+  const haystack = normalizeText(text);
+  const hits = new Map(); // id -> suggestion
+
+  // `matchedTerm` is the wording actually found in the text, which is not
+  // always the catalog name: an alias hit finds "plumber" and credits the
+  // Plumbing skill. Recording the term the employer used is what lets the UI
+  // explain why a skill was suggested.
+  const addHit = (doc, matchedTerm, weight) => {
+    const id = doc._id.toString();
+    const len = normalizeText(matchedTerm).length;
+    const existing = hits.get(id);
+    // Prefer the longest match: "switch board fitting" beats "fitting".
+    if (!existing || len > existing._len) {
+      hits.set(id, {
+        id,
+        canonicalName: doc.name?.en || matchedTerm,
+        matched: matchedTerm,
+        _len: len,
+        _weight: Math.max(weight, existing?._weight ?? 0),
+      });
+    }
+  };
+
+  const consider = (doc, name, weight) => {
+    if (!name) return;
+    const needle = normalizeText(name);
+    // Two characters would match inside unrelated words in every language.
+    if (needle.length < 3 || !haystack.includes(needle)) return;
+    addHit(doc, name, weight);
+  };
+
+  for (const doc of docs) {
+    for (const lang of ["en", "hi", "mr"]) consider(doc, doc.name?.[lang], 2);
+  }
+
+  // The alias table already encodes the spoken variants of each trade
+  // ("plumber" -> "Plumbing"), so free prose benefits from it too.
+  const byCanonical = new Map();
+  for (const doc of docs) {
+    if (doc.name?.en) byCanonical.set(normalizeText(doc.name.en), doc);
+  }
+  for (const [alias, canonicalName] of Object.entries(SKILL_ALIASES)) {
+    const needle = normalizeText(alias);
+    if (needle.length < 3 || !haystack.includes(needle)) continue;
+    const doc = byCanonical.get(normalizeText(canonicalName));
+    // Credited directly: the alias itself is the evidence. Re-testing the
+    // canonical name against the text would throw the match away, because
+    // "Plumber required" does not contain the word "plumbing".
+    if (doc) addHit(doc, alias, 1);
+  }
+
+  return [...hits.values()]
+    // A specific sub-skill is more useful than the trade it belongs to, and a
+    // longer name is a more specific match.
+    .sort((a, b) => b._weight - a._weight || b._len - a._len)
+    .slice(0, limit)
+    .map(({ id, canonicalName, matched }) => ({ id, canonicalName, matched }));
+}

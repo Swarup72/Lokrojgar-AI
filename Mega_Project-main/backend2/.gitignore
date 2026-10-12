@@ -141,3 +141,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+
+# Voice recordings land here before transcription and are deleted in the same
+# request. A crashed or timed-out request can leave one behind, and committing
+# a user's voice recording would be a privacy incident - so ignore the
+# contents while keeping the directory itself, which the app requires.
+public/temp/*
+!public/temp/.gitkeep

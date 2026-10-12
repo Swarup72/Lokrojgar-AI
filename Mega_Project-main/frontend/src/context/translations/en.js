@@ -866,4 +866,15 @@ export default {
   "voiceJob.error.too_many_words": "That was too long. Please say it more briefly.",
   "voiceJob.error.no_skills_found": "We could not pick out any skills. Please name them again.",
   "voice.guided.next": "Next",
+
+  // --- skill picker ---
+  "skills.pickerNoneSelected": "No skills chosen yet.",
+  "skills.clearAll": "Clear all",
+  "skills.suggestedLabel": "Suggested from your description — tap to add",
+  "skills.suggesting": "Looking for matching skills...",
+  "skills.suggestFailed": "Could not suggest skills just now. Search and add them below.",
+  "skills.searchLabel": "Search skills",
+  "skills.searchPlaceholder": "Search for a skill...",
+  "skills.chooseCategoryFirst": "Choose a category first to search its skills.",
+  "skills.noMatches": "No skill matches “{{query}}”.",
 };

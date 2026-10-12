@@ -246,6 +246,9 @@ test("H-4: a nonexistent job still gets the existing 404", async (t) => {
 test("H-4: worker->jobs candidate query still uses exactly the same status set", async (t) => {
   const workerFindOneMock = mock.method(WorkerProfile, "findOne", async () => ({ _id: "WORKER_A" }));
   const workerSkillFindMock = mock.method(WorkerSkill, "find", async () => []);
+  // The controller now also excludes jobs this worker has already applied for
+  // or been invited to, so it asks Application which those are.
+  const appDistinctMock = mock.method(Application, "distinct", async () => []);
   let capturedFilter = null;
   const jobFindMock = mock.method(Job, "find", (filter) => {
     capturedFilter = filter;
@@ -254,6 +257,7 @@ test("H-4: worker->jobs candidate query still uses exactly the same status set",
   t.after(() => {
     workerFindOneMock.mock.restore();
     workerSkillFindMock.mock.restore();
+    appDistinctMock.mock.restore();
     jobFindMock.mock.restore();
   });
 

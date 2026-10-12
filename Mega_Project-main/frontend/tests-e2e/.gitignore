@@ -1,0 +1,3 @@
+# Screenshots are evidence from a run, not source. The audit writes them here
+# so a failure can be looked at; they are regenerated every run.
+screenshots/

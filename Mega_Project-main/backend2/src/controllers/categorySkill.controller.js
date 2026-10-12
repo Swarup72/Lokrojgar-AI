@@ -1,9 +1,11 @@
+import mongoose from "mongoose";
 import JobCategory from "../models/jobCategory.model.js";
 import Skill from "../models/skill.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pickLanguage } from "../utils/languagePicker.js";
+import { suggestSkillsFromText } from "../utils/skillNormalization.js";
 
 // Public Language-Aware List Categories
 export const getCategories = asyncHandler(async (req, res) => {
@@ -107,4 +109,44 @@ export const deleteSkill = asyncHandler(async (req, res) => {
   const { skillId } = req.params;
   await Skill.findByIdAndUpdate(skillId, { isActive: false });
   return res.status(200).json(new ApiResponse(200, {}, "Skill deleted"));
+});
+
+/**
+ * POST /catalog/suggest-skills   { title, description?, categoryId? }
+ *
+ * Catalog skills mentioned in what the employer typed. Suggestions only -
+ * the employer confirms, removes or adds before the job is published, and
+ * the Job's skillIds are whatever they end up selecting, not this list.
+ *
+ * Deterministic and read-only: it makes no AI call and creates nothing, so
+ * it cannot introduce a duplicate or invented skill.
+ */
+export const suggestSkills = asyncHandler(async (req, res) => {
+  const { title = "", description = "", categoryId } = req.body ?? {};
+  const text = [title, description].filter(Boolean).join(" ");
+
+  if (!text.trim()) {
+    return res.status(200).json(new ApiResponse(200, { suggestions: [] }, "Nothing to suggest from"));
+  }
+
+  const filter = { isActive: { $ne: false } };
+  if (categoryId && mongoose.Types.ObjectId.isValid(categoryId)) {
+    filter.categoryId = categoryId;
+  }
+
+  // Scoped to the category when one is chosen, so an electrical job is not
+  // offered plumbing sub-skills that merely share a word.
+  let docs = await Skill.find(filter);
+  let suggestions = suggestSkillsFromText(text, docs);
+
+  // A category with no textual match should still be able to suggest from
+  // the wider catalog rather than showing the employer nothing at all.
+  if (suggestions.length === 0 && filter.categoryId) {
+    docs = await Skill.find({ isActive: { $ne: false } });
+    suggestions = suggestSkillsFromText(text, docs);
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, { suggestions }, suggestions.length ? "Suggestions ready" : "No matching skills found"));
 });

@@ -500,29 +500,56 @@ export const getRecommendedJobs = asyncHandler(async (req, res) => {
 
   const workerSkills = await WorkerSkill.find({ workerId: workerProfile._id });
 
+  // A job this worker has already applied for, or already been invited to,
+  // belongs in My Applications / Job Requests - not back in the public
+  // recommendation list, where it reads as a fresh opportunity and invites a
+  // duplicate application the unique {jobId, workerId} index would reject.
+  const engagedJobIds = await Application.distinct("jobId", { workerId: workerProfile._id });
+
+  const candidateFilter = { status: { $in: RECOMMENDABLE_JOB_STATUSES } };
+  if (engagedJobIds?.length) candidateFilter._id = { $nin: engagedJobIds };
+
   // "open" alone is no longer the full eligibility picture - a
   // partially_assigned job may still need workers. The AI service's
   // candidate filter (app/recommendation/candidates.py) makes the final
   // eligibility call; Node just needs to make sure those candidates are
   // actually in the pool it sends.
-  const candidateJobs = await Job.find({ status: { $in: RECOMMENDABLE_JOB_STATUSES } })
+  const candidateJobs = await Job.find(candidateFilter)
     .populate("categoryId skillIds")
     .populate({ path: "employerId", populate: { path: "userId", select: "fullName" } })
     .limit(50);
 
-  if (candidateJobs.length === 0) {
+  // A single account may hold BOTH a WorkerProfile and an EmployerProfile.
+  // Without this, such a user was recommended their own adverts: the same job
+  // appeared on their employer dashboard AND under "Recommended Jobs for You".
+  //
+  // Done here rather than in the query because the candidate lookup already
+  // populates employerId.userId, so the owner is known without a second
+  // round trip. It is still a SERVER-side exclusion - an own job is dropped
+  // before scoring and never reaches the client.
+  //
+  // Per request, never global: the job stays fully visible and recommendable
+  // to every other worker. A job whose owner cannot be resolved is KEPT, so a
+  // populate failure can never silently empty someone's recommendations.
+  const requestingUserId = String(req.user._id);
+  const eligibleJobs = candidateJobs.filter(
+    (job) => String(job.employerId?.userId?._id ?? "") !== requestingUserId
+  );
+
+  if (eligibleJobs.length === 0) {
     return res.status(200).json(new ApiResponse(200, [], "Recommended jobs retrieved"));
   }
 
-  const jobsById = new Map(candidateJobs.map((job) => [job._id.toString(), job]));
+  const candidateJobsForAi = eligibleJobs;
+  const jobsById = new Map(candidateJobsForAi.map((job) => [job._id.toString(), job]));
 
   let aiResult;
   try {
     aiResult = await getRecommendedJobsForWorker({
       worker: workerProfile,
       workerSkills,
-      jobs: candidateJobs.map(serializeJobForAi),
-      topK: candidateJobs.length,
+      jobs: candidateJobsForAi.map(serializeJobForAi),
+      topK: candidateJobsForAi.length,
     });
   } catch (error) {
     throw wrapAiServiceError(error);
@@ -579,7 +606,12 @@ export const getRecommendedWorkers = asyncHandler(async (req, res) => {
   // No hard filter on worker attributes here (availability, location, etc.
   // are all AI matching factors, not eligibility gates) - the AI service
   // decides match quality, Node just supplies the candidate pool.
-  const candidateWorkers = await WorkerProfile.find().limit(100);
+  //
+  // The mirror of the worker-side exclusion: a dual-role account must not be
+  // recommended to itself as a candidate for its own advert. WorkerProfile
+  // carries userId, so this costs no extra query - the requesting user is
+  // excluded in the candidate lookup itself.
+  const candidateWorkers = await WorkerProfile.find({ userId: { $ne: req.user._id } }).limit(100);
 
   if (candidateWorkers.length === 0) {
     return res.status(200).json(new ApiResponse(200, [], "Recommended workers retrieved"));

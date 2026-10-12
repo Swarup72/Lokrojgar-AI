@@ -275,3 +275,74 @@ def test_pay_type_handles_hinglish_per_day_as_whisper_renders_it():
     result = extract_job_pay_type("रुपीज पर दे.")
     assert result.ok, result.reason
     assert result.value == "daily"
+
+
+# --- ambiguous critical values must fail safe, never guess ------------------
+#
+# The reported concern: a Hindi "आठ सौ रुपये" (800) transcribed as "आठ सो
+# रुपये" would be read as 8. It is not - "सो" is not a number word, so the
+# only grounded value is 8 from "आठ", and 8 is below the plausible-pay floor,
+# so the field stays EMPTY for the employer to correct. A silently wrong wage
+# is far worse than a blank one.
+
+
+@pytest.mark.parametrize("transcript", ["आठ सो रुपये", "8 रुपये", "₹8", "eight rupees"])
+def test_an_implausible_wage_is_refused_rather_than_accepted(transcript):
+    result = extract_job_pay_amount(transcript)
+    assert not result.ok, f"{transcript!r} was accepted as {result.value}"
+    assert result.value is None
+
+
+def test_the_correctly_spoken_hindi_amount_still_works():
+    result = extract_job_pay_amount("आठ सौ रुपये")
+    assert result.ok, result.reason
+    assert result.value == 800
+
+
+@pytest.mark.parametrize(
+    "transcript,expected",
+    [
+        ("15,000 per month", 15000),
+        ("1,50,000 for the whole job", 150000),
+        ("पंधरा हजार रुपये", 15000),
+        ("₹800,", 800),
+    ],
+)
+def test_indian_number_formats_are_grounded(transcript, expected):
+    result = extract_job_pay_amount(transcript)
+    assert result.ok, f"{transcript!r} -> {result.reason}"
+    assert result.value == expected
+
+
+def test_a_failed_pay_step_does_not_invalidate_other_fields():
+    """
+    The guided flow asks one question at a time, so each step is parsed from
+    its own short answer. A step that cannot be grounded returns None for
+    ITSELF and leaves every other field's result untouched.
+    """
+    assert extract_job_worker_count("मला दोन माणसे पाहिजेत").value == 2
+    assert extract_job_city("काम कोल्हापूरमध्ये आहे").value == "कोल्हापूर"
+    # the ambiguous wage, asked on its own step, still refuses
+    pay = extract_job_pay_amount("आठ सो रुपये")
+    assert not pay.ok and pay.value is None
+    # and the earlier two are unaffected by it
+    assert extract_job_worker_count("मला दोन माणसे पाहिजेत").value == 2
+
+
+def test_a_wage_mentioned_alongside_the_headcount_does_not_confuse_it():
+    """
+    An employer often states both in one breath. The headcount's 1-99 bound
+    excludes the wage, so the count still resolves - the range is doing real
+    disambiguation work, not just rejecting nonsense.
+    """
+    result = extract_job_worker_count("मला दोन इलेक्ट्रिशियन पाहिजेत, आठशे रुपये")
+    assert result.ok, result.reason
+    assert result.value == 2
+    assert result.candidates == [2.0], "the wage leaked into the headcount candidates"
+
+
+def test_two_genuinely_plausible_headcounts_are_refused():
+    """When both numbers could be a headcount, neither is picked."""
+    result = extract_job_worker_count("मला दोन किंवा तीन माणसे पाहिजेत")
+    assert not result.ok
+    assert result.reason == "multiple_numbers"

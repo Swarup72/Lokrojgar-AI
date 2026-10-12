@@ -6,6 +6,7 @@ import { PAY_TYPES, SHIFT_TYPES, APP_LANGUAGES, LANGUAGE_LABELS } from "../../ut
 import { PAY_TYPE_KEYS, SHIFT_TYPE_KEYS } from "../../utils/enumLabels";
 import { Button } from "../common/Button";
 import { LocationField } from "../common/LocationField";
+import { SkillPicker } from "./SkillPicker";
 import "../common/Form.css";
 
 export function JobForm({
@@ -18,7 +19,6 @@ export function JobForm({
   const { language, t } = useLanguage();
 
   const [categories, setCategories] = useState([]);
-  const [skills, setSkills] = useState([]);
 
   const [title, setTitle] = useState(initialValues.title || "");
   const [description, setDescription] = useState(initialValues.description || "");
@@ -54,23 +54,9 @@ export function JobForm({
     catalogApi.getCategories().then(setCategories).catch(() => {});
   }, []);
 
-  useEffect(() => {
-    if (categoryId) {
-      catalogApi.getSkills(categoryId).then(setSkills).catch(() => {});
-    } else {
-      setSkills([]);
-    }
-  }, [categoryId]);
-
   const togglePreferredLanguage = (lang) => {
     setPreferredLanguages((prev) =>
       prev.includes(lang) ? prev.filter((item) => item !== lang) : [...prev, lang]
-    );
-  };
-
-  const toggleSkill = (skillId) => {
-    setSkillIds((prev) =>
-      prev.includes(skillId) ? prev.filter((id) => id !== skillId) : [...prev, skillId]
     );
   };
 
@@ -182,72 +168,22 @@ export function JobForm({
         />
       </label>
 
-      {skills.length > 0 && (
-        <div className="form-field">
-          <span>{t("jobs.form.skillsNeeded")}</span>
-          {/* Grouped by trade, with the trade itself selectable alongside its
-              specific tasks. Picking the trade AND a task is what distinguishes
-              a strong match from a weak one: a worker who has both scores
-              higher than one who only has the trade. Both are ordinary skill
-              ids on the job, so the matching needs no special handling. */}
-          <p className="form-hint">{t("jobs.form.skillsHint")}</p>
-          {skills
-            .filter((skill) => !skill.parentSkillId)
-            .map((trade) => {
-              const subSkills = skills.filter(
-                (skill) => String(skill.parentSkillId || "") === String(trade._id)
-              );
-              return (
-                <div className="form-skill-group" key={trade._id}>
-                  <div className="form-chip-group">
-                    <button
-                      type="button"
-                      className={`form-chip ${skillIds.includes(trade._id) ? "active" : ""}`}
-                      onClick={() => toggleSkill(trade._id)}
-                    >
-                      {pickLocalizedText(trade.nameMultilingual, language) || trade.name}
-                    </button>
-                    {subSkills.map((sub) => (
-                      <button
-                        type="button"
-                        key={sub._id}
-                        className={`form-chip form-chip-sub ${skillIds.includes(sub._id) ? "active" : ""}`}
-                        onClick={() => toggleSkill(sub._id)}
-                      >
-                        {pickLocalizedText(sub.nameMultilingual, language) || sub.name}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          {/* A sub-skill whose trade is not in this filtered list must still be
-              selectable rather than vanishing. */}
-          {skills.some(
-            (skill) =>
-              skill.parentSkillId && !skills.some((t) => !t.parentSkillId && String(t._id) === String(skill.parentSkillId))
-          ) && (
-            <div className="form-chip-group">
-              {skills
-                .filter(
-                  (skill) =>
-                    skill.parentSkillId &&
-                    !skills.some((t) => !t.parentSkillId && String(t._id) === String(skill.parentSkillId))
-                )
-                .map((skill) => (
-                  <button
-                    type="button"
-                    key={skill._id}
-                    className={`form-chip ${skillIds.includes(skill._id) ? "active" : ""}`}
-                    onClick={() => toggleSkill(skill._id)}
-                  >
-                    {pickLocalizedText(skill.nameMultilingual, language) || skill.name}
-                  </button>
-                ))}
-            </div>
-          )}
-        </div>
-      )}
+      {/* Skills. Previously every skill in the category rendered as a chip,
+          which on the real catalog meant dozens of them before the employer
+          could post anything. SkillPicker shows the few the title and
+          description actually mention, plus search for the rest. Suggestions
+          are never pre-selected - the employer confirms each one. */}
+      <div className="form-field">
+        <span>{t("jobs.form.skillsNeeded")}</span>
+        <p className="form-hint">{t("jobs.form.skillsHint")}</p>
+        <SkillPicker
+          categoryId={categoryId}
+          title={title}
+          description={description}
+          value={skillIds}
+          onChange={setSkillIds}
+        />
+      </div>
 
       <label className="form-field">
         <span>{t("jobs.form.mapLocationRequired")}</span>

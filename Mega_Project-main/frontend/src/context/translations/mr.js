@@ -866,4 +866,15 @@ export default {
   "voiceJob.error.too_many_words": "ते खूप लांब होते. कृपया थोडक्यात सांगा.",
   "voiceJob.error.no_skills_found": "कोणतीही कौशल्ये ओळखता आली नाहीत. कृपया पुन्हा सांगा.",
   "voice.guided.next": "पुढे",
+
+  // --- skill picker ---
+  "skills.pickerNoneSelected": "अद्याप कोणतेही कौशल्य निवडलेले नाही.",
+  "skills.clearAll": "सर्व काढा",
+  "skills.suggestedLabel": "तुमच्या वर्णनावरून सुचवलेली — जोडण्यासाठी स्पर्श करा",
+  "skills.suggesting": "जुळणारी कौशल्ये शोधत आहे...",
+  "skills.suggestFailed": "आत्ता कौशल्ये सुचवता आली नाहीत. खाली शोधून जोडा.",
+  "skills.searchLabel": "कौशल्ये शोधा",
+  "skills.searchPlaceholder": "कौशल्य शोधा...",
+  "skills.chooseCategoryFirst": "कौशल्ये शोधण्यासाठी आधी प्रकार निवडा.",
+  "skills.noMatches": "“{{query}}” शी जुळणारे कौशल्य नाही.",
 };

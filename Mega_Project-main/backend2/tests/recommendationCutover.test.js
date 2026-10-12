@@ -98,6 +98,9 @@ test("getRecommendedJobs calls the AI service (not the legacy matcher) and retur
 
   const findOneMock = mock.method(WorkerProfile, "findOne", async () => worker);
   const skillFindMock = mock.method(WorkerSkill, "find", async () => []);
+  // The controller also asks which jobs this worker is already engaged with,
+  // so those are not recommended back as fresh opportunities.
+  const appDistinctMock = mock.method(Application, "distinct", async () => []);
   const jobFindMock = mock.method(Job, "find", () => ({
     populate: () => ({
       populate: () => ({
@@ -123,6 +126,7 @@ test("getRecommendedJobs calls the AI service (not the legacy matcher) and retur
     restoreFetch();
     findOneMock.mock.restore();
     skillFindMock.mock.restore();
+    appDistinctMock.mock.restore();
     jobFindMock.mock.restore();
   }
 });
