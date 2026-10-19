@@ -3,7 +3,7 @@
   top: 0;
   z-index: 100;
   min-height: var(--nav-height);
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
@@ -14,8 +14,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 20px;
-  padding: 0 28px;
+  gap: 16px;
+  padding: 0 24px;
   width: 100%;
   max-width: var(--container);
   margin: 0 auto;
@@ -53,27 +53,15 @@
   font-weight: 800;
 }
 
+/* Desktop navigation links row */
 .navbar-links {
   display: flex;
   align-items: center;
   gap: 6px;
   flex: 1;
-  /* A flex item defaults to min-width:auto, which refuses to shrink below its
-     content. `overflow-x: auto` then never engages: instead of scrolling, the
-     row forced the PAGE wider - measured in Chrome at 390px, the navbar ran to
-     x=442 and every screen scrolled sideways by 70px. min-width:0 is what lets
-     the row shrink so its own scroll container does the work. */
   min-width: 0;
-  /* `safe` matters: with plain `center`, a flex row that overflows spills in
-     BOTH directions, and the items before the centre cannot be scrolled back
-     to - they are simply clipped off the left edge. `safe` falls back to
-     flex-start the moment the content no longer fits, which keeps every
-     navigation item reachable. */
   justify-content: safe center;
   overflow-x: auto;
-  /* An always-visible thin track, so it is apparent the row scrolls rather
-     than that the labels have been cut off. Keyboard users do not need it:
-     every item is a focusable link, and tabbing scrolls it into view. */
   scrollbar-width: thin;
   scroll-padding-inline: 12px;
 }
@@ -88,26 +76,21 @@
 }
 
 .navbar-link {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   color: var(--color-text-2);
   font-size: var(--text-sm);
   font-weight: 600;
-  /* The project's own minimum, applied in both axes. Measured at 41x40,
-     these sat under it - and below 900px the labels are visually hidden, so
-     the link shrinks to its icon and the width matters as much as the
-     height. Typography, spacing, colour and order are unchanged: only the
-     hit area grows, and the 6px gap between links keeps the targets from
-     touching. */
   min-height: var(--touch-target-min);
   min-width: var(--touch-target-min);
   padding: 0 12px;
   border-radius: var(--radius-sm);
   white-space: nowrap;
+  flex-shrink: 0;
   text-decoration: none;
-  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+  transition: color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
 }
 
 .navbar-link:hover {
@@ -115,8 +98,16 @@
   background: var(--color-primary-50);
 }
 
+.navbar-link.active {
+  color: var(--color-primary);
+  background: var(--color-primary-50);
+  font-weight: 700;
+  box-shadow: inset 0 -2px 0 var(--color-primary);
+}
+
 .navbar-link svg {
   color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .navbar-actions {
@@ -124,6 +115,12 @@
   align-items: center;
   gap: 12px;
   flex-shrink: 0;
+}
+
+.nav-desktop-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .nav-auth-actions {
@@ -183,9 +180,230 @@
   border-color: var(--color-danger-border);
 }
 
+/* Mobile & Tablet Toggle Button */
+.nav-mobile-toggle {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: var(--color-surface-alt);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.nav-mobile-toggle:hover {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+/* Mobile Drawer Backdrop */
+.nav-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.45);
+  backdrop-filter: blur(4px);
+  z-index: 198;
+  animation: fadeIn 0.2s ease-out;
+}
+
+/* Mobile Drawer Container */
+.nav-drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 320px;
+  max-width: 86vw;
+  background: #ffffff;
+  z-index: 199;
+  display: flex;
+  flex-direction: column;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow-y: auto;
+}
+
+.nav-drawer.open {
+  transform: translateX(0);
+}
+
+.nav-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-drawer-close {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: var(--color-surface-alt);
+  color: var(--color-text-2);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.nav-drawer-close:hover {
+  background: var(--color-danger-bg-soft);
+  color: var(--color-danger-text);
+}
+
+.nav-drawer-user {
+  padding: 12px 20px;
+  background: var(--color-surface-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.nav-drawer-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.nav-drawer-user-name {
+  font-weight: 700;
+  font-size: var(--text-sm);
+  color: var(--color-ink);
+}
+
+.nav-drawer-user-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.nav-drawer-nav {
+  flex: 1;
+  padding: 16px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.nav-drawer-group-label {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--color-faint);
+  padding: 12px 10px 4px;
+}
+
+.nav-drawer-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  min-height: 44px;
+  border-radius: var(--radius-sm);
+  color: var(--color-text-2);
+  font-size: var(--text-base);
+  font-weight: 600;
+  text-decoration: none;
+  transition: background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+}
+
+.nav-drawer-link:hover {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+.nav-drawer-link.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
+.nav-drawer-link svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.nav-drawer-footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: #ffffff;
+}
+
+.nav-drawer-language {
+  display: flex;
+  justify-content: center;
+}
+
+.nav-drawer-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 11px;
+  background: var(--color-surface-alt);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: background var(--dur-fast) var(--ease);
+}
+
+.nav-drawer-logout-btn:hover {
+  background: var(--color-danger-bg-soft);
+}
+
+.nav-drawer-auth {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.nav-drawer-auth-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  text-align: center;
+}
+
+/* Tablet & Mobile responsive rules */
+@media (max-width: 1024px) {
+  .navbar-links {
+    display: none;
+  }
+
+  .nav-desktop-actions .nav-logout-btn,
+  .nav-desktop-actions .nav-auth-actions {
+    display: none;
+  }
+
+  .nav-mobile-toggle {
+    display: inline-flex;
+  }
+}
+
 @media (max-width: 900px) {
   .navbar-inner {
-    padding: 0 12px;
+    padding: 0 16px;
   }
 
   .navbar-link span {
@@ -202,25 +420,12 @@
 }
 
 @media (max-width: 600px) {
-  /* On a phone the logo, the nav row and the auth actions cannot share one
-     line: after padding and gaps the nav row was left ~16px of space holding
-     ~88px of items, so it was scrollable in theory and unusable in practice.
-     Giving it its own full-width row keeps every destination reachable. */
   .navbar-inner {
-    flex-wrap: wrap;
-    padding: 8px 12px;
-    gap: 6px 12px;
-  }
-
-  .navbar-links {
-    order: 3;
-    flex-basis: 100%;
-    justify-content: safe flex-start;
-    padding-bottom: 2px;
+    padding: 0 12px;
   }
 
   .navbar-logo-text {
-    display: none;
+    font-size: var(--text-sm);
   }
 
   .nav-auth-actions span {
