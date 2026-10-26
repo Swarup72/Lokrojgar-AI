@@ -18,11 +18,130 @@ import { JobRequestsPage } from "../pages/JobRequestsPage";
 import { ChatPage } from "../pages/ChatPage";
 import { ApplicantsPage } from "../pages/ApplicantsPage";
 import { RecommendedWorkersPage } from "../pages/RecommendedWorkersPage";
+import { NotificationsPage } from "../pages/NotificationsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
+
+// Admin Panel Module
+import { AdminLayout } from "../components/admin/AdminLayout";
+import { AdminLoginPage } from "../pages/admin/AdminLoginPage";
+import { AdminDashboardPage } from "../pages/admin/AdminDashboardPage";
+import { AdminWorkersPage } from "../pages/admin/AdminWorkersPage";
+import { AdminEmployersPage } from "../pages/admin/AdminEmployersPage";
+import { AdminJobsPage } from "../pages/admin/AdminJobsPage";
+import { AdminApplicationsPage } from "../pages/admin/AdminApplicationsPage";
+import { AdminReportsPage } from "../pages/admin/AdminReportsPage";
+import { AdminRatingsPage } from "../pages/admin/AdminRatingsPage";
+import { AdminAnnouncementsPage } from "../pages/admin/AdminAnnouncementsPage";
+import { AdminAiMonitoringPage } from "../pages/admin/AdminAiMonitoringPage";
+import { AdminAuditLogsPage } from "../pages/admin/AdminAuditLogsPage";
 
 export function AppRoutes() {
   return (
     <Routes>
+      {/* Dedicated Admin Portal Routes */}
+      <Route path="/admin/login" element={<AdminLoginPage />} />
+
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminDashboardPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/workers"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminWorkersPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/employers"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminEmployersPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/jobs"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminJobsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/applications"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminApplicationsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/reports"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminReportsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/ratings"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminRatingsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/announcements"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminAnnouncementsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/ai-monitoring"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminAiMonitoringPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/audit-logs"
+        element={
+          <ProtectedRoute allowedRoles={[USER_ROLES.ADMIN]}>
+            <AdminLayout>
+              <AdminAuditLogsPage />
+            </AdminLayout>
+          </ProtectedRoute>
+        }
+      />
+
       <Route element={<AppShell />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -80,6 +199,14 @@ export function AppRoutes() {
           element={
             <ProtectedRoute>
               <ChatPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/notifications"
+          element={
+            <ProtectedRoute>
+              <NotificationsPage />
             </ProtectedRoute>
           }
         />

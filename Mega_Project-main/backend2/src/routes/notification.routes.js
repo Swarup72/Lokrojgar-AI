@@ -14,7 +14,7 @@ router.use(verifyJWT);
 
 router.get("/", languageMiddleware, getNotifications);
 router.get("/unread-count", getUnreadCount);
-router.patch("/:id/read", markNotificationRead);
 router.patch("/read-all", markAllNotificationsRead);
+router.patch("/:id/read", markNotificationRead);
 
 export default router;

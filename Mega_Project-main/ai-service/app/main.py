@@ -34,3 +34,19 @@ app.include_router(recommendations_router)
 app.include_router(voice_router)
 app.include_router(translation_router)
 app.include_router(skills_router)
+
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "service": "lokrozgar-ai-service",
+        "version": "1.0.0",
+        "capabilities": [
+            "recommendations",
+            "voice_extraction",
+            "translation",
+            "skill_resolution",
+        ],
+    }
+

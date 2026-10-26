@@ -17,6 +17,19 @@ const NOTIFICATION_TEMPLATES = {
     },
   }),
 
+  APPLICATION_SUBMITTED: (data = {}) => ({
+    title: {
+      mr: `नवीन अर्ज: ${data.jobTitle || "नोकरी"}`,
+      hi: `नया आवेदन: ${data.jobTitle || "नौकरी"}`,
+      en: `New Application: ${data.jobTitle || "Job"}`,
+    },
+    body: {
+      mr: `${data.workerName || "एका कामगाराने"} "${data.jobTitle || "नोकरी"}" साठी अर्ज केला आहे.`,
+      hi: `${data.workerName || "एक श्रमिक ने"} "${data.jobTitle || "नौकरी"}" के लिए आवेदन किया है।`,
+      en: `${data.workerName || "A worker"} has applied for "${data.jobTitle || "Job"}".`,
+    },
+  }),
+
   APPLICATION_ACCEPTED: (data = {}) => ({
     title: {
       mr: "अर्ज स्वीकारला गेला!",
@@ -40,6 +53,19 @@ const NOTIFICATION_TEMPLATES = {
       mr: `"${data.jobTitle || "नोकरी"}" साठीचा अर्ज निवडला गेला नाही.`,
       hi: `"${data.jobTitle || "नौकरी"}" के लिए आपका आवेदन चुना नहीं गया।`,
       en: `Your application for "${data.jobTitle || "Job"}" was not selected.`,
+    },
+  }),
+
+  APPLICATION_COMPLETED: (data = {}) => ({
+    title: {
+      mr: "काम पूर्ण झाले",
+      hi: "काम पूरा हुआ",
+      en: "Job Completed",
+    },
+    body: {
+      mr: `"${data.jobTitle || "नोकरी"}" यशस्वीरित्या पूर्ण म्हणून नोंदवले गेले आहे.`,
+      hi: `"${data.jobTitle || "नौकरी"}" को सफलतापूर्वक पूरा चिह्नित किया गया है।`,
+      en: `"${data.jobTitle || "Job"}" has been marked as completed.`,
     },
   }),
 
@@ -69,6 +95,45 @@ const NOTIFICATION_TEMPLATES = {
     },
   }),
 
+  DISPUTE_RESOLVED: (data = {}) => ({
+    title: {
+      mr: "वाद निराकरण",
+      hi: "विवाद समाधान",
+      en: "Dispute Resolved",
+    },
+    body: {
+      mr: `"${data.jobTitle || "नोकरी"}" संदर्भातील वाद प्रशासकाद्वारे सोडवला गेला आहे.`,
+      hi: `"${data.jobTitle || "नौकरी"}" के संबंध में विवाद प्रशासक द्वारा हल कर दिया गया है।`,
+      en: `The dispute regarding "${data.jobTitle || "Job"}" has been resolved by an administrator.`,
+    },
+  }),
+
+  DISPUTE_STATUS_UPDATED: (data = {}) => ({
+    title: {
+      mr: "वाद स्थिती अद्यतन",
+      hi: "विवाद स्थिति अद्यतन",
+      en: "Dispute Status Update",
+    },
+    body: {
+      mr: `विवादाची स्थिती "${data.status || "अद्यतनित"}" अशी अद्यतनित करण्यात आली आहे.`,
+      hi: `विवाद की स्थिति "${data.status || "अपडेट"}" के रूप में अपडेट की गई है।`,
+      en: `Dispute status has been updated to "${data.status || "Updated"}".`,
+    },
+  }),
+
+  SYSTEM_ANNOUNCEMENT: (data = {}) => ({
+    title: {
+      mr: data.titleMr || data.title || "प्लॅटफॉर्म घोषणा",
+      hi: data.titleHi || data.title || "प्लेटफ़ॉर्म घोषणा",
+      en: data.titleEn || data.title || "Platform Announcement",
+    },
+    body: {
+      mr: data.bodyMr || data.body || "महत्त्वाची प्रशासकीय सूचना.",
+      hi: data.bodyHi || data.body || "महत्वपूर्ण प्रशासनिक सूचना।",
+      en: data.bodyEn || data.body || "Important platform announcement.",
+    },
+  }),
+
   NEW_MESSAGE: (data = {}) => ({
     title: {
       mr: `नवीन संदेश - ${data.senderName || "वापरकर्ता"}`,
@@ -76,9 +141,9 @@ const NOTIFICATION_TEMPLATES = {
       en: `New Message from ${data.senderName || "User"}`,
     },
     body: {
-      mr: data.messageText || "तुम्हाला एक नवीन संदेश प्राप्त झाला आहे.",
-      hi: data.messageText || "आपको एक नया संदेश प्राप्त हुआ है।",
-      en: data.messageText || "You have received a new message.",
+      mr: data.messageTextMr || data.messageText || "तुम्हाला एक नवीन संदेश प्राप्त झाला आहे.",
+      hi: data.messageTextHi || data.messageText || "आपको एक नया संदेश प्राप्त हुआ है।",
+      en: data.messageTextEn || data.messageText || "You have received a new message.",
     },
   }),
 };

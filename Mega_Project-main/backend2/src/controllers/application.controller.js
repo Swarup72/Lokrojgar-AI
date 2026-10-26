@@ -172,15 +172,20 @@ export const applyForJob = asyncHandler(async (req, res) => {
   // Notify employer
   const employer = await EmployerProfile.findById(job.employerId);
   if (employer) {
+    const jobTitle = job.title?.en || job.titleText || "Job";
     await sendNotificationService({
       userId: employer.userId,
       type: "application_update",
       templateKey: "NEW_MESSAGE",
       templateData: {
         senderName: workerProfile.fullName,
-        messageText: `New application for job ${job.title?.en || job.titleText || "Job"} with match score ${matchScore}%`,
+        messageText: `New application for job ${jobTitle} with match score ${matchScore}%`,
+        messageTextEn: `New application for job ${jobTitle} with match score ${matchScore}%`,
+        messageTextMr: `कामगार ${workerProfile.fullName || "कामगार"} कडून "${jobTitle}" साठी नवीन अर्ज आला आहे (साम्य: ${matchScore}%).`,
+        messageTextHi: `श्रमिक ${workerProfile.fullName || "श्रमिक"} से "${jobTitle}" के लिए नया आवेदन आया है (मैच: ${matchScore}%)।`,
       },
       refId: application._id,
+      idempotencyKey: `app_submitted_${application._id}`,
     });
   }
 
@@ -418,6 +423,7 @@ export const acceptOrRejectApplication = asyncHandler(async (req, res) => {
         templateKey: "APPLICATION_ACCEPTED",
         templateData: { jobTitle: (job || app.jobId)?.title?.en || (job || app.jobId)?.titleText || "Job" },
         refId: app._id,
+        idempotencyKey: `app_accepted_${app._id}`,
       });
     }
   } else {
@@ -453,6 +459,7 @@ export const acceptOrRejectApplication = asyncHandler(async (req, res) => {
         templateKey: "APPLICATION_REJECTED",
         templateData: { jobTitle: app.jobId?.title?.en || app.jobId?.titleText || "Job" },
         refId: app._id,
+        idempotencyKey: `app_rejected_${app._id}`,
       });
     }
   }
@@ -487,6 +494,19 @@ export const completeApplication = asyncHandler(async (req, res) => {
 
   app.status = "completed";
   await app.save();
+
+  // Notify worker of job completion
+  const workerUserId = app.workerId?.userId?._id || app.workerId?.userId || app.workerId;
+  if (workerUserId) {
+    await sendNotificationService({
+      userId: workerUserId,
+      type: "application_update",
+      templateKey: "APPLICATION_COMPLETED",
+      templateData: { jobTitle: app.jobId?.title?.en || app.jobId?.titleText || "Job" },
+      refId: app._id,
+      idempotencyKey: `app_completed_${app._id}`,
+    });
+  }
 
   return res.status(200).json(new ApiResponse(200, app, "Application marked completed"));
 });

@@ -259,3 +259,32 @@ export const translateText = ({ text, sourceLang }) => {
 export const resolveSkillsSemantically = ({ transcript, rawSkills, catalog }) => {
   return postToAiService("/skills/resolve", { transcript, rawSkills, catalog }, getAiServiceInferenceTimeoutMs());
 };
+
+/**
+ * Safe health-check for the AI service, measuring round-trip latency.
+ * Does not expose raw credentials or internal environment variables.
+ */
+export const getAiServiceHealth = async (timeoutMs = 5000) => {
+  const start = Date.now();
+  try {
+    const data = await fetchWithTimeout("/health", { method: "GET" }, timeoutMs);
+    const latencyMs = Date.now() - start;
+    return {
+      available: true,
+      latencyMs,
+      status: data?.status || "healthy",
+      service: data?.service || "lokrozgar-ai-service",
+      version: data?.version || "1.0.0",
+      capabilities: data?.capabilities || [],
+    };
+  } catch (error) {
+    const latencyMs = Date.now() - start;
+    return {
+      available: false,
+      latencyMs,
+      status: "unreachable",
+      error: error.message || "Failed to connect to AI service",
+    };
+  }
+};
+

@@ -1,8 +1,10 @@
 import Dispute from "../models/dispute.model.js";
+import Job from "../models/job.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { uploadImageService } from "../services/storage.service.js";
+import { sendNotificationService } from "../services/notification.service.js";
 import { DISPUTE_STATUS } from "../constants.js";
 
 export const raiseDispute = asyncHandler(async (req, res) => {
@@ -16,6 +18,24 @@ export const raiseDispute = asyncHandler(async (req, res) => {
     description,
     status: DISPUTE_STATUS.OPEN,
   });
+
+  // Notify the user against whom the dispute was raised
+  if (againstUserId) {
+    let jobTitle = "Job";
+    try {
+      const job = await Job.findById(jobId).select("title titleText");
+      if (job) jobTitle = job.title?.en || job.titleText || "Job";
+    } catch (e) {}
+
+    await sendNotificationService({
+      userId: againstUserId,
+      type: "dispute",
+      templateKey: "DISPUTE_RAISED",
+      templateData: { jobTitle, reason },
+      refId: dispute._id,
+      idempotencyKey: `dispute_raised_${dispute._id}`,
+    });
+  }
 
   return res.status(201).json(new ApiResponse(201, dispute, "Dispute raised successfully"));
 });
@@ -69,6 +89,19 @@ export const resolveDispute = asyncHandler(async (req, res) => {
   );
 
   if (!dispute) throw new ApiError(404, "Dispute not found");
+
+  // Notify parties of resolution
+  const recipients = [dispute.raisedByUserId, dispute.againstUserId].filter(Boolean);
+  for (const uid of recipients) {
+    await sendNotificationService({
+      userId: uid,
+      type: "dispute",
+      templateKey: "DISPUTE_RESOLVED",
+      templateData: { status, resolutionNote },
+      refId: dispute._id,
+      idempotencyKey: `dispute_resolved_${dispute._id}_${uid}`,
+    });
+  }
 
   return res.status(200).json(new ApiResponse(200, dispute, "Dispute resolved by admin"));
 });

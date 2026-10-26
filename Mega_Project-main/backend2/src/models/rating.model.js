@@ -32,6 +32,28 @@ const ratingSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
+
+    isModerated: {
+      type: Boolean,
+      default: false,
+    },
+
+    moderatedAt: {
+      type: Date,
+      default: null,
+    },
+
+    moderatedByAdminId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
+
+    moderationReason: {
+      type: String,
+      trim: true,
+      default: null,
+    },
   },
   {
     timestamps: {

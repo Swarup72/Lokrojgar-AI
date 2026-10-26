@@ -12,10 +12,13 @@ import {
   UserPlus,
   Inbox,
   MessageSquare,
+  Bell,
   Menu,
   X,
   BadgeCheck,
+  Shield,
 } from "lucide-react";
+import { getUnreadCount } from "../../api/notifications";
 import { useAuth } from "../../hooks/useAuth";
 import { useLanguage } from "../../hooks/useLanguage";
 import { LanguageSwitcher } from "../common/LanguageSwitcher";
@@ -29,11 +32,39 @@ export function Navbar() {
   const location = useLocation();
 
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   const roles = user?.roles || [];
   const isWorker = roles.includes(USER_ROLES.WORKER);
   const isEmployer = roles.includes(USER_ROLES.EMPLOYER);
+  const isAdmin = roles.includes(USER_ROLES.ADMIN);
   const isDualRole = isWorker && isEmployer;
+
+  // Fetch unread notifications count when authenticated
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setUnreadCount(0);
+      return;
+    }
+    let isMounted = true;
+    const fetchUnread = async () => {
+      try {
+        const res = await getUnreadCount();
+        if (isMounted && typeof res?.unreadCount === "number") {
+          setUnreadCount(res.unreadCount);
+        }
+      } catch (err) {
+        // Silently catch unread count fetch error
+      }
+    };
+
+    fetchUnread();
+    const timer = setInterval(fetchUnread, 45000);
+    return () => {
+      isMounted = false;
+      clearInterval(timer);
+    };
+  }, [isAuthenticated, location.pathname]);
 
   // Close drawer whenever the route changes
   useEffect(() => {
@@ -135,6 +166,17 @@ export function Navbar() {
           {/* Shared Authenticated Links */}
           {isAuthenticated && (
             <>
+              <NavLink to="/notifications" className={navLinkClass}>
+                <span className="nav-icon-badge-wrapper">
+                  <Bell size={17} aria-hidden="true" />
+                  {unreadCount > 0 && (
+                    <span className="nav-badge-dot">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </span>
+                <span>{t("nav.notifications")}</span>
+              </NavLink>
               <NavLink to="/messages" className={navLinkClass}>
                 <MessageSquare size={17} aria-hidden="true" />
                 <span>{t("nav.messages")}</span>
@@ -143,6 +185,12 @@ export function Navbar() {
                 <User size={17} aria-hidden="true" />
                 <span>{t("profile")}</span>
               </NavLink>
+              {isAdmin && (
+                <NavLink to="/admin" className={navLinkClass}>
+                  <Shield size={17} aria-hidden="true" />
+                  <span>{t("nav.adminDashboard")}</span>
+                </NavLink>
+              )}
             </>
           )}
         </nav>
@@ -290,6 +338,17 @@ export function Navbar() {
           {isAuthenticated && (
             <>
               <div className="nav-drawer-group-label">{t("profile")}</div>
+              <NavLink to="/notifications" className={drawerLinkClass}>
+                <span className="nav-icon-badge-wrapper">
+                  <Bell size={18} aria-hidden="true" />
+                  {unreadCount > 0 && (
+                    <span className="nav-badge-dot">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </span>
+                <span>{t("nav.notifications")}</span>
+              </NavLink>
               <NavLink to="/messages" className={drawerLinkClass}>
                 <MessageSquare size={18} aria-hidden="true" />
                 <span>{t("nav.messages")}</span>
@@ -298,6 +357,12 @@ export function Navbar() {
                 <User size={18} aria-hidden="true" />
                 <span>{t("profile")}</span>
               </NavLink>
+              {isAdmin && (
+                <NavLink to="/admin" className={drawerLinkClass}>
+                  <Shield size={18} aria-hidden="true" />
+                  <span>{t("nav.adminDashboard")}</span>
+                </NavLink>
+              )}
             </>
           )}
         </nav>

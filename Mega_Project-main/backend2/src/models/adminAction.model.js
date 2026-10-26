@@ -41,6 +41,11 @@ const adminActionSchema = new mongoose.Schema(
   }
 );
 
+adminActionSchema.index({ createdAt: -1 });
+adminActionSchema.index({ actionType: 1, createdAt: -1 });
+adminActionSchema.index({ adminId: 1, createdAt: -1 });
+adminActionSchema.index({ targetUserId: 1, createdAt: -1 });
+
 const AdminAction = mongoose.model("AdminAction", adminActionSchema);
 
 export default AdminAction;

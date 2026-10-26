@@ -53,6 +53,40 @@ const notificationSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+
+    channel: {
+      type: String,
+      enum: ["in_app", "push", "sms", "whatsapp", "email"],
+      default: "in_app",
+    },
+
+    deliveryStatus: {
+      type: String,
+      enum: ["pending", "delivered", "failed", "skipped"],
+      default: "delivered",
+    },
+
+    attempts: {
+      type: Number,
+      default: 1,
+    },
+
+    idempotencyKey: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+
+    externalId: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+
+    errorMetadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: null,
+    },
   },
   {
     timestamps: {
@@ -68,6 +102,11 @@ notificationSchema.index({
   isRead: 1,
   createdAt: -1,
 });
+
+notificationSchema.index(
+  { idempotencyKey: 1 },
+  { unique: true, sparse: true }
+);
 
 const Notification = mongoose.model("Notification", notificationSchema);
 

@@ -16,6 +16,7 @@ import {
   getRecommendedWorkersForJob,
 } from "../services/aiService.client.js";
 import { employerDisplayName } from "../utils/displayName.js";
+import { notifyMatchingWorkersForJob } from "../services/notification.service.js";
 
 // Mongoose populate() replaces a ref field with the referenced document.
 // The AI service needs the raw ObjectId string instead (Job.category_id /
@@ -94,6 +95,12 @@ export const createJob = asyncHandler(async (req, res) => {
     },
     status: ["open", "draft"].includes(status) ? status : "open",
   });
+
+  if (job.status === "open") {
+    notifyMatchingWorkersForJob(job).catch((err) =>
+      logger.warn("[createJob] Failed to notify workers:", err?.message)
+    );
+  }
 
   return res.status(201).json(new ApiResponse(201, job, "Job created successfully with auto-translations"));
 });
