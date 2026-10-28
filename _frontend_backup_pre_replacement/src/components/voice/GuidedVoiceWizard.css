@@ -1,0 +1,239 @@
+.guided-wizard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.guided-loading {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6) 0;
+  color: var(--color-muted);
+}
+
+.guided-progress {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.guided-progress-bar {
+  height: 6px;
+  background: var(--color-bg);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.guided-progress-bar > div {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+  transition: width 200ms ease;
+}
+
+.guided-wizard h2 {
+  margin: 0;
+}
+
+.guided-prompt {
+  font-size: var(--text-lg);
+  color: var(--color-text);
+  margin: 0;
+}
+
+.guided-hint {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+.guided-processing {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--color-muted);
+  padding: var(--space-4) 0;
+}
+
+.spin {
+  animation: guided-spin 1s linear infinite;
+}
+
+@keyframes guided-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.guided-send {
+  align-self: flex-start;
+}
+
+.guided-result {
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+  background: var(--color-bg);
+}
+
+.guided-result.failed {
+  background: color-mix(in srgb, var(--color-danger) 8%, var(--color-surface));
+}
+
+.guided-transcript {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  margin: 0 0 6px;
+  overflow-wrap: anywhere;
+}
+
+.guided-value {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-success-text);
+  font-size: var(--text-lg);
+  font-weight: 700;
+  margin: 0;
+}
+
+.guided-failed-reason {
+  color: var(--color-danger-text);
+  margin: 0;
+}
+
+.guided-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guided-chip {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  /* index.css styles every <button> as a primary action: blue ground, white
+     text. This rule repainted the ground white but inherited that white
+     text, so an unselected chip rendered its label invisibly - the shift
+     chips read as three blank pills. Restating the colour is what makes the
+     label visible; .active below restores white on the blue ground. */
+  color: var(--color-ink);
+  border-radius: var(--radius-pill);
+  padding: 10px 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.guided-chip:hover:not(:disabled) {
+  background: var(--color-surface);
+  border-color: var(--color-primary);
+}
+
+/* The global button:hover turns the ground blue; without this the hovered
+   chip would lose its label the same way. */
+.guided-chip:hover:not(.active) {
+  color: var(--color-ink);
+}
+
+.guided-chip:focus-visible {
+  outline: var(--outline-focus);
+  outline-offset: 2px;
+}
+
+.guided-chip.active,
+.guided-chip.active:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #fff;
+}
+
+/* The guided job wizard's date step. Without a rule the native control
+   inherited the global button sizing and sat flush against the question. */
+.guided-tap-input {
+  display: block;
+  margin: 4px 0 8px;
+  padding: 10px 12px;
+  min-height: var(--touch-target-min);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  font-size: var(--text-base);
+}
+
+.guided-exit {
+  display: inline-block;
+  margin-top: var(--space-3);
+}
+
+.guided-tap-input:focus-visible {
+  outline: var(--outline-focus);
+  outline-offset: 2px;
+}
+
+.guided-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.guided-link {
+  background: transparent;
+  color: var(--color-primary);
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+}
+
+.guided-link:hover {
+  text-decoration: underline;
+}
+
+.guided-review-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.guided-review-list li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.guided-review-label {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.guided-review-value {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.guided-review-missing {
+  color: var(--color-faint);
+  font-size: var(--text-sm);
+}
+
+@media (max-width: 600px) {
+  .guided-review-list li {
+    grid-template-columns: 1fr auto;
+    row-gap: 4px;
+  }
+
+  .guided-actions .btn {
+    flex: 1 1 auto;
+  }
+}

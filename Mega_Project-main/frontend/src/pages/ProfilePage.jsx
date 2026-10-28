@@ -746,6 +746,11 @@ export function ProfilePage() {
                   userId={user._id}
                   ratingAvg={workerProfile?.ratingAvg}
                   ratingCount={workerProfile?.ratingCount}
+                  workerProfile={workerProfile}
+                  employerProfile={employerProfile}
+                  isWorker={isWorker}
+                  isEmployer={isEmployer}
+                  activeTab="worker"
                 />
               </Card>
             )}
@@ -798,6 +803,11 @@ export function ProfilePage() {
                   userId={user._id}
                   ratingAvg={employerProfile?.ratingAvg}
                   ratingCount={employerProfile?.ratingCount}
+                  workerProfile={workerProfile}
+                  employerProfile={employerProfile}
+                  isWorker={isWorker}
+                  isEmployer={isEmployer}
+                  activeTab="employer"
                 />
               </Card>
             )}

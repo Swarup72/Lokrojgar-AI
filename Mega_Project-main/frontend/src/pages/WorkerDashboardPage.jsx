@@ -17,6 +17,7 @@ import {
   Wallet,
   ClipboardList,
   ShieldCheck,
+  Wrench,
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
@@ -24,6 +25,9 @@ import { useAsync } from "../hooks/useAsync";
 import { useLanguage } from "../hooks/useLanguage";
 import * as recommendationsApi from "../api/recommendations";
 import * as applicationsApi from "../api/applications";
+import * as workerSkillsApi from "../api/workerSkills";
+import { speakText, stopSpeech } from "../utils/speech";
+import { sortRecommendedMatches } from "../utils/recommendationScoring";
 import { JobCard } from "../components/jobs/JobCard";
 import { Card } from "../components/common/Card";
 import { Spinner } from "../components/common/Spinner";
@@ -120,6 +124,17 @@ const DASHBOARD_TEXT = {
   },
 };
 
+function extractSkillName(s) {
+  if (!s) return "";
+  const nameVal = s.name || s.skillName || s.skill?.name || s;
+  if (typeof nameVal === "string") return nameVal.toLowerCase().trim();
+  if (nameVal && typeof nameVal === "object") {
+    const str = nameVal.en || nameVal.mr || nameVal.hi || Object.values(nameVal)[0] || "";
+    return typeof str === "string" ? str.toLowerCase().trim() : "";
+  }
+  return "";
+}
+
 export function WorkerDashboardPage() {
   const { user, workerProfile } = useAuth();
   const { t, language } = useLanguage();
@@ -138,6 +153,8 @@ export function WorkerDashboardPage() {
     error: recommendedError,
   } = useAsync(recommendationsApi.getRecommendedJobs);
 
+  const { data: workerSkills } = useAsync(workerSkillsApi.getMine);
+
   const {
     data: applications,
     loading: loadingApplications,
@@ -154,58 +171,41 @@ export function WorkerDashboardPage() {
     ? applications.slice(0, 5)
     : [];
 
-  const recommendedJobs = Array.isArray(recommended)
-    ? recommended
-    : [];
+  const recommendedJobs = useMemo(
+    () => sortRecommendedMatches(recommended, workerSkills),
+    [recommended, workerSkills]
+  );
 
   useEffect(() => {
     return () => {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
-      utteranceRef.current = null;
+      stopSpeech();
     };
   }, []);
 
-  const stopSpeech = () => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
-    utteranceRef.current = null;
+  const handleStopSpeech = () => {
+    stopSpeech();
     setSpeaking(false);
   };
 
   const speak = (message) => {
-    if (
-      !("speechSynthesis" in window) ||
-      !("SpeechSynthesisUtterance" in window)
-    ) {
-      return;
+    const started = speakText({
+      text: message,
+      lang: language,
+      rate: 0.88,
+      onStart: () => setSpeaking(true),
+      onEnd: () => setSpeaking(false),
+      onError: () => setSpeaking(false),
+      onNoVoice: () => setSpeaking(false),
+    });
+
+    if (!started) {
+      setSpeaking(false);
     }
-
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(message);
-    utterance.lang =
-      language === "mr"
-        ? "mr-IN"
-        : language === "hi"
-        ? "hi-IN"
-        : "en-IN";
-
-    utterance.rate = 0.85;
-
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
-
-    utteranceRef.current = utterance;
-    window.speechSynthesis.speak(utterance);
   };
 
   const handleAudioHelp = () => {
     if (speaking) {
-      stopSpeech();
+      handleStopSpeech();
     } else {
       speak(ui.helpText);
     }
@@ -428,6 +428,25 @@ export function WorkerDashboardPage() {
           />
         )}
 
+        {workerProfile && !loadingRecommended && (!workerSkills || workerSkills.length === 0) && (
+          <Card className="worker-cold-start-card animated-card">
+            <div className="cold-start-content">
+              <div className="cold-start-left">
+                <div className="cold-start-icon">
+                  <Wrench size={24} aria-hidden="true" />
+                </div>
+                <div className="cold-start-text">
+                  <h3>{t("recommendations.coldStartTitle")}</h3>
+                  <p>{t("recommendations.coldStartDesc")}</p>
+                </div>
+              </div>
+              <Link to="/profile" className="btn btn-primary">
+                {t("recommendations.addSkillsAction")}
+              </Link>
+            </div>
+          </Card>
+        )}
+
         {workerProfile && loadingRecommended && (
           <Spinner label={t("findingJobs")} />
         )}
@@ -463,9 +482,14 @@ export function WorkerDashboardPage() {
                   >
                     <JobCard
                       job={match.job}
-                      matchScore={match.matchScore}
+                      matchScore={match.recommendationScore ?? match.matchScore}
+                      originalMatchScore={match.originalMatchScore ?? match.matchScore}
                       matchFactors={match.matchFactors}
                       explanation={match.explanation}
+                      matchingSkills={match.matchingSkills}
+                      missingSkills={match.missingSkills}
+                      skillMatchStatus={match.skillMatchStatus}
+                      penaltyApplied={match.penaltyApplied}
                       onApply={() => handleApply(match.job._id)}
                       applyDisabled={
                         appliedJobIds.has(match.job._id) ||

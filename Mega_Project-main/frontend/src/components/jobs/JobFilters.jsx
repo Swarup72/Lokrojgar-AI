@@ -1,4 +1,4 @@
-import { Search, Navigation } from "lucide-react";
+import { Search, Navigation, RotateCcw } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { PAY_TYPES } from "../../utils/enums";
@@ -13,20 +13,43 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
 
   const update = (key, value) => onFilterChange({ ...filters, [key]: value || undefined });
 
+  const hasActiveFilters = Boolean(filters.categoryId || filters.payType || filters.minPay);
+
+  const handleClearFilters = () => {
+    onFilterChange({
+      ...filters,
+      categoryId: undefined,
+      payType: undefined,
+      minPay: undefined,
+    });
+  };
+
   return (
     <div className="job-filters">
       <div className="job-filters-mode">
-        <button type="button" className={mode === "search" ? "active" : ""} onClick={() => onModeChange("search")}>
+        <button
+          type="button"
+          className={mode === "search" ? "active" : ""}
+          onClick={() => onModeChange("search")}
+        >
           <Search size={15} aria-hidden="true" /> {t("common.search")}
         </button>
-        <button type="button" className={mode === "nearby" ? "active" : ""} onClick={() => onModeChange("nearby")}>
+        <button
+          type="button"
+          className={mode === "nearby" ? "active" : ""}
+          onClick={() => onModeChange("nearby")}
+        >
           <Navigation size={15} aria-hidden="true" /> {t("jobs.search.nearMe")}
         </button>
       </div>
 
       {mode === "search" && (
         <div className="job-filters-fields">
-          <select value={filters.categoryId || ""} onChange={(event) => update("categoryId", event.target.value)}>
+          <select
+            value={filters.categoryId || ""}
+            onChange={(event) => update("categoryId", event.target.value)}
+            aria-label={t("jobs.search.allCategories")}
+          >
             <option value="">{t("jobs.search.allCategories")}</option>
             {categories.map((category) => (
               <option key={category._id} value={category._id}>
@@ -35,7 +58,11 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
             ))}
           </select>
 
-          <select value={filters.payType || ""} onChange={(event) => update("payType", event.target.value)}>
+          <select
+            value={filters.payType || ""}
+            onChange={(event) => update("payType", event.target.value)}
+            aria-label={t("jobs.search.anyPayType")}
+          >
             <option value="">{t("jobs.search.anyPayType")}</option>
             {PAY_TYPES.map((type) => (
               <option key={type} value={type}>
@@ -50,7 +77,20 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
             placeholder={t("jobs.search.minPay")}
             value={filters.minPay || ""}
             onChange={(event) => update("minPay", event.target.value)}
+            aria-label={t("jobs.search.minPay")}
           />
+
+          {hasActiveFilters && (
+            <button
+              type="button"
+              className="job-filters-clear-btn"
+              onClick={handleClearFilters}
+              title={t("jobs.search.clearFilters")}
+            >
+              <RotateCcw size={13} aria-hidden="true" />
+              <span>{t("jobs.search.clearFilters")}</span>
+            </button>
+          )}
         </div>
       )}
     </div>

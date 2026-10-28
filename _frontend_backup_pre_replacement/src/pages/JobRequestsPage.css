@@ -1,0 +1,90 @@
+.job-requests-page h1 {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.job-requests-intro {
+  color: var(--color-muted);
+  margin-top: 0;
+}
+
+.job-requests-section {
+  margin-top: var(--space-5);
+}
+
+.job-requests-section h2 {
+  font-size: var(--text-md);
+  color: var(--color-muted);
+  margin-bottom: var(--space-3);
+}
+
+.job-request-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+.job-request-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.job-request-head h3 {
+  margin: 0;
+}
+
+.job-request-employer {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  margin: 2px 0 0;
+}
+
+.job-request-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.job-request-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.job-request-skills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.job-request-description {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.job-request-actions {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.job-request-answered {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  margin: 0;
+}
+
+@media (max-width: 600px) {
+  .job-request-actions {
+    flex-direction: column;
+  }
+
+  .job-request-actions .btn {
+    width: 100%;
+  }
+}

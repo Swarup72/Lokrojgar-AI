@@ -70,8 +70,13 @@ export function JobCard({
   job,
   categoriesById,
   matchScore,
+  originalMatchScore,
   matchFactors,
   explanation,
+  matchingSkills,
+  missingSkills,
+  skillMatchStatus,
+  penaltyApplied,
   onApply,
   applyDisabled,
   applyLabel,
@@ -216,6 +221,44 @@ export function JobCard({
         )}
       </div>
 
+      {/* Skill matching breakdown */}
+      {matchFactors && (
+        <div className="job-card-skills-overview">
+          {skillMatchStatus === "matched" || (matchingSkills && matchingSkills.length > 0) ? (
+            <div className="job-skills-matched">
+              <span className="skills-badge matched">
+                <CheckCircle2 size={14} aria-hidden="true" />
+                <strong>{t("recommendations.matchingSkills")}:</strong>
+              </span>
+              <div className="skills-chip-list">
+                {matchingSkills.map((s) => (
+                  <span key={s._id || s} className="skill-chip match">
+                    {pickLocalizedText(s.nameMultilingual || s.name, language) || (typeof s.name === "string" ? s.name : "") || "Skill"}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ) : skillMatchStatus === "unmatched" || (Array.isArray(job.skillIds) && job.skillIds.length > 0) ? (
+            <div className="job-skills-unmatched">
+              <span className="skills-badge unmatched">
+                {t("recommendations.noMatchingSkills")}
+              </span>
+              {penaltyApplied > 0 && (
+                <span className="skills-penalty-tag">
+                  -{penaltyApplied}
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="job-skills-unspecified">
+              <span className="skills-badge unspecified">
+                {t("recommendations.skillsNotSpecified")}
+              </span>
+            </div>
+          )}
+        </div>
+      )}
+
       {matchFactors && (
         <div className="job-card-match-details">
           <MatchFactorsList
@@ -230,6 +273,7 @@ export function JobCard({
           type="button"
           className="job-card-view-btn"
           onClick={handleView}
+          aria-label={ui.viewJob}
         >
           <span>{ui.viewJob}</span>
           <ChevronRight size={20} aria-hidden="true" />
@@ -240,6 +284,7 @@ export function JobCard({
           className="job-card-apply-btn"
           onClick={handleApply}
           disabled={applyDisabled}
+          aria-label={applyLabel || ui.apply}
         >
           {applyDisabled ? (
             <CheckCircle2 size={20} aria-hidden="true" />

@@ -29,11 +29,41 @@
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
   font-weight: 700;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.job-filters-mode button:hover:not(.active):not(:disabled) {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--color-text);
 }
 
 .job-filters-mode button.active {
   background: var(--color-primary);
   color: #fff;
+}
+
+.job-filters-clear-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  padding: 0 14px;
+  min-height: 42px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.job-filters-clear-btn:hover:not(:disabled) {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
 }
 
 .job-filters-fields {

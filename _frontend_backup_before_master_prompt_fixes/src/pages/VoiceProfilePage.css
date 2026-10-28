@@ -1,0 +1,218 @@
+.voice-page {
+  max-width: 680px;
+  padding: 32px 0 60px;
+}
+
+.voice-page-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--color-text-3);
+  padding: 8px 0;
+  margin-bottom: 16px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+.voice-page-back:hover {
+  color: var(--color-primary);
+}
+
+.voice-page-card {
+  padding: 32px;
+}
+
+.voice-page-title {
+  font-size: var(--text-xl);
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.voice-page-subtitle {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.voice-step-label {
+  text-align: center;
+  font-weight: 700;
+  color: var(--color-text-2);
+  margin-bottom: 16px;
+}
+
+.voice-language-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.voice-language-options {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.voice-language-option {
+  background: var(--color-surface);
+  color: var(--color-text-2);
+  border: 1px solid var(--color-border);
+  padding: 14px 24px;
+  border-radius: var(--radius-md);
+  font-weight: 700;
+}
+
+.voice-language-option.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  border-color: var(--color-primary-200);
+}
+
+.voice-input-example {
+  text-align: center;
+  color: var(--color-text-3);
+  font-size: var(--text-sm);
+  line-height: 1.7;
+  margin-bottom: 20px;
+}
+
+.voice-input-mode {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+  background: var(--color-surface-alt);
+  padding: 4px;
+  border-radius: var(--radius-pill);
+  width: fit-content;
+  margin: 0 auto 12px;
+}
+
+.voice-input-mode button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--color-text-3);
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.voice-input-mode button.active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.voice-extract-btn {
+  display: flex;
+  width: 100%;
+  margin-top: 20px;
+}
+
+.voice-processing-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 50px 20px;
+}
+
+.voice-processing-spinner {
+  color: var(--color-primary);
+  animation: spin 0.9s linear infinite;
+  margin-bottom: 8px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.voice-processing-step h2 {
+  font-size: var(--text-lg);
+}
+
+.voice-processing-step p {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.voice-page-alt-link {
+  text-align: center;
+  margin-top: 16px;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .voice-processing-spinner {
+    animation: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .voice-page-card {
+    padding: 20px;
+  }
+}
+
+/* Mode choice: one long recording, or one question at a time. */
+.voice-mode-step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.voice-mode-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-3);
+}
+
+.voice-mode-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  text-align: left;
+  background: var(--color-surface);
+  /* Each text child sets its own colour, but the lucide icon strokes with
+     currentColor - without this it inherited the global white and vanished. */
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  cursor: pointer;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.voice-mode-option:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-nav);
+}
+
+.voice-mode-option strong {
+  font-size: var(--text-lg);
+  color: var(--color-ink);
+}
+
+.voice-mode-option span {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.voice-mode-option em {
+  color: var(--color-primary);
+  font-style: normal;
+  font-weight: 700;
+  font-size: var(--text-sm);
+  margin-top: 4px;
+}

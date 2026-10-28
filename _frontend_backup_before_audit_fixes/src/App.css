@@ -1,0 +1,170 @@
+
+/* LOKROZGAR AI - Permanent Sidebar Layout */
+
+:root {
+  --sidebar-width: 260px;
+}
+
+html {
+  width: 100%;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-width: 0;
+  min-height: 100vh;
+  padding-left: var(--sidebar-width);
+  overflow-x: hidden;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+#root {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+}
+
+#root > * {
+  min-width: 0;
+}
+
+main {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.container {
+  max-width: 100%;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  :root {
+    --sidebar-width: 215px;
+  }
+}
+
+/* Mobile - sidebar stays permanently visible */
+@media (max-width: 600px) {
+  :root {
+    --sidebar-width: 126px;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  main {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .container {
+    width: 100%;
+    min-width: 0;
+  }
+
+  input,
+  textarea,
+  select {
+    max-width: 100%;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* ============================================
+   LOKROZGAR AI - FIXED WEBSITE BACKGROUND
+   ============================================ */
+
+/* Fixed background image across all pages */
+body {
+  background-color: #eaf4ff;
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.78),
+      rgba(255, 255, 255, 0.78)
+    ),
+    url("/websitebackground.jpeg");
+
+  background-position: center center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* Let the global background show through */
+html,
+#root {
+  min-height: 100%;
+}
+
+#root,
+.app,
+.app-layout,
+.main-content,
+.page-content {
+  background-color: transparent;
+}
+
+/* Preserve the original Home page hero image */
+.home-page .visual-hero {
+  background-image: url("/backcover.jpeg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Home page sections below the hero */
+.home-page .visual-categories,
+.home-page .home-trust-section,
+.home-page .home-section {
+  background-color: transparent;
+}
+
+/* Keep the alternative section softly translucent */
+.home-page .home-section-alt {
+  background-color: rgba(255, 255, 255, 0.55);
+}
+
+/* Keep cards readable over the background */
+.home-page .visual-category-card,
+.home-page .trust-card,
+.home-page .home-feature-card,
+.home-page .home-how-column {
+  background-color: rgba(255, 255, 255, 0.92);
+}
+
+/* Mobile background support */
+@media (max-width: 768px) {
+  body {
+    background-attachment: scroll;
+  }
+
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image:
+      linear-gradient(
+        rgba(255, 255, 255, 0.60),
+        rgba(255, 255, 255, 0.60)
+      ),
+      url("/websitebackground.jpeg");
+    background-size: cover;
+    background-position: center;
+    pointer-events: none;
+  }
+}

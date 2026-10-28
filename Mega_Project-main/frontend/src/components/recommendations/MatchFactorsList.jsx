@@ -1,4 +1,4 @@
-import { Check, Minus } from "lucide-react";
+import { Check, Minus, Info } from "lucide-react";
 import { MATCH_FACTOR_ORDER } from "../../utils/enums";
 import { useLanguage } from "../../hooks/useLanguage";
 import "./MatchFactorsList.css";
@@ -69,6 +69,12 @@ export function MatchFactorsList({ matchFactors, explanation }) {
       </ul>
       {explanation?.summary && (
         <p className="match-factors-summary">{explanation.summary}</p>
+      )}
+      {matchFactors.skill === 0 && (
+        <p className="match-skill-zero-note">
+          <Info size={13} aria-hidden="true" />
+          <span>{t("recommendations.skillsPrioritizedNotice")}</span>
+        </p>
       )}
     </div>
   );

@@ -1,0 +1,710 @@
+
+/* ==========================================
+   LOKROZGAR AI - HOME PAGE
+   ========================================== */
+
+.home-page {
+  width: 100%;
+  min-width: 0;
+}
+
+/* HERO WITH BACKGROUND IMAGE */
+
+.visual-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  min-height: 430px;
+  width: 100%;
+  overflow: hidden;
+
+  background-image: url("/backcover.jpeg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+/* No decorative circles covering the image */
+
+.visual-hero::before,
+.visual-hero::after {
+  display: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1250px;
+  margin: 0 auto;
+  padding: 48px 5%;
+}
+
+.hero-text-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 52%;
+  max-width: 620px;
+  text-align: center;
+}
+
+/* AI BADGE */
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: fit-content;
+  margin: 0 auto 20px;
+  padding: 9px 16px;
+  border: 1px solid #dbeafe;
+  border-radius: 30px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 800;
+  box-shadow: 0 8px 25px rgba(37, 99, 235, 0.08);
+}
+
+/* MULTILINGUAL SLOGAN */
+
+.hero-title {
+  width: 100%;
+  margin: 0;
+  color: #14213d;
+  font-size: clamp(30px, 3.8vw, 50px);
+  font-weight: 900;
+  line-height: 1.25;
+  letter-spacing: -0.8px;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+/* HERO DESCRIPTION */
+
+.hero-description {
+  width: 100%;
+  max-width: 540px;
+  margin: 18px auto 20px;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.65;
+  text-align: center;
+}
+
+/* LISTEN TO INSTRUCTIONS */
+
+.home-audio-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  width: fit-content;
+  min-height: 46px;
+  margin: 0 auto;
+  padding: 10px 17px;
+  border: 2px solid #1875c8;
+  border-radius: 13px;
+  background: #e8f3ff;
+  color: #135d9f;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.home-audio-help:hover {
+  background: #d4eaff;
+}
+
+.home-voice-feedback {
+  margin: 12px 0 0;
+  color: #155d9c;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+/* JOB CATEGORIES */
+
+.visual-categories {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 65px 24px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.section-eyebrow {
+  color: #2563eb;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.section-heading h2 {
+  margin: 8px 0;
+  color: #14213d;
+  font-size: 32px;
+}
+
+.section-heading p {
+  color: #64748b;
+  font-size: 16px;
+}
+
+.view-all-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.visual-category-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.visual-category-card {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 24px 20px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  color: inherit;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.home-picture-category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 205px;
+  text-align: center;
+  font: inherit;
+  cursor: pointer;
+}
+
+.home-picture-category:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.1);
+}
+
+.home-category-picture {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  width: 92px;
+  height: 92px;
+  flex-shrink: 0;
+  border-radius: 25px;
+  background: #e7f2ff;
+  color: #176fba;
+}
+
+.home-category-picture span {
+  font-size: 37px;
+  line-height: 1;
+}
+
+.category-card-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.category-card-content h3 {
+  margin-bottom: 4px;
+  color: #14213d;
+  font-size: 20px;
+  font-weight: 800;
+}
+
+.category-card-content p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.category-arrow {
+  color: #176fba;
+  transition: transform 0.2s ease;
+}
+
+.home-picture-category:hover .category-arrow {
+  transform: translateX(4px);
+}
+
+/* TRUST SECTION */
+
+.home-trust-section {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+  padding: 30px 20px 60px;
+}
+
+.trust-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+  padding: 22px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.trust-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 50px;
+  height: 50px;
+  background: #eff6ff;
+  border-radius: 12px;
+  font-size: 24px;
+}
+
+.trust-card h3 {
+  margin-bottom: 3px;
+  color: #14213d;
+  font-size: 15px;
+}
+
+.trust-card p {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+/* FEATURES */
+
+.home-section {
+  padding: 60px 8%;
+}
+
+.home-section-alt {
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.home-section-title {
+  margin-bottom: 32px;
+  color: #14213d;
+  font-size: clamp(23px, 3vw, 30px);
+  font-weight: 800;
+  text-align: center;
+}
+
+.home-features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.home-feature-card {
+  min-width: 0;
+  padding: 25px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  text-align: center;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+}
+
+.home-feature-icon {
+  margin-bottom: 12px;
+  font-size: 34px;
+}
+
+.home-feature-card h3 {
+  margin-bottom: 6px;
+  color: #14213d;
+  font-size: 17px;
+}
+
+.home-feature-card p {
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* HOW IT WORKS */
+
+.home-how-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 25px;
+}
+
+.home-how-column {
+  min-width: 0;
+  padding: 25px 30px;
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+  border-radius: 18px;
+}
+
+.home-how-column h3 {
+  margin-bottom: 16px;
+  color: #14213d;
+  font-size: 19px;
+}
+
+.home-how-column ol {
+  margin: 0;
+  padding-left: 20px;
+  color: #475569;
+  line-height: 2;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .visual-hero {
+    min-height: 380px;
+    background-position: 60% center;
+  }
+
+  .hero-content {
+    padding: 35px 3%;
+  }
+
+  .hero-text-content {
+    width: 58%;
+  }
+
+  .hero-title {
+    font-size: clamp(25px, 3.5vw, 38px);
+  }
+
+  .hero-description {
+    font-size: 13px;
+  }
+
+  .visual-category-grid,
+  .home-trust-section,
+  .home-features-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .section-heading {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .visual-hero {
+    min-height: 390px;
+    background-position: 63% center;
+  }
+
+  .hero-content {
+    padding: 24px 4%;
+  }
+
+  .hero-text-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 15px 10px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(3px);
+  }
+
+  .hero-badge {
+    font-size: 11px;
+    padding: 7px 11px;
+    margin-bottom: 12px;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+
+  .hero-description {
+    margin: 12px auto 15px;
+    font-size: 12px;
+  }
+
+  .home-audio-help {
+    min-height: 42px;
+    padding: 9px 12px;
+    font-size: 12px;
+  }
+
+  .visual-categories {
+    padding: 40px 12px;
+  }
+
+  .visual-category-grid,
+  .home-trust-section,
+  .home-features-grid,
+  .home-how-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .home-picture-category {
+    min-height: 160px;
+    padding: 15px;
+  }
+
+  .home-category-picture {
+    width: 73px;
+    height: 73px;
+  }
+
+  .home-category-picture span {
+    font-size: 29px;
+  }
+
+  .category-card-content h3 {
+    font-size: 16px;
+  }
+
+  .category-card-content p {
+    font-size: 12px;
+  }
+
+  .home-trust-section {
+    padding: 20px 12px 40px;
+  }
+
+  .home-section {
+    padding: 40px 12px;
+  }
+
+  .home-how-column {
+    padding: 18px;
+  }
+}
+
+/* ACCESSIBILITY */
+
+.home-picture-category:focus-visible,
+.home-audio-help:focus-visible {
+  outline: 3px solid #0f67ba;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-picture-category,
+  .category-arrow {
+    transition: none;
+  }
+}
+
+/* ============================================
+   LOKROZGAR AI - LARGE HERO WITH BOTTOM FADE
+   ============================================ */
+
+/* LARGE HERO SECTION */
+
+.home-page .visual-hero {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 620px;
+
+  background-image: url("/backcover.jpeg");
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* SMOOTH WHITE FADE AT BOTTOM */
+
+.home-page .visual-hero::after {
+  content: "";
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 210px;
+
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 30%,
+    rgba(255, 255, 255, 0.55) 65%,
+    rgba(255, 255, 255, 1) 100%
+  );
+
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* HERO CONTENT */
+
+.home-page .visual-hero .hero-content {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 65px 5% 130px;
+}
+
+/* TEXT AREA */
+
+.home-page .visual-hero .hero-text-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 56%;
+  max-width: 720px;
+  text-align: center;
+}
+
+/* BIG SLOGAN */
+
+.home-page .visual-hero .hero-title {
+  width: 100%;
+  margin: 0;
+  color: #102a43;
+
+  font-size: clamp(40px, 4.5vw, 60px);
+  font-weight: 900;
+  line-height: 1.22;
+  letter-spacing: -1.2px;
+  text-align: center;
+
+  text-shadow: 0 2px 12px rgba(255, 255, 255, 0.55);
+}
+
+/* DESCRIPTION */
+
+.home-page .visual-hero .hero-description {
+  max-width: 590px;
+  margin: 22px auto 24px;
+  color: #334155;
+  font-size: 17px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+/* AI BADGE */
+
+.home-page .visual-hero .hero-badge {
+  margin-bottom: 24px;
+  padding: 11px 19px;
+  font-size: 14px;
+}
+
+/* AUDIO BUTTON */
+
+.home-page .visual-hero .home-audio-help {
+  min-height: 49px;
+  padding: 12px 20px;
+  font-size: 15px;
+}
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .home-page .visual-hero {
+    min-height: 520px;
+    background-position: 60% center;
+  }
+
+  .home-page .visual-hero .hero-content {
+    padding: 50px 4% 105px;
+  }
+
+  .home-page .visual-hero .hero-text-content {
+    width: 65%;
+  }
+
+  .home-page .visual-hero .hero-title {
+    font-size: clamp(32px, 4.5vw, 45px);
+  }
+
+  .home-page .visual-hero .hero-description {
+    font-size: 15px;
+  }
+
+  .home-page .visual-hero::after {
+    height: 170px;
+  }
+}
+
+/* MOBILE */
+
+@media (max-width: 600px) {
+  .home-page .visual-hero {
+    min-height: 480px;
+    background-position: 65% center;
+  }
+
+  .home-page .visual-hero .hero-content {
+    padding: 40px 4% 105px;
+  }
+
+  .home-page .visual-hero .hero-text-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 18px 12px;
+    background: rgba(255, 255, 255, 0.75);
+    border-radius: 16px;
+  }
+
+  .home-page .visual-hero .hero-title {
+    font-size: clamp(27px, 6vw, 35px);
+    line-height: 1.35;
+    letter-spacing: -0.4px;
+  }
+
+  .home-page .visual-hero .hero-description {
+    font-size: 13px;
+    margin: 15px auto 18px;
+  }
+
+  .home-page .visual-hero .hero-badge {
+    font-size: 11px;
+    margin-bottom: 15px;
+  }
+
+  .home-page .visual-hero .home-audio-help {
+    font-size: 12px;
+    padding: 10px 13px;
+  }
+
+  .home-page .visual-hero::after {
+    height: 150px;
+  }
+}

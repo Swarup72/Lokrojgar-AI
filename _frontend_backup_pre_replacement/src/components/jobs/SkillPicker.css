@@ -1,0 +1,165 @@
+/* Skill selection for the Add/Edit Job form.
+   Every control that repaints its ground restates `color`: index.css styles
+   each <button> white-on-blue, so omitting it renders the label invisibly. */
+
+.skill-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skill-picker-selected {
+  min-height: 34px;
+}
+
+.skill-picker-selected-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-picker-none {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+/* A selected skill is a solid primary tag; an option below is an outline.
+   The two states have to be distinguishable at a glance. */
+.skill-picker-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-primary);
+  color: #fff;
+  border-radius: var(--radius-pill);
+  padding: 6px 8px 6px 14px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  /* long Marathi/Hindi skill names wrap instead of overflowing the card */
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.skill-picker-tag button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+  border-radius: 50%;
+  padding: 3px;
+  min-width: 20px;
+  min-height: 20px;
+}
+
+.skill-picker-tag button:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.38);
+  color: #fff;
+}
+
+.skill-picker-clear {
+  background: none;
+  color: var(--color-muted);
+  padding: 4px 0;
+  font-size: var(--text-sm);
+  text-decoration: underline;
+}
+
+.skill-picker-clear:hover:not(:disabled) {
+  background: none;
+  color: var(--color-danger);
+}
+
+.skill-picker-suggested {
+  border: 1px dashed var(--color-border-strong);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+  background: var(--color-primary-50);
+}
+
+.skill-picker-suggested-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 8px;
+  font-size: var(--text-sm);
+  font-weight: 700;
+  color: var(--color-accent, var(--color-primary));
+}
+
+.skill-picker-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.skill-picker-option {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-pill);
+  padding: 7px 14px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  min-height: var(--touch-target-min);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.skill-picker-option:hover:not(:disabled) {
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.skill-picker-option:focus-visible,
+.skill-picker-tag button:focus-visible,
+.skill-picker-clear:focus-visible {
+  outline: var(--outline-focus);
+  outline-offset: 2px;
+}
+
+.skill-picker-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0 10px;
+  background: var(--color-surface);
+  color: var(--color-muted);
+}
+
+.skill-picker-search:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: var(--ring-focus);
+}
+
+.skill-picker-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  padding: 11px 0;
+  min-height: var(--touch-target-min);
+  background: none;
+  color: var(--color-ink);
+  font-size: var(--text-base);
+}
+
+.skill-picker-hint {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+  line-height: 1.45;
+}
+
+@media (max-width: 600px) {
+  .skill-picker-option,
+  .skill-picker-tag {
+    font-size: var(--text-sm);
+  }
+}

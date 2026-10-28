@@ -1,0 +1,33 @@
+.jobs-page {
+  max-width: 1000px;
+  padding: 32px 0 60px;
+}
+
+.jobs-header {
+  text-align: center;
+  margin-bottom: 28px;
+}
+
+.jobs-page-title {
+  font-size: var(--text-3xl);
+  color: var(--color-ink);
+  margin-bottom: 6px;
+}
+
+.jobs-header-desc {
+  color: var(--color-muted);
+  font-size: var(--text-base);
+}
+
+.jobs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+.jobs-page-loading {
+  display: flex;
+  justify-content: center;
+  padding: 60px 0;
+}

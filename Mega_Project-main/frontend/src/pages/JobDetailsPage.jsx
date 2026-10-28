@@ -33,6 +33,7 @@ import { normalizeError } from "../api/client";
 import { Card } from "../components/common/Card";
 import { StatusPill } from "../components/common/StatusPill";
 import { Spinner } from "../components/common/Spinner";
+import { speakText, stopSpeech } from "../utils/speech";
 import { ErrorBanner } from "../components/common/ErrorBanner";
 import { EmptyState } from "../components/common/EmptyState";
 import { JobStatusActions } from "../components/jobs/JobStatusActions";
@@ -173,9 +174,7 @@ export function JobDetailsPage() {
 
   useEffect(() => {
     return () => {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
+      stopSpeech();
     };
   }, []);
 
@@ -269,14 +268,8 @@ export function JobDetailsPage() {
   const speakJob = () => {
     setAudioError("");
 
-    if (!("speechSynthesis" in window)) {
-      setAudioError(ui.audioUnavailable);
-      return;
-    }
-
-    window.speechSynthesis.cancel();
-
     if (speaking) {
+      stopSpeech();
       setSpeaking(false);
       return;
     }
@@ -290,14 +283,22 @@ export function JobDetailsPage() {
       .filter(Boolean)
       .join(". ");
 
-    const utterance = new SpeechSynthesisUtterance(content);
-    utterance.lang = SPEECH_LANGUAGES[lang] || "en-IN";
-    utterance.rate = 0.88;
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
+    const started = speakText({
+      text: content,
+      lang,
+      rate: 0.88,
+      onStart: () => setSpeaking(true),
+      onEnd: () => setSpeaking(false),
+      onError: () => setSpeaking(false),
+      onNoVoice: () => {
+        setSpeaking(false);
+        setAudioError(ui.audioUnavailable);
+      },
+    });
 
-    setSpeaking(true);
-    window.speechSynthesis.speak(utterance);
+    if (!started) {
+      setSpeaking(false);
+    }
   };
 
   const handleApply = async (event) => {

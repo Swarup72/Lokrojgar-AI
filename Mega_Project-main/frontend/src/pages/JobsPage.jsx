@@ -28,6 +28,7 @@ import { useGeolocation } from "../hooks/useGeolocation";
 import { useLanguage } from "../hooks/useLanguage";
 import { JobCard } from "../components/jobs/JobCard";
 import { JobFilters } from "../components/jobs/JobFilters";
+import { speakText, stopSpeech } from "../utils/speech";
 import { Pagination } from "../components/common/Pagination";
 import { Spinner } from "../components/common/Spinner";
 import { EmptyState } from "../components/common/EmptyState";
@@ -177,7 +178,7 @@ export function JobsPage() {
   useEffect(() => {
     return () => {
       recognitionRef.current?.abort();
-      window.speechSynthesis?.cancel();
+      stopSpeech();
     };
   }, []);
 
@@ -305,21 +306,15 @@ export function JobsPage() {
   };
 
   const speakInstructions = () => {
-    if (!("speechSynthesis" in window)) {
-      setVoiceError(ui.voiceUnavailable);
-      return;
-    }
+    stopSpeech();
 
-    window.speechSynthesis.cancel();
-
-    const utterance = new SpeechSynthesisUtterance(
-      `${ui.popularJobs}. ${ui.helper} ${ui.locationHint}`
-    );
-
-    utterance.lang = speechLang;
-    utterance.rate = 0.88;
-
-    window.speechSynthesis.speak(utterance);
+    speakText({
+      text: `${ui.popularJobs}. ${ui.helper} ${ui.locationHint}`,
+      lang: speechLang,
+      rate: 0.88,
+      onError: () => setVoiceError(ui.voiceUnavailable),
+      onNoVoice: () => setVoiceError(ui.voiceUnavailable),
+    });
   };
 
   const jobs =

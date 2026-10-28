@@ -1,0 +1,28 @@
+.language-switcher {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  white-space: nowrap;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-pill);
+  padding: 3px;
+}
+
+.language-option {
+  background: transparent;
+  color: var(--color-text-3);
+  padding: 6px 10px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+}
+
+.language-option:hover:not(.active) {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+.language-option.active {
+  background: var(--color-primary);
+  color: #fff;
+}

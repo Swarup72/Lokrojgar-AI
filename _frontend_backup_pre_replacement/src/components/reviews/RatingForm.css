@@ -1,0 +1,36 @@
+.rating-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.rating-form-stars {
+  display: flex;
+  gap: 4px;
+}
+
+.rating-form-stars button {
+  background: transparent;
+  padding: 4px;
+  color: var(--color-faint);
+}
+
+.rating-form-stars svg.filled {
+  color: var(--color-warning);
+  fill: var(--color-warning);
+}
+
+.rating-form textarea {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: var(--text-sm);
+  resize: vertical;
+}
+
+.rating-form button[type="submit"] {
+  align-self: flex-start;
+  font-size: var(--text-sm);
+  padding: 8px 18px;
+}

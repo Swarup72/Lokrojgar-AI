@@ -1,0 +1,28 @@
+.job-status-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.job-status-actions-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.job-status-actions-buttons .btn {
+  padding: 8px 14px;
+  font-size: var(--text-xs);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.action-error-banner {
+  background: var(--color-danger-bg-soft);
+  color: var(--color-danger, var(--color-danger));
+  border: 1px solid var(--color-danger-border);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+}

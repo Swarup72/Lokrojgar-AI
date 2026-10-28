@@ -1,0 +1,88 @@
+/* Shared form primitives reused across WorkerProfileForm, EmployerProfileForm,
+   PostJobPage, and any other data-entry form - keeps their look consistent
+   without a form-library dependency. */
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 18px;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.form-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 16px;
+}
+
+.form-field input,
+.form-field select,
+.form-field textarea {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 12px 14px;
+  font-size: var(--text-base);
+  color: var(--color-text);
+  background: var(--color-surface);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.form-field input:focus-visible,
+.form-field select:focus-visible,
+.form-field textarea:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--ring-focus);
+  outline: none;
+}
+
+.form-field textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.form-chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.form-chip {
+  background: var(--color-surface);
+  color: var(--color-text-3);
+  border: 1px solid var(--color-border);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.form-chip.active {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  border-color: var(--color-primary-200);
+}
+
+@media (max-width: 600px) {
+  .form-field-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Skills grouped by trade: the trade chip, then its specific tasks. */
+.form-hint {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+  margin: 2px 0 8px;
+}
+
+.form-skill-group {
+  margin-bottom: 8px;
+}
+
+.form-chip-sub {
+  font-size: var(--text-xs);
+  opacity: 0.92;
+}

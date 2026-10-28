@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { useLanguage } from "../hooks/useLanguage";
+import { speakText, stopSpeech } from "../utils/speech";
 import "./HomePage.css";
 
 const FEATURE_KEYS = [
@@ -153,18 +154,12 @@ export function HomePage() {
 
   useEffect(() => {
     return () => {
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-      }
+      stopSpeech();
     };
   }, []);
 
   useEffect(() => {
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-    }
-
-    // Reset the audio button when language changes.
+    stopSpeech();
     setSpeaking(false);
     setAudioMessage("");
   }, [language]);
@@ -177,18 +172,12 @@ export function HomePage() {
   };
 
   const handleAudioHelp = () => {
-    if (!("speechSynthesis" in window)) {
-      setAudioMessage(labels.audioUnavailable);
-      return;
-    }
-
     if (speaking) {
-      window.speechSynthesis.cancel();
+      stopSpeech();
       setSpeaking(false);
       return;
     }
 
-    window.speechSynthesis.cancel();
     setAudioMessage("");
 
     const instructions = isMarathi
@@ -197,18 +186,28 @@ export function HomePage() {
       ? "लोक रोजगार ए आई में आपका स्वागत है। आपका काम, आपकी पहचान! नौकरी खोजने के लिए नौकरी खोजें पेज पर जाएं। आप नीचे दिए गए काम के चित्र पर क्लिक करके नौकरी खोज सकते हैं। अपनी प्रोफ़ाइल में जानकारी और कौशल जोड़ सकते हैं।"
       : "Welcome to Lokrozgar AI. Your Work, Your Identity! To find a job, open the Find Jobs page. You can also select a job category below. Complete your profile to show employers your skills and experience.";
 
-    const utterance = new SpeechSynthesisUtterance(
-      instructions
-    );
+    const started = speakText({
+      text: instructions,
+      lang,
+      rate: 0.88,
+      onStart: () => setSpeaking(true),
+      onEnd: () => setSpeaking(false),
+      onError: () => setSpeaking(false),
+      onNoVoice: ({ reason }) => {
+        setSpeaking(false);
+        setAudioMessage(
+          isMarathi
+            ? "तुमच्या ब्राऊझरमध्ये मराठी आवाज उपलब्ध नाही. कृपया स्क्रीनवरील सूचना वाचा."
+            : isHindi
+            ? "आपके ब्राउज़र में हिंदी आवाज़ उपलब्ध नहीं है। कृपया स्क्रीन पर दिए गए निर्देश पढ़ें।"
+            : labels.audioUnavailable
+        );
+      },
+    });
 
-    utterance.lang = LANGUAGE_CODES[lang] || "en-IN";
-    utterance.rate = 0.85;
-
-    utterance.onstart = () => setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
-    utterance.onerror = () => setSpeaking(false);
-
-    window.speechSynthesis.speak(utterance);
+    if (!started && !audioMessage) {
+      setSpeaking(false);
+    }
   };
 
   return (

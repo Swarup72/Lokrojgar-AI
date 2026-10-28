@@ -1,0 +1,160 @@
+.job-review-container {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.job-review-header {
+  margin-bottom: 20px;
+}
+
+.job-review-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: transparent;
+  color: var(--color-primary);
+  border: none;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 12px;
+}
+
+.job-review-back-btn:hover {
+  text-decoration: underline;
+}
+
+.job-review-header h2 {
+  font-size: var(--text-2xl);
+  margin-bottom: 6px;
+}
+
+.job-review-subtitle {
+  color: var(--color-muted);
+  font-size: var(--text-sm);
+}
+
+.job-review-ai-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--color-primary-50);
+  border: 1px solid var(--color-primary-200);
+  border-radius: var(--radius-md);
+  padding: 14px 16px;
+  color: var(--color-primary);
+  margin-bottom: 20px;
+}
+
+.job-review-ai-notice strong {
+  display: block;
+  font-size: var(--text-sm);
+  margin-bottom: 2px;
+}
+
+.job-review-ai-notice p {
+  font-size: var(--text-xs);
+  color: var(--color-text-2);
+  margin: 0;
+}
+
+.job-review-card {
+  padding: 24px;
+}
+
+.job-review-title-section {
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.job-review-title-section h3 {
+  font-size: var(--text-xl);
+  margin-bottom: 8px;
+}
+
+.job-review-desc {
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.job-review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.job-review-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.job-review-item svg {
+  color: var(--color-primary);
+  margin-top: 3px;
+  flex-shrink: 0;
+}
+
+.job-review-item-label {
+  display: block;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.job-review-item-value {
+  display: block;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.job-review-skills {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--color-border);
+}
+
+.job-review-skill-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.job-review-chip {
+  display: inline-block;
+  padding: 6px 12px;
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 500;
+}
+
+.job-review-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--color-border);
+}
+
+@media (max-width: 600px) {
+  .job-review-grid {
+    grid-template-columns: 1fr;
+  }
+  .job-review-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+}

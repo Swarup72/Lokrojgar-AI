@@ -1,0 +1,33 @@
+.rating-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--color-faint);
+}
+
+.rating-stars svg.filled {
+  color: var(--color-warning);
+  fill: var(--color-warning);
+}
+
+.rating-stars-value {
+  margin-left: 6px;
+  font-weight: 700;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+}
+
+.rating-stars-count {
+  color: var(--color-muted);
+  font-size: var(--text-xs);
+}
+
+/* Never-rated: visibly different from a low rating, never shown as 0.0. */
+.rating-stars-unrated {
+  color: var(--color-faint);
+}
+
+.rating-stars-unrated-text {
+  font-size: var(--text-xs);
+  font-weight: 600;
+}

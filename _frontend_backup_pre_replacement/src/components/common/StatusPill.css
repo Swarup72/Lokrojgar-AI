@@ -1,0 +1,33 @@
+.status-pill {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-pill-success {
+  background: var(--color-success-bg);
+  color: var(--color-success-text);
+}
+
+.status-pill-warning {
+  background: var(--color-warning-bg);
+  color: var(--color-warning-text);
+}
+
+.status-pill-danger {
+  background: var(--color-danger-bg);
+  color: var(--color-danger-text);
+}
+
+.status-pill-info {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+}
+
+.status-pill-muted {
+  background: var(--color-surface-alt);
+  color: var(--color-text-3);
+}

@@ -1,0 +1,144 @@
+.worker-dashboard {
+  max-width: 1000px;
+  padding: 32px 20px 60px;
+}
+
+.worker-dashboard-header {
+  margin-bottom: 24px;
+}
+
+.worker-dashboard-header h1 {
+  font-size: var(--text-2xl);
+  color: var(--color-ink);
+  margin-bottom: 4px;
+}
+
+.worker-dashboard-sub {
+  color: var(--color-muted);
+  font-size: var(--text-base);
+}
+
+.worker-dashboard-completion-card {
+  padding: 18px 22px;
+  margin-bottom: 24px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.completion-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-size: var(--text-sm);
+}
+
+.completion-text {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.completion-sparkle {
+  color: var(--color-primary);
+}
+
+.worker-dashboard-completion-bar {
+  height: 10px;
+  background: var(--color-surface-alt);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.worker-dashboard-completion-bar > div {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+
+.worker-dashboard-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 36px;
+}
+
+.visual-action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.worker-dashboard-section {
+  margin-bottom: 40px;
+}
+
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.section-title-row h2 {
+  font-size: var(--text-xl);
+  color: var(--color-ink);
+}
+
+.section-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.worker-dashboard-job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.worker-dashboard-applications {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 14px;
+}
+
+.worker-dashboard-application-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.worker-dashboard-application-card h3 {
+  font-size: 15px;
+  color: var(--color-ink);
+  margin-bottom: 4px;
+}
+
+.worker-dashboard-application-card p {
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .worker-dashboard-applications {
+    grid-template-columns: 1fr;
+  }
+}

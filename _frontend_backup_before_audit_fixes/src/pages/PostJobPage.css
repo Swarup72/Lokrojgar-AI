@@ -1,0 +1,68 @@
+.post-job-page {
+  max-width: 720px;
+  padding: 32px 0 60px;
+}
+
+.post-job-page h1 {
+  font-size: var(--text-2xl);
+  margin-bottom: 20px;
+}
+
+/* --- voice / manual mode chooser ------------------------------------------ */
+
+.post-job-modes {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.post-job-mode {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 20px;
+  text-align: left;
+  background: var(--color-surface);
+  color: var(--color-ink);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  min-height: var(--touch-target-min);
+}
+
+.post-job-mode:hover,
+.post-job-mode:focus-visible {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-card);
+}
+
+.post-job-mode svg {
+  color: var(--color-primary);
+}
+
+.post-job-mode strong {
+  font-size: var(--text-md);
+  color: var(--color-ink);
+}
+
+.post-job-mode span {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.45;
+}
+
+.post-job-voice-language {
+  max-width: 260px;
+  margin-bottom: 16px;
+}
+
+/* One column on a phone: two side-by-side cards leave the descriptions
+   unreadably narrow at 600px and below. */
+@media (max-width: 600px) {
+  .post-job-modes {
+    grid-template-columns: 1fr;
+  }
+}

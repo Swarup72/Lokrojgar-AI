@@ -1,0 +1,31 @@
+.availability-toggle {
+  display: inline-flex;
+  gap: 4px;
+  background: var(--color-surface-alt);
+  padding: 4px;
+  border-radius: var(--radius-pill);
+}
+
+.availability-option {
+  background: transparent;
+  color: var(--color-text-3);
+  padding: 8px 14px;
+  border-radius: var(--radius-pill);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.availability-option.availability-available.active {
+  background: var(--color-success);
+  color: #fff;
+}
+
+.availability-option.availability-busy.active {
+  background: var(--color-warning);
+  color: #fff;
+}
+
+.availability-option.availability-unavailable.active {
+  background: var(--color-danger);
+  color: #fff;
+}

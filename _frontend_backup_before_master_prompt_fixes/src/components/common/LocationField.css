@@ -1,0 +1,44 @@
+.location-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.location-field-current {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-text-2);
+  font-size: var(--text-sm);
+}
+
+.location-field-current svg {
+  color: var(--color-primary);
+}
+
+.location-field-empty {
+  color: var(--color-faint);
+}
+
+.location-field-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  font-weight: 700;
+}
+
+.location-field-btn:hover:not(:disabled) {
+  background: var(--color-primary-100);
+}
+
+.location-field-error {
+  color: var(--color-danger-text);
+  font-size: var(--text-xs);
+  width: 100%;
+}

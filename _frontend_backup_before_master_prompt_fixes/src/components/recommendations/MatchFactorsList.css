@@ -1,0 +1,41 @@
+.match-factors-list {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 16px;
+}
+
+.match-factors-list li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: var(--text-xs);
+}
+
+.match-factors-list li.available {
+  color: var(--color-success-text);
+}
+
+.match-factors-list li.unavailable {
+  color: var(--color-faint);
+}
+
+.match-factors-summary {
+  margin: 6px 0 0;
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  line-height: 1.4;
+}
+
+.match-skill-zero-note {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 6px 0 0;
+  font-size: 0.76rem;
+  color: #b45309;
+  font-weight: 600;
+}
+

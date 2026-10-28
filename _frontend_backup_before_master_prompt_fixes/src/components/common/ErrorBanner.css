@@ -1,0 +1,26 @@
+.error-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--color-danger-bg-soft);
+  border: 1px solid var(--color-danger-border);
+  color: var(--color-danger-text);
+  padding: 12px 16px;
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+}
+
+.error-banner-retry {
+  margin-left: auto;
+  background: transparent;
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+  padding: 6px 12px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  border-radius: var(--radius-sm);
+}
+
+.error-banner-retry:hover {
+  background: var(--color-danger-bg);
+}

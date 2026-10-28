@@ -1,0 +1,250 @@
+/*
+  Admin Pages Common CSS Styles
+*/
+
+/* Admin Login Page */
+.admin-login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 20%, #eff6ff 0%, #f8fafc 100%);
+  padding: var(--space-4);
+}
+
+.admin-login-card {
+  max-width: 440px;
+  width: 100%;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-hover);
+  padding: var(--space-8);
+  animation: authCardEnter 0.4s ease-out;
+}
+
+.admin-login-header {
+  text-align: center;
+  margin-bottom: var(--space-6);
+}
+
+.admin-login-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-pill);
+  background-color: var(--color-primary-50);
+  border: 2px solid var(--color-primary-200);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--space-4);
+}
+
+.admin-login-title {
+  font-size: var(--text-2xl);
+  font-weight: 800;
+  color: var(--color-ink);
+}
+
+.admin-login-subtitle {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  margin-top: var(--space-1);
+}
+
+.admin-login-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.admin-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.admin-form-label {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-text-2);
+}
+
+.admin-login-submit {
+  margin-top: var(--space-2);
+  width: 100%;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.admin-login-footer {
+  margin-top: var(--space-6);
+  text-align: center;
+}
+
+.admin-login-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-decoration: none;
+}
+
+.admin-login-back-link:hover {
+  color: var(--color-primary);
+}
+
+/* Alert Boxes */
+.admin-alert {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  margin-bottom: var(--space-4);
+}
+
+.admin-alert-danger {
+  background-color: var(--color-danger-bg);
+  color: var(--color-danger-text);
+  border: 1px solid var(--color-danger-border);
+}
+
+.admin-alert-success {
+  background-color: var(--color-success-bg);
+  color: var(--color-success-text);
+  border: 1px solid var(--color-success);
+}
+
+/* Dashboard Trend Visualizers */
+.admin-trends-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: var(--space-5);
+  margin-bottom: var(--space-6);
+}
+
+.admin-chart-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-card);
+}
+
+.admin-chart-title {
+  font-size: var(--text-md);
+  font-weight: 700;
+  color: var(--color-ink);
+  margin-bottom: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.admin-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  height: 180px;
+  padding-top: var(--space-4);
+  border-bottom: 2px solid var(--color-border);
+}
+
+.admin-bar-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 100%;
+  justify-content: flex-end;
+  gap: var(--space-2);
+}
+
+.admin-bar {
+  width: 100%;
+  max-width: 38px;
+  border-radius: 4px 4px 0 0;
+  background-color: var(--color-primary);
+  min-height: 4px;
+  transition: height var(--dur-base) var(--ease), background-color var(--dur-fast) var(--ease);
+}
+
+.admin-bar-blue {
+  background-color: var(--color-primary);
+}
+
+.admin-bar-green {
+  background-color: var(--color-success);
+}
+
+.admin-bar-amber {
+  background-color: var(--color-warning);
+}
+
+.admin-bar-col:hover .admin-bar {
+  filter: brightness(1.15);
+}
+
+.admin-bar-val {
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  color: var(--color-text-2);
+}
+
+.admin-bar-label {
+  font-size: var(--text-2xs);
+  color: var(--color-muted);
+  white-space: nowrap;
+}
+
+/* Detail Inspection Modal Grid */
+.admin-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
+}
+
+.admin-detail-item {
+  padding: var(--space-3);
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-sm);
+}
+
+.admin-detail-label {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.admin-detail-val {
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* Form Controls in Admin */
+.admin-textarea {
+  width: 100%;
+  min-height: 90px;
+  padding: 10px 14px;
+  background: white;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: inherit;
+  outline: none;
+  resize: vertical;
+}
+
+.admin-textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}

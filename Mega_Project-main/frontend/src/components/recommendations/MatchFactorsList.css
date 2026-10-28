@@ -29,3 +29,13 @@
   line-height: 1.4;
 }
 
+.match-skill-zero-note {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin: 6px 0 0;
+  font-size: 0.76rem;
+  color: #b45309;
+  font-weight: 600;
+}
+
