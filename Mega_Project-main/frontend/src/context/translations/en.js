@@ -1,9 +1,6 @@
 export default {
-  // App
   "app.name": "LokRozgar",
   "app.tagline": "Connecting local workers with local opportunities",
-
-  // Navigation
   "nav.home": "Home",
   "nav.jobs": "Find Jobs",
   "nav.dashboard": "Dashboard",
@@ -23,8 +20,6 @@ export default {
   "nav.closeMenu": "Close navigation menu",
   "nav.userRole": "Account Role",
   "nav.dualRole": "Worker & Employer",
-
-  // Flat nav aliases
   "home": "Home",
   "findJobs": "Find Jobs",
   "dashboard": "Dashboard",
@@ -35,8 +30,6 @@ export default {
   "register": "Register",
   "logout": "Logout",
   "employerProfile": "Employer Profile",
-
-  // Common actions & statuses
   "common.loading": "Loading...",
   "common.retry": "Try again",
   "common.cancel": "Cancel",
@@ -93,8 +86,6 @@ export default {
   "common.viewDetails": "View Details",
   "common.saveChanges": "Save Changes",
   "common.viewAll": "View All",
-
-  // Homepage
   "home.hero.line1": "Find work.",
   "home.hero.line2": "Hire local talent.",
   "home.hero.line3": "In your language.",
@@ -124,15 +115,12 @@ export default {
   "home.howItWorks.employers.step2": "Get recommended workers",
   "home.howItWorks.employers.step3": "Review applicants",
   "home.howItWorks.employers.step4": "Hire",
-
-  // Reference visual home aliases
   "aiPoweredMatching": "AI-Powered Job Matching",
   "findRightJob": "Find the Right Job.",
   "buildFuture": "Build Your Future.",
   "homeDescription": "LOKROZGAR AI connects skilled workers with trusted job opportunities near them.",
   "jobSearchQuestion": "What job are you looking for?",
-  "jobSearchPlaceholder": "E.g. Electrician, Driver, Plumber",
-  "listenToInstructions": "Listen to instructions",
+  "jobSearchPlaceholder": "Electrician, Driver, Plumber...",
   "where": "Where?",
   "locationPlaceholder": "Kolhapur, Pune, Mumbai...",
   "browseAllJobs": "Browse All Jobs",
@@ -147,8 +135,6 @@ export default {
   "connectDirectlyDesc": "Discover opportunities from employers looking for your skills.",
   "findFaster": "Find Faster",
   "findFasterDesc": "AI-powered matching helps you discover relevant jobs quickly.",
-
-  // Categories
   "electrician": "Electrician",
   "electricianDesc": "Wiring & repair jobs",
   "plumber": "Plumber",
@@ -161,8 +147,6 @@ export default {
   "constructionDesc": "Construction work",
   "securityGuard": "Security Guard",
   "securityDesc": "Security jobs",
-
-  // Auth (Login & Register)
   "auth.login.title": "Log in to LokRozgar",
   "auth.login.phone": "Phone number",
   "auth.login.password": "Password",
@@ -193,8 +177,6 @@ export default {
   "auth.register.loginLink": "Log in",
   "auth.error.invalidPhone": "Enter a valid 10-digit Indian phone number.",
   "auth.error.shortPassword": "Password must be at least 6 characters.",
-
-  // Auth flat aliases
   "welcomeBack": "Welcome Back",
   "loginSubtitle": "Login to continue to LOKROZGAR AI",
   "mobileEmail": "Mobile Number",
@@ -217,8 +199,6 @@ export default {
   "mobileNumberPlaceholder": "Enter mobile number",
   "createPassword": "Create a password",
   "alreadyAccount": "Already have an account?",
-
-  // Jobs search & details
   "jobs.search.title": "Find Jobs That Match Your Skills",
   "jobs.search.subtitle": "Search for jobs based on your skills, location and experience.",
   "jobs.search.keywordPlaceholder": "Search by job title or skill (e.g. Electrician, Driver)...",
@@ -259,8 +239,6 @@ export default {
   "jobs.details.matchFactors": "Matching Factors",
   "jobs.details.back": "Back to Jobs",
   "jobs.details.share": "Share Job",
-
-  // Job details flat aliases
   "jobTitle": "Job Title",
   "jobDescription": "Job Description",
   "salary": "Salary",
@@ -275,8 +253,6 @@ export default {
   "applicationSubmitted": "Application Submitted!",
   "applyNow": "Apply Now",
   "loginToApply": "Login to Apply",
-
-  // Post & Edit Job
   "jobs.post.title": "Post a New Job",
   "jobs.post.subtitle": "Create a job posting to discover and hire verified local workers.",
   "jobs.edit.title": "Edit Job Posting",
@@ -314,8 +290,6 @@ export default {
   "jobs.form.cancel": "Cancel",
   "jobs.form.successCreate": "Job posted successfully!",
   "jobs.form.successUpdate": "Job updated successfully!",
-
-  // Worker Dashboard
   "worker.dashboard.welcome": "Hello, {{name}}",
   "worker.dashboard.profileComplete": "{{percent}}% profile complete",
   "worker.dashboard.completeProfilePrompt": "Complete your profile to get better job recommendations.",
@@ -330,8 +304,6 @@ export default {
   "worker.dashboard.recentApplicationsTitle": "Recent Applications",
   "worker.dashboard.noApplications": "You haven't applied to any jobs yet.",
   "worker.dashboard.viewAllApplications": "View All Applications",
-
-  // Employer Dashboard
   "employer.dashboard.welcome": "Welcome, {{name}}",
   "employer.dashboard.subtitle": "Manage your job listings, review applicant matches, and hire local workers.",
   "employer.dashboard.stats.postedJobs": "Posted Jobs",
@@ -349,8 +321,6 @@ export default {
   "employer.dashboard.actions.close": "Close Job",
   "employer.dashboard.actions.reopen": "Reopen Job",
   "employer.dashboard.actions.cancel": "Cancel Job",
-
-  // Applications & Hiring
   "applications.title": "My Applications",
   "applications.subtitle": "Track the status of all your job applications in real time.",
   "applications.filterAll": "All ({{count}})",
@@ -366,8 +336,6 @@ export default {
   "applications.coverNote": "Cover note:",
   "applications.appliedOn": "Applied on {{date}}",
   "applications.matchScoreBadge": "{{score}}% Match",
-
-  // Applicants Management (Employer)
   "applicants.title": "Applicants for {{jobTitle}}",
   "applicants.subtitle": "Review worker applications, match scores, and make hiring decisions.",
   "applicants.totalCount": "{{count}} total applicants",
@@ -386,15 +354,11 @@ export default {
   "applicants.acceptSuccess": "Worker accepted and assigned to the job!",
   "applicants.rejectSuccess": "Application rejected.",
   "applicants.shortlistSuccess": "Applicant shortlisted.",
-
-  // Recommended Workers (Employer)
   "recommendedWorkers.title": "Recommended Workers",
   "recommendedWorkers.subtitle": "AI-recommended candidates for {{jobTitle}} based on skills, location & ratings.",
   "recommendedWorkers.noMatches": "No matching workers found at this moment. Check back soon!",
   "recommendedWorkers.sendRequest": "Send Job Offer / Request",
   "recommendedWorkers.requestSent": "Request Sent",
-
-  // Worker Profile
   "profile.title": "Worker Profile",
   "profile.subtitle": "Keep your personal details, work skills, and availability updated.",
   "profile.fullName": "Full Name",
@@ -417,8 +381,6 @@ export default {
   "profile.reviewsCount": "{{count}} ratings from completed jobs",
   "profile.save": "Save Profile",
   "profile.savedSuccess": "Profile updated successfully!",
-
-  // Employer Profile
   "employerProfile.title": "Employer Profile",
   "employerProfile.subtitle": "Manage your business profile, contact details, and hiring verification.",
   "employerProfile.businessName": "Business Name",
@@ -433,8 +395,6 @@ export default {
   "employerProfile.pincode": "Pincode",
   "employerProfile.save": "Save Employer Profile",
   "employerProfile.savedSuccess": "Employer profile saved successfully!",
-
-  // Direct Job Requests (Worker)
   "jobRequests.title": "Direct Job Requests",
   "jobRequests.subtitle": "Employers who selected your profile and offered you work directly.",
   "jobRequests.noRequests": "No direct job requests at this moment.",
@@ -442,8 +402,6 @@ export default {
   "jobRequests.reject": "Decline",
   "jobRequests.accepted": "Accepted",
   "jobRequests.rejected": "Declined",
-
-  // Messages & Chat
   "chat.title": "Messages",
   "chat.subtitle": "Communicate directly with employers and workers.",
   "chat.noConversations": "No active conversations yet.",
@@ -452,16 +410,12 @@ export default {
   "chat.send": "Send",
   "chat.online": "Online",
   "chat.jobContext": "Regarding job: {{title}}",
-
-  // Error messages
   "errors.network": "Unable to connect to the server. Please check your internet connection.",
   "errors.unknown": "Something went wrong. Please try again.",
   "errors.notFound": "Page or resource not found.",
   "errors.unauthorized": "Please log in to access this page.",
   "errors.forbidden": "You do not have permission to view this page.",
   "errors.rateLimit": "Too many requests. Please wait a moment before trying again.",
-
-  // Voice profile
   "voice.mode.title": "How would you like to do this?",
   "voice.mode.quick.title": "Say everything at once",
   "voice.mode.quick.desc": "One recording covering your name, pay, experience, skills and city. Fastest if you know what to say.",
@@ -531,8 +485,6 @@ export default {
   "profile.employer.voiceBanner.title": "Set up profile with voice",
   "profile.employer.voiceBanner.desc": "Answer 4 quick questions using your voice to complete your employer profile in seconds.",
   "profile.employer.voiceBanner.action": "Use Voice Setup",
-
-  // --- keys the pages call directly (added to stop raw keys rendering) ---
   "message": "Message",
   "accept": "Accept",
   "markComplete": "Mark Complete",
@@ -660,8 +612,6 @@ export default {
   "checkBackSoon": "Check back soon.",
   "dashboard.greeting": "Hello, {{name}}",
   "noJobsMatchFilter": "No jobs match the '{{filter}}' filter.",
-
-  // --- shared component strings (were hardcoded English) ---
   "common.village": "Village",
   "common.processing": "Processing...",
   "common.goHome": "Go back home",
@@ -782,8 +732,6 @@ export default {
   "status.partiallyAssigned": "Partially assigned",
   "status.assigned": "Assigned",
   "status.expired": "Expired",
-
-  // --- error copy and job lifecycle actions ---
   "error.badRequest": "Please check your input and try again.",
   "error.sessionExpired": "Your session has expired. Please log in again.",
   "error.forbidden": "You don't have permission to do that.",
@@ -796,10 +744,6 @@ export default {
   "error.voice.forbidden": "You are not authorized to create a voice profile.",
   "error.voice.tooLarge": "Audio file is too large. Please choose a smaller file (max 15MB).",
   "error.voice.unavailable": "Voice AI is temporarily unavailable. Please try again later.",
-  "error.auth.invalidCredentials": "Incorrect password or phone number. Please try again.",
-  "error.auth.blocked": "Your account has been blocked by an administrator.",
-  "error.auth.userNotFound": "No account found with this phone number.",
-  "error.auth.alreadyExists": "An account with this phone number already exists.",
   "error.network": "Unable to connect to the server. Please check your internet connection.",
   "error.timeout": "The request took too long. Please try again.",
   "error.unknown": "Something went wrong. Please try again.",
@@ -833,8 +777,6 @@ export default {
   "map.viewOnMap": "View on map",
   "map.navigate": "Navigate",
   "voice.stopRecording": "Stop Recording",
-
-  // --- guided voice job posting ---
   "voiceJob.chooseSubtitle": "Type the job in yourself, or speak it and we'll fill the form for you.",
   "voiceJob.modeManual": "Fill the form",
   "voiceJob.modeManualDesc": "Type the job details yourself.",
@@ -891,8 +833,6 @@ export default {
   "voiceJob.error.too_many_words": "That was too long. Please say it more briefly.",
   "voiceJob.error.no_skills_found": "We could not pick out any skills. Please name them again.",
   "voice.guided.next": "Next",
-
-  // --- skill picker ---
   "skills.pickerNoneSelected": "No skills chosen yet.",
   "skills.clearAll": "Clear all",
   "skills.suggestedLabel": "Suggested from your description — tap to add",
@@ -902,15 +842,17 @@ export default {
   "skills.searchPlaceholder": "Search for a skill...",
   "skills.chooseCategoryFirst": "Choose a category first to search its skills.",
   "skills.noMatches": "No skill matches “{{query}}”.",
-
-  // --- Admin Panel Module ---
+  "listenToInstructions": "Listen to instructions",
+  "error.auth.invalidCredentials": "Incorrect password or phone number. Please try again.",
+  "error.auth.blocked": "Your account has been blocked by an administrator.",
+  "error.auth.userNotFound": "No account found with this phone number.",
+  "error.auth.alreadyExists": "An account with this phone number already exists.",
   "admin.portal": "Admin Portal",
   "admin.roleAdmin": "Admin",
   "admin.navAria": "Admin Navigation",
   "admin.returnToSite": "Return to Site",
   "admin.toggleMenu": "Toggle navigation menu",
   "nav.adminDashboard": "Admin Panel",
-
   "admin.nav.dashboard": "Dashboard",
   "admin.nav.workers": "Workers",
   "admin.nav.employers": "Employers",
@@ -921,13 +863,11 @@ export default {
   "admin.nav.announcements": "Announcements",
   "admin.nav.aiMonitoring": "AI Monitoring",
   "admin.nav.auditLogs": "Audit Logs",
-
   "admin.paginationShowing": "Showing page",
   "admin.paginationItems": "total items",
   "admin.prevPage": "Previous page",
   "admin.nextPage": "Next page",
   "admin.noDataFound": "No records found matching your criteria.",
-
   "admin.status.active": "Active",
   "admin.status.suspended": "Suspended",
   "admin.status.verified": "Verified",
@@ -942,7 +882,6 @@ export default {
   "admin.filter.allPayTypes": "All Pay Types",
   "admin.moderation.reasonLabel": "Reason for Action (Recorded in audit log)",
   "admin.moderation.reasonPlaceholder": "Enter clear justification for this action...",
-
   "admin.login.unauthorized": "This account does not have administrator privileges.",
   "admin.login.failed": "Administrator login failed. Please verify credentials.",
   "admin.login.portalTitle": "Administrator Portal",
@@ -952,7 +891,6 @@ export default {
   "admin.login.passwordLabel": "Admin Password",
   "admin.login.passwordPlaceholder": "Enter your secure password",
   "admin.login.submitButton": "Sign In as Administrator",
-
   "admin.dashboard.title": "Platform Overview",
   "admin.dashboard.subtitle": "Real-time analytics, platform growth trends, and required actions",
   "admin.dashboard.fetchError": "Failed to load dashboard metrics.",
@@ -975,7 +913,6 @@ export default {
   "admin.dashboard.recentActivityTitle": "Recent Administrative & Platform Activity",
   "admin.dashboard.viewAllLogs": "View All Logs",
   "admin.dashboard.noRecentActivity": "No recent platform activity recorded.",
-
   "admin.workers.title": "Worker Management",
   "admin.workers.subtitle": "Search, inspect, and moderate blue-collar worker accounts",
   "admin.workers.fetchError": "Failed to fetch worker accounts.",
@@ -1003,7 +940,6 @@ export default {
   "admin.workers.confirmSuspend": "Suspend Worker Account",
   "admin.workers.reactivatePrompt": "Are you sure you want to reactivate this worker account?",
   "admin.workers.suspendPrompt": "Are you sure you want to suspend this worker account? They will be unable to sign in or apply for jobs.",
-
   "admin.employers.title": "Employer Management",
   "admin.employers.subtitle": "Manage employer business verification, job history, and access status",
   "admin.employers.fetchError": "Failed to fetch employers.",
@@ -1032,7 +968,6 @@ export default {
   "admin.employers.confirmSuspend": "Suspend Employer Account",
   "admin.employers.reactivatePrompt": "Are you sure you want to reactivate this employer account?",
   "admin.employers.suspendPrompt": "Are you sure you want to suspend this employer account? Suspended employers are blocked from posting new jobs.",
-
   "admin.jobs.title": "Job Moderation",
   "admin.jobs.subtitle": "Review, inspect, and moderate all platform job postings",
   "admin.jobs.fetchError": "Failed to fetch job postings.",
@@ -1058,7 +993,6 @@ export default {
   "admin.jobs.disputesTitle": "Associated Complaints / Disputes",
   "admin.jobs.moderateModalTitle": "Job Moderation Action",
   "admin.jobs.moderateActionPrompt": "You are applying moderation action:",
-
   "admin.applications.title": "Applications & Hiring Activity",
   "admin.applications.subtitle": "Administrative overview of hiring flow and candidate match scores",
   "admin.applications.fetchError": "Failed to fetch applications.",
@@ -1079,7 +1013,6 @@ export default {
   "admin.applications.proposedPay": "Proposed Pay",
   "admin.applications.matchFactorsTitle": "AI Match Factors Breakdown",
   "admin.applications.coverNoteTitle": "Cover Note / Statement",
-
   "admin.reports.title": "Reports & Complaints Management",
   "admin.reports.subtitle": "Review user complaints, inspect evidence, and enforce resolutions",
   "admin.reports.fetchError": "Failed to load disputes.",
@@ -1103,7 +1036,6 @@ export default {
   "admin.reports.resolvedBy": "Resolved by Administrator",
   "admin.reports.updateStatusTitle": "Update Dispute Status & Resolution",
   "admin.reports.resolutionNotePlaceholder": "Detail findings, decisions and remedial actions taken...",
-
   "admin.ratings.title": "Rating & Review Moderation",
   "admin.ratings.subtitle": "Audit feedback, flag offensive comments, and enforce review standards",
   "admin.ratings.fetchError": "Failed to fetch ratings.",
@@ -1127,7 +1059,6 @@ export default {
   "admin.ratings.flagReview": "Flag & Moderate",
   "admin.ratings.originalReview": "Original Review Text",
   "admin.ratings.hideOffensiveContent": "Remove offensive text and replace with standard notice",
-
   "admin.announcements.title": "Platform Announcements",
   "admin.announcements.subtitle": "Broadcast targeted, multilingual announcements across the platform",
   "admin.announcements.fetchError": "Failed to load notification statistics.",
@@ -1156,7 +1087,6 @@ export default {
   "admin.announcements.confirmSendBtn": "Dispatch Now",
   "admin.announcements.confirmSendPrompt": "You are about to broadcast this notification to",
   "admin.announcements.confirmSendWarning": "This will trigger system notifications across all active user accounts in the selected group.",
-
   "admin.ai.title": "AI Service Telemetry & Health",
   "admin.ai.subtitle": "Live telemetry, response latency, and status of the FastAPI AI microservice",
   "admin.ai.fetchError": "Failed to connect to AI monitoring service.",
@@ -1184,7 +1114,6 @@ export default {
   "admin.ai.privacyDesc": "Raw speech audio files, private prompts, personal credentials, and API secret keys are never exposed in administrative views.",
   "admin.ai.evaluationStatusLabel": "Live Evaluation Metrics",
   "admin.ai.evaluationDesc": "Offline ground-truth benchmark suite required before displaying quantitative accuracy percentages. Real-time telemetry is displayed above.",
-
   "admin.audit.title": "System Audit Trail",
   "admin.audit.subtitle": "Tamper-evident record of all administrative decisions, suspensions, and verifications",
   "admin.audit.fetchError": "Failed to load audit trail.",
@@ -1198,8 +1127,6 @@ export default {
   "admin.audit.allActionTypes": "All Action Types",
   "admin.audit.modalTitle": "Audit Record Details",
   "admin.audit.metadataTitle": "Sanitized Operation Metadata",
-
-  // Notifications
   "nav.notifications": "Notifications",
   "notifications.title": "Notification Inbox",
   "notifications.subtitle": "Stay updated on jobs, application status, payments, and announcements",
@@ -1223,5 +1150,7 @@ export default {
   "notifications.typeChat": "Message",
   "notifications.viewDetails": "View Details",
   "notifications.pageShowing": "Page {{page}} of {{totalPages}}",
+  "footer.explore": "Explore",
+  "footer.account": "Account",
+  "footer.madeWith": "Made with ❤️ for workers and employers"
 };
-

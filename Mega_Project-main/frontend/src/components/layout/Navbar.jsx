@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react";
-import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
+import { Link, NavLink, useNavigate, useLocation } from "react-router-dom";
+
 import {
   Home,
   Briefcase,
   LayoutDashboard,
-  User,
   FileText,
   PlusCircle,
   LogOut,
@@ -12,17 +12,19 @@ import {
   UserPlus,
   Inbox,
   MessageSquare,
-  Bell,
-  Menu,
-  X,
   BadgeCheck,
+  Languages,
+  Bell,
   Shield,
 } from "lucide-react";
-import { getUnreadCount } from "../../api/notifications";
+
 import { useAuth } from "../../hooks/useAuth";
 import { useLanguage } from "../../hooks/useLanguage";
 import { LanguageSwitcher } from "../common/LanguageSwitcher";
+import { ProfileAvatar } from "../common/ProfileAvatar";
 import { USER_ROLES } from "../../utils/enums";
+import { getUnreadCount } from "../../api/notifications";
+
 import "./Navbar.css";
 
 export function Navbar() {
@@ -31,14 +33,22 @@ export function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
 
   const roles = user?.roles || [];
+
   const isWorker = roles.includes(USER_ROLES.WORKER);
   const isEmployer = roles.includes(USER_ROLES.EMPLOYER);
   const isAdmin = roles.includes(USER_ROLES.ADMIN);
   const isDualRole = isWorker && isEmployer;
+
+  const activeRole = isWorker
+    ? "worker"
+    : isEmployer
+    ? "employer"
+    : isAdmin
+    ? "admin"
+    : "worker";
 
   // Fetch unread notifications count when authenticated
   useEffect(() => {
@@ -66,343 +76,333 @@ export function Navbar() {
     };
   }, [isAuthenticated, location.pathname]);
 
-  // Close drawer whenever the route changes
-  useEffect(() => {
-    setIsMobileOpen(false);
-  }, [location.pathname]);
-
-  // Close drawer on Escape key press
-  useEffect(() => {
-    const handleKeyDown = (e) => {
-      if (e.key === "Escape" && isMobileOpen) {
-        setIsMobileOpen(false);
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMobileOpen]);
-
-  // Lock body scroll when drawer is open
-  useEffect(() => {
-    if (isMobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
-    }
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [isMobileOpen]);
+  const navLinkClass = ({ isActive }) =>
+    `sidebar-link ${isActive ? "active" : ""}`;
 
   const handleLogout = async () => {
-    await logout();
-    setIsMobileOpen(false);
-    navigate("/");
+    try {
+      await logout();
+      navigate("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
-  const navLinkClass = ({ isActive }) =>
-    `navbar-link nav-item ${isActive ? "active" : ""}`;
-
-  const drawerLinkClass = ({ isActive }) =>
-    `nav-drawer-link ${isActive ? "active" : ""}`;
-
   return (
-    <header className="navbar visual-navbar">
-      <div className="navbar-inner container">
-        {/* Logo Branding */}
-        <Link to="/" className="navbar-logo visual-logo" aria-label="LokRozgar AI Home">
-          <span className="navbar-logo-icon" aria-hidden="true">
+    <>
+      {/* TOP NAVIGATION BAR */}
+      <header className="top-navbar">
+        <Link to="/" className="top-navbar-brand">
+          <span
+            className="top-navbar-brand-icon"
+            aria-hidden="true"
+          >
             👷
           </span>
-          <span className="navbar-logo-text">
-            LOKROZGAR <span className="navbar-logo-ai">AI</span>
+
+          <span>
+            LOKROZGAR <strong>AI</strong>
           </span>
         </Link>
 
-        {/* Desktop Navigation Links */}
-        <nav className="navbar-links visual-nav-links" aria-label={t("nav.mainAria")}>
-          <NavLink to="/" end className={navLinkClass}>
-            <Home size={17} aria-hidden="true" />
-            <span>{t("home")}</span>
-          </NavLink>
-
-          <NavLink to="/jobs" className={navLinkClass}>
-            <Briefcase size={17} aria-hidden="true" />
-            <span>{t("findJobs")}</span>
-          </NavLink>
-
-          {/* Worker Navigation */}
-          {isWorker && (
-            <>
-              <NavLink to="/worker-dashboard" className={navLinkClass}>
-                <LayoutDashboard size={17} aria-hidden="true" />
-                <span>{isDualRole ? t("nav.workerDashboard") : t("dashboard")}</span>
-              </NavLink>
-              <NavLink to="/applications" className={navLinkClass}>
-                <FileText size={17} aria-hidden="true" />
-                <span>{t("nav.applications")}</span>
-              </NavLink>
-              <NavLink to="/job-requests" className={navLinkClass}>
-                <Inbox size={17} aria-hidden="true" />
-                <span>{t("nav.jobRequests")}</span>
-              </NavLink>
-            </>
-          )}
-
-          {/* Employer Navigation */}
-          {isEmployer && (
-            <>
-              <NavLink to="/employer-dashboard" className={navLinkClass}>
-                <LayoutDashboard size={17} aria-hidden="true" />
-                <span>{isDualRole ? t("nav.employerDashboard") : t("dashboard")}</span>
-              </NavLink>
-              <NavLink to="/post-job" className={navLinkClass}>
-                <PlusCircle size={17} aria-hidden="true" />
-                <span>{t("postJob")}</span>
-              </NavLink>
-            </>
-          )}
-
-          {/* Shared Authenticated Links */}
-          {isAuthenticated && (
-            <>
-              <NavLink to="/notifications" className={navLinkClass}>
-                <span className="nav-icon-badge-wrapper">
-                  <Bell size={17} aria-hidden="true" />
-                  {unreadCount > 0 && (
-                    <span className="nav-badge-dot">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </span>
-                <span>{t("nav.notifications")}</span>
-              </NavLink>
-              <NavLink to="/messages" className={navLinkClass}>
-                <MessageSquare size={17} aria-hidden="true" />
-                <span>{t("nav.messages")}</span>
-              </NavLink>
-              <NavLink to="/profile" className={navLinkClass}>
-                <User size={17} aria-hidden="true" />
-                <span>{t("profile")}</span>
-              </NavLink>
-              {isAdmin && (
-                <NavLink to="/admin" className={navLinkClass}>
-                  <Shield size={17} aria-hidden="true" />
-                  <span>{t("nav.adminDashboard")}</span>
-                </NavLink>
-              )}
-            </>
-          )}
-        </nav>
-
-        {/* Desktop Actions & Mobile Menu Toggle */}
-        <div className="navbar-actions">
-          <div className="nav-desktop-actions">
-            <LanguageSwitcher />
-
-            {isAuthenticated ? (
-              <button
-                type="button"
-                className="nav-logout-btn"
-                onClick={handleLogout}
-                aria-label={t("logout")}
-              >
-                <LogOut size={16} aria-hidden="true" />
-                <span>{t("logout")}</span>
-              </button>
-            ) : (
-              <div className="nav-auth-actions">
-                <Link to="/login" className="nav-login-btn">
-                  <LogIn size={16} aria-hidden="true" />
-                  <span>{t("login")}</span>
-                </Link>
-                <Link to="/register" className="nav-register-btn">
-                  <UserPlus size={16} aria-hidden="true" />
-                  <span>{t("register")}</span>
-                </Link>
-              </div>
-            )}
-          </div>
-
-          {/* Mobile / Tablet Menu Button */}
-          <button
-            type="button"
-            className="nav-mobile-toggle"
-            onClick={() => setIsMobileOpen((prev) => !prev)}
-            aria-label={isMobileOpen ? t("nav.closeMenu") : t("nav.openMenu")}
-            aria-expanded={isMobileOpen}
-            aria-controls="nav-mobile-drawer"
-          >
-            {isMobileOpen ? <X size={22} aria-hidden="true" /> : <Menu size={22} aria-hidden="true" />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Drawer Backdrop */}
-      {isMobileOpen && (
-        <div
-          className="nav-drawer-backdrop"
-          onClick={() => setIsMobileOpen(false)}
-          aria-hidden="true"
-        />
-      )}
-
-      {/* Mobile / Tablet Navigation Drawer */}
-      <div
-        id="nav-mobile-drawer"
-        className={`nav-drawer ${isMobileOpen ? "open" : ""}`}
-        role="dialog"
-        aria-modal="true"
-        aria-label={t("nav.mainAria")}
-      >
-        <div className="nav-drawer-header">
-          <Link to="/" className="navbar-logo" onClick={() => setIsMobileOpen(false)}>
-            <span className="navbar-logo-icon" aria-hidden="true">
-              👷
-            </span>
-            <span className="navbar-logo-text">
-              LOKROZGAR <span className="navbar-logo-ai">AI</span>
-            </span>
-          </Link>
-          <button
-            type="button"
-            className="nav-drawer-close"
-            onClick={() => setIsMobileOpen(false)}
-            aria-label={t("nav.closeMenu")}
-          >
-            <X size={20} aria-hidden="true" />
-          </button>
-        </div>
-
-        {isAuthenticated && user && (
-          <div className="nav-drawer-user">
-            <div className="nav-drawer-user-info">
-              <span className="nav-drawer-user-name">{user.fullName || user.phone}</span>
-              <span className="nav-drawer-user-role">
-                <BadgeCheck size={13} aria-hidden="true" />
-                {isDualRole
-                  ? t("nav.dualRole")
-                  : isWorker
-                  ? t("worker")
-                  : isEmployer
-                  ? t("employer")
-                  : t("nav.userRole")}
-              </span>
-            </div>
-          </div>
-        )}
-
-        <nav className="nav-drawer-nav" aria-label={t("nav.mainAria")}>
-          <NavLink to="/" end className={drawerLinkClass}>
-            <Home size={18} aria-hidden="true" />
-            <span>{t("home")}</span>
-          </NavLink>
-
-          <NavLink to="/jobs" className={drawerLinkClass}>
-            <Briefcase size={18} aria-hidden="true" />
-            <span>{t("findJobs")}</span>
-          </NavLink>
-
-          {isWorker && (
-            <>
-              <div className="nav-drawer-group-label">{t("profile.title")}</div>
-              <NavLink to="/worker-dashboard" className={drawerLinkClass}>
-                <LayoutDashboard size={18} aria-hidden="true" />
-                <span>{isDualRole ? t("nav.workerDashboard") : t("dashboard")}</span>
-              </NavLink>
-              <NavLink to="/applications" className={drawerLinkClass}>
-                <FileText size={18} aria-hidden="true" />
-                <span>{t("nav.applications")}</span>
-              </NavLink>
-              <NavLink to="/job-requests" className={drawerLinkClass}>
-                <Inbox size={18} aria-hidden="true" />
-                <span>{t("nav.jobRequests")}</span>
-              </NavLink>
-            </>
-          )}
-
-          {isEmployer && (
-            <>
-              <div className="nav-drawer-group-label">{t("employerProfile")}</div>
-              <NavLink to="/employer-dashboard" className={drawerLinkClass}>
-                <LayoutDashboard size={18} aria-hidden="true" />
-                <span>{isDualRole ? t("nav.employerDashboard") : t("dashboard")}</span>
-              </NavLink>
-              <NavLink to="/post-job" className={drawerLinkClass}>
-                <PlusCircle size={18} aria-hidden="true" />
-                <span>{t("postJob")}</span>
-              </NavLink>
-            </>
-          )}
-
-          {isAuthenticated && (
-            <>
-              <div className="nav-drawer-group-label">{t("profile")}</div>
-              <NavLink to="/notifications" className={drawerLinkClass}>
-                <span className="nav-icon-badge-wrapper">
-                  <Bell size={18} aria-hidden="true" />
-                  {unreadCount > 0 && (
-                    <span className="nav-badge-dot">
-                      {unreadCount > 9 ? "9+" : unreadCount}
-                    </span>
-                  )}
-                </span>
-                <span>{t("nav.notifications")}</span>
-              </NavLink>
-              <NavLink to="/messages" className={drawerLinkClass}>
-                <MessageSquare size={18} aria-hidden="true" />
-                <span>{t("nav.messages")}</span>
-              </NavLink>
-              <NavLink to="/profile" className={drawerLinkClass}>
-                <User size={18} aria-hidden="true" />
-                <span>{t("profile")}</span>
-              </NavLink>
-              {isAdmin && (
-                <NavLink to="/admin" className={drawerLinkClass}>
-                  <Shield size={18} aria-hidden="true" />
-                  <span>{t("nav.adminDashboard")}</span>
-                </NavLink>
-              )}
-            </>
-          )}
-        </nav>
-
-        <div className="nav-drawer-footer">
-          <div className="nav-drawer-language">
-            <LanguageSwitcher />
-          </div>
-
+        <div className="top-navbar-actions">
           {isAuthenticated ? (
-            <button
-              type="button"
-              className="nav-drawer-logout-btn"
-              onClick={handleLogout}
-            >
-              <LogOut size={16} aria-hidden="true" />
-              <span>{t("logout")}</span>
-            </button>
+            <>
+              {isAdmin && (
+                <NavLink
+                  to="/admin"
+                  className={({ isActive }) =>
+                    `top-nav-link ${isActive ? "active" : ""}`
+                  }
+                >
+                  <Shield size={19} aria-hidden="true" />
+                  <span>{t("nav.adminDashboard")}</span>
+                </NavLink>
+              )}
+
+              <NavLink
+                to="/notifications"
+                className={({ isActive }) =>
+                  `top-nav-link ${isActive ? "active" : ""}`
+                }
+                title={t("nav.notifications")}
+              >
+                <Bell size={19} aria-hidden="true" />
+                <span>{t("nav.notifications")}</span>
+                {unreadCount > 0 && (
+                  <span className="nav-badge-dot">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </NavLink>
+
+              <NavLink
+                to="/profile"
+                className={({ isActive }) =>
+                  `top-nav-link ${
+                    isActive ? "active" : ""
+                  }`
+                }
+              >
+                <ProfileAvatar
+                  role={activeRole}
+                  size={35}
+                />
+
+                <span>{t("profile")}</span>
+              </NavLink>
+            </>
           ) : (
-            <div className="nav-drawer-auth">
+            <>
               <Link
                 to="/login"
-                className="btn btn-secondary nav-drawer-auth-btn"
-                onClick={() => setIsMobileOpen(false)}
+                className="top-nav-link"
               >
-                <LogIn size={16} aria-hidden="true" />
+                <LogIn
+                  size={19}
+                  aria-hidden="true"
+                />
                 <span>{t("login")}</span>
               </Link>
+
               <Link
                 to="/register"
-                className="btn btn-primary nav-drawer-auth-btn"
-                onClick={() => setIsMobileOpen(false)}
+                className="top-nav-register"
               >
-                <UserPlus size={16} aria-hidden="true" />
+                <UserPlus
+                  size={19}
+                  aria-hidden="true"
+                />
                 <span>{t("register")}</span>
               </Link>
+            </>
+          )}
+
+          <div className="top-navbar-language">
+            <span className="top-language-label">
+              <Languages
+                size={19}
+                aria-hidden="true"
+              />
+              <span>Language</span>
+            </span>
+
+            <LanguageSwitcher />
+          </div>
+        </div>
+      </header>
+
+      {/* PERMANENT LEFT SIDEBAR */}
+      <aside
+        className="navbar sidebar"
+        aria-label={t("nav.mainAria")}
+      >
+        <div className="sidebar-inner">
+          <div className="sidebar-heading">
+            <LayoutDashboard
+              size={20}
+              aria-hidden="true"
+            />
+            <span>Navigation</span>
+          </div>
+
+          {isAuthenticated && user && (
+            <div className="sidebar-user">
+              <ProfileAvatar
+                role={activeRole}
+                size={48}
+                className="sidebar-user-avatar"
+              />
+
+              <div className="sidebar-user-details">
+                <strong>
+                  {user.fullName || user.phone}
+                </strong>
+
+                <span>
+                  <BadgeCheck
+                    size={14}
+                    aria-hidden="true"
+                  />
+
+                  {isAdmin
+                    ? t("admin.roleAdmin")
+                    : isDualRole
+                    ? t("nav.dualRole")
+                    : isWorker
+                    ? t("worker")
+                    : isEmployer
+                    ? t("employer")
+                    : t("nav.userRole")}
+                </span>
+              </div>
+            </div>
+          )}
+
+          <nav
+            className="sidebar-nav"
+            aria-label={t("nav.mainAria")}
+          >
+            <NavLink
+              to="/"
+              end
+              className={navLinkClass}
+            >
+              <Home
+                size={22}
+                aria-hidden="true"
+              />
+              <span>{t("home")}</span>
+            </NavLink>
+
+            <NavLink
+              to="/jobs"
+              className={navLinkClass}
+            >
+              <Briefcase
+                size={22}
+                aria-hidden="true"
+              />
+              <span>{t("findJobs")}</span>
+            </NavLink>
+
+            {isWorker && (
+              <>
+                <NavLink
+                  to="/worker-dashboard"
+                  className={navLinkClass}
+                >
+                  <LayoutDashboard
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    {isDualRole
+                      ? t("nav.workerDashboard")
+                      : t("dashboard")}
+                  </span>
+                </NavLink>
+
+                <NavLink
+                  to="/applications"
+                  className={navLinkClass}
+                >
+                  <FileText
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    {t("nav.applications")}
+                  </span>
+                </NavLink>
+
+                <NavLink
+                  to="/job-requests"
+                  className={navLinkClass}
+                >
+                  <Inbox
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    {t("nav.jobRequests")}
+                  </span>
+                </NavLink>
+              </>
+            )}
+
+            {isEmployer && (
+              <>
+                <NavLink
+                  to="/employer-dashboard"
+                  className={navLinkClass}
+                >
+                  <LayoutDashboard
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    {isDualRole
+                      ? t("nav.employerDashboard")
+                      : t("dashboard")}
+                  </span>
+                </NavLink>
+
+                <NavLink
+                  to="/post-job"
+                  className={navLinkClass}
+                >
+                  <PlusCircle
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>{t("postJob")}</span>
+                </NavLink>
+              </>
+            )}
+
+            {isAuthenticated && (
+              <>
+                <NavLink
+                  to="/notifications"
+                  className={navLinkClass}
+                >
+                  <Bell
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>{t("nav.notifications")}</span>
+                  {unreadCount > 0 && (
+                    <span className="sidebar-badge">
+                      {unreadCount > 9 ? "9+" : unreadCount}
+                    </span>
+                  )}
+                </NavLink>
+
+                <NavLink
+                  to="/messages"
+                  className={navLinkClass}
+                >
+                  <MessageSquare
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>{t("nav.messages")}</span>
+                </NavLink>
+
+                {isAdmin && (
+                  <NavLink
+                    to="/admin"
+                    className={navLinkClass}
+                  >
+                    <Shield
+                      size={22}
+                      aria-hidden="true"
+                    />
+                    <span>{t("nav.adminDashboard")}</span>
+                  </NavLink>
+                )}
+              </>
+            )}
+          </nav>
+
+          {isAuthenticated && (
+            <div className="sidebar-footer">
+              <button
+                type="button"
+                className="sidebar-logout"
+                onClick={handleLogout}
+              >
+                <LogOut
+                  size={21}
+                  aria-hidden="true"
+                />
+                <span>{t("logout")}</span>
+              </button>
             </div>
           )}
         </div>
-      </div>
-    </header>
+      </aside>
+    </>
   );
 }

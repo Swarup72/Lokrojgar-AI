@@ -1,9 +1,6 @@
 export default {
-  // App
   "app.name": "लोकरोज़गार",
   "app.tagline": "स्थानीय श्रमिकों को स्थानीय अवसरों से जोड़ना",
-
-  // Navigation
   "nav.home": "होम",
   "nav.jobs": "नौकरी खोजें",
   "nav.dashboard": "डैशबोर्ड",
@@ -23,8 +20,6 @@ export default {
   "nav.closeMenu": "मेनू बंद करें",
   "nav.userRole": "खाता भूमिका",
   "nav.dualRole": "श्रमिक और नियोक्ता",
-
-  // Flat nav aliases
   "home": "होम",
   "findJobs": "नौकरी खोजें",
   "dashboard": "डैशबोर्ड",
@@ -35,8 +30,6 @@ export default {
   "register": "रजिस्टर",
   "logout": "लॉगआउट",
   "employerProfile": "नियोक्ता प्रोफ़ाइल",
-
-  // Common actions & statuses
   "common.loading": "लोड हो रहा है...",
   "common.retry": "पुनः प्रयास करें",
   "common.cancel": "रद्द करें",
@@ -93,8 +86,6 @@ export default {
   "common.viewDetails": "विवरण देखें",
   "common.saveChanges": "बदलाव सहेजें",
   "common.viewAll": "सभी देखें",
-
-  // Homepage
   "home.hero.line1": "काम खोजें।",
   "home.hero.line2": "स्थानीय प्रतिभा को काम पर रखें।",
   "home.hero.line3": "अपनी भाषा में।",
@@ -124,15 +115,12 @@ export default {
   "home.howItWorks.employers.step2": "अनुशंसित श्रमिक प्राप्त करें",
   "home.howItWorks.employers.step3": "आवेदकों की समीक्षा करें",
   "home.howItWorks.employers.step4": "नियुक्त करें",
-
-  // Reference visual home aliases
   "aiPoweredMatching": "AI-संचालित नौकरी मिलान",
   "findRightJob": "सही नौकरी खोजें।",
   "buildFuture": "अपना भविष्य बनाएं।",
   "homeDescription": "लोकरोज़गार AI कुशल श्रमिकों को उनके नज़दीकी विश्वसनीय नौकरी अवसरों से जोड़ता है।",
   "jobSearchQuestion": "आप कौन सी नौकरी खोज रहे हैं?",
-  "jobSearchPlaceholder": "उदा. इलेक्ट्रीशियन, ड्राइवर, प्लंबर",
-  "listenToInstructions": "निर्देश सुनें",
+  "jobSearchPlaceholder": "इलेक्ट्रीशियन, ड्राइवर, प्लंबर...",
   "where": "कहाँ?",
   "locationPlaceholder": "कोल्हापुर, पुणे, मुंबई...",
   "browseAllJobs": "सभी नौकरियाँ देखें",
@@ -147,8 +135,6 @@ export default {
   "connectDirectlyDesc": "आपके कौशल की तलाश कर रहे नियोक्ताओं से सीधे अवसर प्राप्त करें।",
   "findFaster": "तेज़ी से खोजें",
   "findFasterDesc": "AI-आधारित मिलान आपको प्रासंगिक नौकरियाँ तेज़ी से खोजने में मदद करता है।",
-
-  // Categories
   "electrician": "इलेक्ट्रीशियन",
   "electricianDesc": "वायरिंग और मरम्मत कार्य",
   "plumber": "प्लंबर",
@@ -161,8 +147,6 @@ export default {
   "constructionDesc": "भवन और निर्माण कार्य",
   "securityGuard": "सुरक्षा गार्ड",
   "securityDesc": "सुरक्षा और पहरेदारी कार्य",
-
-  // Auth (Login & Register)
   "auth.login.title": "लोकरोज़गार में लॉग इन करें",
   "auth.login.phone": "फ़ोन नंबर",
   "auth.login.password": "पासवर्ड",
@@ -193,8 +177,6 @@ export default {
   "auth.register.loginLink": "लॉग इन करें",
   "auth.error.invalidPhone": "कृपया 10 अंकों का वैध भारतीय मोबाइल नंबर दर्ज करें।",
   "auth.error.shortPassword": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।",
-
-  // Auth flat aliases
   "welcomeBack": "वापसी पर स्वागत है",
   "loginSubtitle": "लोकरोज़गार AI में आगे बढ़ने के लिए लॉगिन करें",
   "mobileEmail": "मोबाइल नंबर",
@@ -217,8 +199,6 @@ export default {
   "mobileNumberPlaceholder": "मोबाइल नंबर दर्ज करें",
   "createPassword": "पासवर्ड बनाएं",
   "alreadyAccount": "पहले से खाता है?",
-
-  // Jobs search & details
   "jobs.search.title": "अपने कौशल के अनुकूल नौकरियाँ खोजें",
   "jobs.search.subtitle": "कौशल, स्थान और अनुभव के आधार पर नौकरियाँ खोजें।",
   "jobs.search.keywordPlaceholder": "पद या कौशल से खोजें (उदा. इलेक्ट्रीशियन, ड्राइवर)...",
@@ -259,8 +239,6 @@ export default {
   "jobs.details.matchFactors": "मिलान कारक",
   "jobs.details.back": "नौकरियों पर वापस जाएं",
   "jobs.details.share": "नौकरी साझा करें",
-
-  // Job details flat aliases
   "jobTitle": "नौकरी का नाम",
   "jobDescription": "नौकरी का विवरण",
   "salary": "वेतन",
@@ -275,8 +253,6 @@ export default {
   "applicationSubmitted": "आवेदन सफलतापूर्वक जमा हुआ!",
   "applyNow": "अभी आवेदन करें",
   "loginToApply": "आवेदन करने हेतु लॉगिन करें",
-
-  // Post & Edit Job
   "jobs.post.title": "नई नौकरी पोस्ट करें",
   "jobs.post.subtitle": "सत्यापित स्थानीय श्रमिकों की खोज और नियुक्ति के लिए पोस्टिंग बनाएं।",
   "jobs.edit.title": "नौकरी पोस्टिंग संपादित करें",
@@ -314,8 +290,6 @@ export default {
   "jobs.form.cancel": "रद्द करें",
   "jobs.form.successCreate": "नौकरी सफलतापूर्वक पोस्ट की गई!",
   "jobs.form.successUpdate": "नौकरी सफलतापूर्वक अपडेट की गई!",
-
-  // Worker Dashboard
   "worker.dashboard.welcome": "नमस्ते, {{name}}",
   "worker.dashboard.profileComplete": "{{percent}}% प्रोफ़ाइल पूर्ण",
   "worker.dashboard.completeProfilePrompt": "बेहतर नौकरी सिफारिशें पाने के लिए अपनी प्रोफ़ाइल पूरी करें।",
@@ -330,8 +304,6 @@ export default {
   "worker.dashboard.recentApplicationsTitle": "हाल के आवेदन",
   "worker.dashboard.noApplications": "आपने अभी तक किसी नौकरी के लिए आवेदन नहीं किया है।",
   "worker.dashboard.viewAllApplications": "सभी आवेदन देखें",
-
-  // Employer Dashboard
   "employer.dashboard.welcome": "स्वागत है, {{name}}",
   "employer.dashboard.subtitle": "अपनी नौकरियों का प्रबंधन करें, आवेदकों की समीक्षा करें और स्थानीय कारीगर नियुक्त करें।",
   "employer.dashboard.stats.postedJobs": "पोस्ट की गई नौकरियाँ",
@@ -349,8 +321,6 @@ export default {
   "employer.dashboard.actions.close": "नौकरी बंद करें",
   "employer.dashboard.actions.reopen": "पुनः खोलें",
   "employer.dashboard.actions.cancel": "रद्द करें",
-
-  // Applications & Hiring
   "applications.title": "मेरे आवेदन",
   "applications.subtitle": "अपने सभी नौकरी आवेदनों की स्थिति रीयल-टाइम में ट्रैक करें।",
   "applications.filterAll": "सभी ({{count}})",
@@ -366,8 +336,6 @@ export default {
   "applications.coverNote": "आवेदन संदेश:",
   "applications.appliedOn": "आवेदन तिथि: {{date}}",
   "applications.matchScoreBadge": "{{score}}% मिलान",
-
-  // Applicants Management (Employer)
   "applicants.title": "{{jobTitle}} के आवेदक",
   "applicants.subtitle": "श्रमिक आवेदनों, मिलान स्कोर की समीक्षा करें और नियुक्ति के निर्णय लें।",
   "applicants.totalCount": "कुल {{count}} आवेदक",
@@ -386,15 +354,11 @@ export default {
   "applicants.acceptSuccess": "श्रमिक को स्वीकार कर नौकरी पर नियुक्त कर लिया गया!",
   "applicants.rejectSuccess": "आवेदन अस्वीकृत कर दिया गया।",
   "applicants.shortlistSuccess": "आवेदक को शॉर्टलिस्ट कर लिया गया।",
-
-  // Recommended Workers (Employer)
   "recommendedWorkers.title": "अनुशंसित श्रमिक",
   "recommendedWorkers.subtitle": "कौशल, स्थान और रेटिंग के आधार पर {{jobTitle}} के लिए AI-अनुशंसित उम्मीदवार।",
   "recommendedWorkers.noMatches": "इस समय कोई उपयुक्त उम्मीदवार नहीं मिला। कृपया जल्द पुनः जाँचें!",
   "recommendedWorkers.sendRequest": "नौकरी का प्रस्ताव / अनुरोध भेजें",
   "recommendedWorkers.requestSent": "अनुरोध भेजा गया",
-
-  // Worker Profile
   "profile.title": "श्रमिक प्रोफ़ाइल",
   "profile.subtitle": "अपनी व्यक्तिगत जानकारी, कौशल और कार्य उपलब्धता को अद्यतित रखें।",
   "profile.fullName": "पूरा नाम",
@@ -417,8 +381,6 @@ export default {
   "profile.reviewsCount": "पूर्ण कार्यों से {{count}} रेटिंग्स",
   "profile.save": "प्रोफ़ाइल सहेजें",
   "profile.savedSuccess": "प्रोफ़ाइल सफलतापूर्वक अपडेट की गई!",
-
-  // Employer Profile
   "employerProfile.title": "नियोक्ता प्रोफ़ाइल",
   "employerProfile.subtitle": "कंपनी विवरण, संपर्क जानकारी और सत्यापन का प्रबंधन करें।",
   "employerProfile.businessName": "व्यवसाय / कंपनी का नाम",
@@ -433,8 +395,6 @@ export default {
   "employerProfile.pincode": "पिनकोड",
   "employerProfile.save": "नियोक्ता प्रोफ़ाइल सहेजें",
   "employerProfile.savedSuccess": "नियोक्ता प्रोफ़ाइल सफलतापूर्वक सहेजी गई!",
-
-  // Direct Job Requests (Worker)
   "jobRequests.title": "प्रत्यक्ष कार्य अनुरोध",
   "jobRequests.subtitle": "वे नियोक्ता जिन्होंने आपकी प्रोफ़ाइल देखकर सीधे काम का प्रस्ताव भेजा है।",
   "jobRequests.noRequests": "वर्तमान में कोई प्रत्यक्ष कार्य अनुरोध नहीं है।",
@@ -442,8 +402,6 @@ export default {
   "jobRequests.reject": "अस्वीकार करें",
   "jobRequests.accepted": "स्वीकृत",
   "jobRequests.rejected": "अस्वीकृत",
-
-  // Messages & Chat
   "chat.title": "संदेश",
   "chat.subtitle": "नियोक्ताओं और कारीगरों से सीधे संवाद करें।",
   "chat.noConversations": "अभी कोई सक्रिय बातचीत नहीं है।",
@@ -452,16 +410,12 @@ export default {
   "chat.send": "भेजें",
   "chat.online": "ऑनलाइन",
   "chat.jobContext": "नौकरी संदर्भ: {{title}}",
-
-  // Error messages
   "errors.network": "सर्वर से कनेक्ट नहीं हो सका। कृपया इंटरनेट कनेक्शन जांचें।",
   "errors.unknown": "कुछ गलत हुआ। कृपया पुनः प्रयास करें।",
   "errors.notFound": "पृष्ठ या संसाधन नहीं मिला।",
   "errors.unauthorized": "कृपया इस पृष्ठ पर जाने के लिए लॉगिन करें।",
   "errors.forbidden": "आपको यह पृष्ठ देखने की अनुमति नहीं है।",
   "errors.rateLimit": "बहुत सारे अनुरोध। कृपया कुछ समय बाद प्रयास करें।",
-
-  // Voice profile
   "voice.mode.title": "आप यह कैसे करना चाहेंगे?",
   "voice.mode.quick.title": "सब कुछ एक साथ बोलें",
   "voice.mode.quick.desc": "एक रिकॉर्डिंग में अपना नाम, वेतन, अनुभव, कौशल और शहर बताएं। यदि आपको क्या बोलना है पता है तो यह सबसे तेज़ है।",
@@ -531,8 +485,6 @@ export default {
   "profile.employer.voiceBanner.title": "आवाज़ से प्रोफ़ाइल बनाएं",
   "profile.employer.voiceBanner.desc": "सिर्फ ४ आसान सवालों के आवाज़ में जवाब देकर कुछ ही सेकंड में अपना नियोक्ता प्रोफ़ाइल पूरा करें।",
   "profile.employer.voiceBanner.action": "वॉइस सेटअप शुरू करें",
-
-  // --- keys the pages call directly (added to stop raw keys rendering) ---
   "message": "संदेश",
   "accept": "स्वीकारें",
   "markComplete": "पूर्ण के रूप में चिह्नित करें",
@@ -660,8 +612,6 @@ export default {
   "checkBackSoon": "जल्द ही फिर देखें।",
   "dashboard.greeting": "नमस्ते, {{name}}",
   "noJobsMatchFilter": "'{{filter}}' फ़िल्टर से मेल खाता कोई काम नहीं।",
-
-  // --- shared component strings (were hardcoded English) ---
   "common.village": "गाँव",
   "common.processing": "प्रक्रिया चल रही है...",
   "common.goHome": "मुख्य पृष्ठ पर वापस जाएं",
@@ -782,8 +732,6 @@ export default {
   "status.partiallyAssigned": "आंशिक रूप से नियुक्त",
   "status.assigned": "नियुक्त",
   "status.expired": "अवधि समाप्त",
-
-  // --- error copy and job lifecycle actions ---
   "error.badRequest": "कृपया भरी जानकारी जांचें और फिर कोशिश करें।",
   "error.sessionExpired": "आपका सत्र समाप्त हो गया है। कृपया फिर लॉग इन करें।",
   "error.forbidden": "यह करने की आपको अनुमति नहीं है।",
@@ -796,10 +744,6 @@ export default {
   "error.voice.forbidden": "आवाज़ प्रोफ़ाइल बनाने की आपको अनुमति नहीं है।",
   "error.voice.tooLarge": "ऑडियो फ़ाइल बहुत बड़ी है। कृपया छोटी फ़ाइल चुनें (अधिकतम 15MB)।",
   "error.voice.unavailable": "आवाज़ AI अस्थायी रूप से उपलब्ध नहीं है। कृपया बाद में कोशिश करें।",
-  "error.auth.invalidCredentials": "गलत पासवर्ड या फ़ोन नंबर। कृपया पुनः प्रयास करें।",
-  "error.auth.blocked": "आपका खाता व्यवस्थापक द्वारा ब्लॉक कर दिया गया है।",
-  "error.auth.userNotFound": "इस फ़ोन नंबर के साथ कोई खाता नहीं मिला।",
-  "error.auth.alreadyExists": "इस फ़ोन नंबर के साथ एक खाता पहले से मौजूद है।",
   "error.network": "सर्वर से कनेक्ट नहीं हो सका। कृपया अपना इंटरनेट जांचें।",
   "error.timeout": "अनुरोध में बहुत समय लगा। कृपया फिर कोशिश करें।",
   "error.unknown": "कुछ गलत हुआ। कृपया फिर कोशिश करें।",
@@ -833,8 +777,6 @@ export default {
   "map.viewOnMap": "नक्शे पर देखें",
   "map.navigate": "रास्ता दिखाएं",
   "voice.stopRecording": "रिकॉर्डिंग रोकें",
-
-  // --- guided voice job posting ---
   "voiceJob.chooseSubtitle": "काम खुद लिखें, या बोलें और हम फ़ॉर्म भर देंगे।",
   "voiceJob.modeManual": "फ़ॉर्म भरें",
   "voiceJob.modeManualDesc": "काम की जानकारी खुद लिखें।",
@@ -891,8 +833,6 @@ export default {
   "voiceJob.error.too_many_words": "वह बहुत लंबा था। कृपया संक्षेप में बोलें।",
   "voiceJob.error.no_skills_found": "कोई कौशल पहचान नहीं पाए। कृपया फिर बताएं।",
   "voice.guided.next": "आगे",
-
-  // --- skill picker ---
   "skills.pickerNoneSelected": "अभी तक कोई कौशल नहीं चुना गया।",
   "skills.clearAll": "सभी हटाएं",
   "skills.suggestedLabel": "आपके विवरण से सुझाए गए — जोड़ने के लिए टैप करें",
@@ -902,15 +842,17 @@ export default {
   "skills.searchPlaceholder": "कौशल खोजें...",
   "skills.chooseCategoryFirst": "कौशल खोजने के लिए पहले श्रेणी चुनें।",
   "skills.noMatches": "“{{query}}” से मेल खाता कौशल नहीं।",
-
-  // --- Admin Panel Module ---
+  "listenToInstructions": "निर्देश सुनें",
+  "error.auth.invalidCredentials": "गलत पासवर्ड या फ़ोन नंबर। कृपया पुनः प्रयास करें।",
+  "error.auth.blocked": "आपका खाता व्यवस्थापक द्वारा ब्लॉक कर दिया गया है।",
+  "error.auth.userNotFound": "इस फ़ोन नंबर के साथ कोई खाता नहीं मिला।",
+  "error.auth.alreadyExists": "इस फ़ोन नंबर के साथ एक खाता पहले से मौजूद है।",
   "admin.portal": "प्रशासक पोर्टल",
   "admin.roleAdmin": "प्रशासक",
   "admin.navAria": "प्रशासक नेविगेशन",
   "admin.returnToSite": "मुख्य वेबसाइट पर वापस जाएं",
   "admin.toggleMenu": "मेनू बदलें",
   "nav.adminDashboard": "प्रशासक पैनल",
-
   "admin.nav.dashboard": "डैशबोर्ड",
   "admin.nav.workers": "श्रमिक प्रबंधन",
   "admin.nav.employers": "नियोक्ता प्रबंधन",
@@ -921,13 +863,11 @@ export default {
   "admin.nav.announcements": "प्लेटफ़ॉर्म घोषणाएं",
   "admin.nav.aiMonitoring": "एआई सेवा निगरानी",
   "admin.nav.auditLogs": "ऑडिट लॉग्स",
-
   "admin.paginationShowing": "पेज दिखा रहे हैं",
   "admin.paginationItems": "कुल रिकॉर्ड्स",
   "admin.prevPage": "पिछला पेज",
   "admin.nextPage": "अगला पेज",
   "admin.noDataFound": "आपके मानदंडों से मेल खाने वाला कोई रिकॉर्ड नहीं मिला।",
-
   "admin.status.active": "सक्रिय",
   "admin.status.suspended": "निलंबित",
   "admin.status.verified": "सत्यापित",
@@ -942,7 +882,6 @@ export default {
   "admin.filter.allPayTypes": "सभी वेतन प्रकार",
   "admin.moderation.reasonLabel": "निर्णय का कारण (ऑडिट के लिए आवश्यक)",
   "admin.moderation.reasonPlaceholder": "इस प्रशासनिक कार्रवाई का स्पष्ट कारण दर्ज करें...",
-
   "admin.login.unauthorized": "इस खाते के पास व्यवस्थापक विशेषाधिकार नहीं हैं।",
   "admin.login.failed": "प्रशासक लॉगिन विफल रहा। कृपया विवरण जांचें।",
   "admin.login.portalTitle": "प्रशासक पोर्टल",
@@ -952,7 +891,6 @@ export default {
   "admin.login.passwordLabel": "प्रशासक पासवर्ड",
   "admin.login.passwordPlaceholder": "सुरक्षित पासवर्ड दर्ज करें",
   "admin.login.submitButton": "व्यवस्थापक के रूप में लॉगिन करें",
-
   "admin.dashboard.title": "प्लेटफ़ॉर्म अवलोकन",
   "admin.dashboard.subtitle": "वास्तविक आंकड़े, विकास रुझान और आवश्यक प्रशासनिक कार्रवाइयां",
   "admin.dashboard.fetchError": "डैशबोर्ड आंकड़े लोड करने में त्रुटि आई।",
@@ -975,7 +913,6 @@ export default {
   "admin.dashboard.recentActivityTitle": "हालिया प्रशासनिक और प्लेटफ़ॉर्म गतिविधि",
   "admin.dashboard.viewAllLogs": "सभी लॉग देखें",
   "admin.dashboard.noRecentActivity": "कोई हालिया गतिविधि नहीं मिली।",
-
   "admin.workers.title": "श्रमिक प्रबंधन",
   "admin.workers.subtitle": "श्रमिक खातों को खोजें, समीक्षा करें और नियंत्रित करें",
   "admin.workers.fetchError": "श्रमिक खातों को लाने में त्रुटि हुई।",
@@ -1003,7 +940,6 @@ export default {
   "admin.workers.confirmSuspend": "श्रमिक खाता निलंबित करें",
   "admin.workers.reactivatePrompt": "क्या आप वाकई इस श्रमिक खाते को पुन: सक्रिय करना चाहते हैं?",
   "admin.workers.suspendPrompt": "क्या आप वाकई इस श्रमिक खाते को निलंबित करना चाहते हैं? वे साइन इन या आवेदन नहीं कर पाएंगे।",
-
   "admin.employers.title": "नियोक्ता प्रबंधन",
   "admin.employers.subtitle": "व्यवसाय सत्यापन, नौकरी इतिहास और पहुंच स्थिति प्रबंधित करें",
   "admin.employers.fetchError": "नियोक्ता लोड करने में त्रुटि हुई।",
@@ -1032,7 +968,6 @@ export default {
   "admin.employers.confirmSuspend": "नियोक्ता खाता निलंबित करें",
   "admin.employers.reactivatePrompt": "क्या आप वाकई इस नियोक्ता खाते को पुन: सक्रिय करना चाहते हैं?",
   "admin.employers.suspendPrompt": "क्या आप वाकई इस नियोक्ता खाते को निलंबित करना चाहते हैं? निलंबित नियोक्ता नई नौकरियां पोस्ट नहीं कर सकते।",
-
   "admin.jobs.title": "नौकरियां और मॉडरेशन",
   "admin.jobs.subtitle": "सभी प्लेटफ़ॉर्म नौकरियों की समीक्षा, निरीक्षण और मॉडरेशन करें",
   "admin.jobs.fetchError": "नौकरियां लाने में त्रुटि हुई।",
@@ -1058,7 +993,6 @@ export default {
   "admin.jobs.disputesTitle": "संबंधित विवाद / शिकायतें",
   "admin.jobs.moderateModalTitle": "नौकरी मॉडरेशन कार्रवाई",
   "admin.jobs.moderateActionPrompt": "आप मॉडरेशन कार्रवाई लागू कर रहे हैं:",
-
   "admin.applications.title": "आवेदन और भर्ती गतिविधि",
   "admin.applications.subtitle": "भर्ती प्रक्रियाओं और उम्मीदवार मिलान स्कोर का प्रशासनिक अवलोकन",
   "admin.applications.fetchError": "आवेदन लाने में त्रुटि।",
@@ -1079,7 +1013,6 @@ export default {
   "admin.applications.proposedPay": "प्रस्तावित वेतन",
   "admin.applications.matchFactorsTitle": "एआई मिलान कारक विश्लेषण",
   "admin.applications.coverNoteTitle": "कवर नोट / वक्तव्य",
-
   "admin.reports.title": "शिकायतें और विवाद प्रबंधन",
   "admin.reports.subtitle": "उपयोगकर्ता विवादों की समीक्षा करें, साक्ष्य जांचें और समाधान लागू करें",
   "admin.reports.fetchError": "विवाद लाने में विफल।",
@@ -1103,7 +1036,6 @@ export default {
   "admin.reports.resolvedBy": "प्रशासक द्वारा हल किया गया",
   "admin.reports.updateStatusTitle": "विवाद स्थिति और समाधान अपडेट करें",
   "admin.reports.resolutionNotePlaceholder": "जांच निष्कर्ष, निर्णय और सुधारात्मक कार्रवाई दर्ज करें...",
-
   "admin.ratings.title": "रेटिंग और समीक्षा मॉडरेशन",
   "admin.ratings.subtitle": "फीडबैक का ऑडिट करें, आपत्तिजनक टिप्पणियां चिह्नित करें और समीक्षा मानक लागू करें",
   "admin.ratings.fetchError": "रेटिंग लाने में त्रुटि हुई।",
@@ -1127,7 +1059,6 @@ export default {
   "admin.ratings.flagReview": "चिह्नित करें और मॉडरेट करें",
   "admin.ratings.originalReview": "मूल समीक्षा पाठ",
   "admin.ratings.hideOffensiveContent": "आपत्तिजनक सामग्री छुपाएं और मानक सूचना से बदलें",
-
   "admin.announcements.title": "प्लेटफ़ॉर्म घोषणाएं",
   "admin.announcements.subtitle": "पूरे प्लेटफ़ॉर्म पर लक्षित, बहुभाषी घोषणाएं प्रसारित करें",
   "admin.announcements.fetchError": "अधिसूचना आंकड़े लोड करने में विफल।",
@@ -1156,7 +1087,6 @@ export default {
   "admin.announcements.confirmSendBtn": "अभी भेजें",
   "admin.announcements.confirmSendPrompt": "आप यह अधिसूचना प्रसारित करने वाले हैं",
   "admin.announcements.confirmSendWarning": "यह चयनित समूह के सभी सक्रिय उपयोगकर्ता खातों को सिस्टम सूचनाएं भेजेगा।",
-
   "admin.ai.title": "एआई सेवा टेलीमेट्री और स्वास्थ्य",
   "admin.ai.subtitle": "फास्टएपीआई एआई माइक्रोसर्विस की लाइव टेलीमेट्री, प्रतिक्रिया विलंब और स्थिति",
   "admin.ai.fetchError": "एआई निगरानी सेवा से कनेक्ट करने में विफल।",
@@ -1184,7 +1114,6 @@ export default {
   "admin.ai.privacyDesc": "कच्ची वॉइस ऑडियो फ़ाइलें, निजी प्रॉम्प्ट, व्यक्तिगत साख और एपीआई सीक्रेट की कभी भी प्रशासनिक दृश्यों में उजागर नहीं की जाती हैं।",
   "admin.ai.evaluationStatusLabel": "लाइव मूल्यांकन मेट्रिक्स",
   "admin.ai.evaluationDesc": "संख्यात्मक सटीकता प्रतिशत प्रदर्शित करने से पहले ऑफ़लाइन बेंचमार्क परीक्षण की आवश्यकता है। वास्तविक समय की टेलीमेट्री ऊपर दिखाई गई है।",
-
   "admin.audit.title": "सिस्टम ऑडिट ट्रेल",
   "admin.audit.subtitle": "सभी प्रशासनिक निर्णयों, निलंबन और सत्यापन की सुरक्षित लॉग",
   "admin.audit.fetchError": "ऑडिट ट्रेल लाने में विफल।",
@@ -1198,8 +1127,6 @@ export default {
   "admin.audit.allActionTypes": "सभी कार्रवाई प्रकार",
   "admin.audit.modalTitle": "ऑडिट रिकॉर्ड विवरण",
   "admin.audit.metadataTitle": "सुरक्षित संचालन मेटाडेटा",
-
-  // Notifications
   "nav.notifications": "सूचनाएं",
   "notifications.title": "सूचना इनबॉक्स",
   "notifications.subtitle": "नौकरियों, आवेदन स्थिति, भुगतान और घोषणाओं के बारे में अपडेट रहें",
@@ -1223,4 +1150,7 @@ export default {
   "notifications.typeChat": "संदेश",
   "notifications.viewDetails": "विवरण देखें",
   "notifications.pageShowing": "पृष्ठ {{page}} कुल {{totalPages}}",
+  "footer.explore": "एक्सप्लोर करें",
+  "footer.account": "खाता",
+  "footer.madeWith": "कामगारों और नियोक्ताओं के लिए ❤️ से निर्मित"
 };

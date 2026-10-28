@@ -1,9 +1,8 @@
-import { useState } from "react";
+
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+
 import {
-  Search,
-  MapPin,
-  Briefcase,
   Wrench,
   Droplets,
   Car,
@@ -13,11 +12,21 @@ import {
   ArrowRight,
   Sparkles,
   Volume2,
+  VolumeX,
 } from "lucide-react";
+
 import { useLanguage } from "../hooks/useLanguage";
 import "./HomePage.css";
 
-const FEATURE_KEYS = ["voice", "languages", "ai", "location", "ratings", "local"];
+const FEATURE_KEYS = [
+  "voice",
+  "languages",
+  "ai",
+  "location",
+  "ratings",
+  "local",
+];
+
 const FEATURE_EMOJI = {
   voice: "🎤",
   languages: "🌐",
@@ -27,218 +36,286 @@ const FEATURE_EMOJI = {
   local: "🏢",
 };
 
+const LANGUAGE_CODES = {
+  en: "en-IN",
+  hi: "hi-IN",
+  mr: "mr-IN",
+};
+
 export function HomePage() {
   const { t, language } = useLanguage();
   const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [searchLocation, setSearchLocation] = useState("");
 
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set("query", searchQuery.trim());
-    if (searchLocation.trim()) params.set("location", searchLocation.trim());
-    navigate(`/jobs?${params.toString()}`);
-  };
+  const [speaking, setSpeaking] = useState(false);
+  const [audioMessage, setAudioMessage] = useState("");
 
-  const handleListen = () => {
-    if (typeof window !== "undefined" && "speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      const textToSpeak = `${t("home.hero.line1")} ${t("home.hero.line2")}. ${t("homeDescription")}`;
-      const utterance = new SpeechSynthesisUtterance(textToSpeak);
-      utterance.lang = language === "mr" ? "mr-IN" : language === "hi" ? "hi-IN" : "en-IN";
-      window.speechSynthesis.speak(utterance);
-    }
+  const lang = String(language || "en")
+    .toLowerCase()
+    .slice(0, 2);
+
+  const isMarathi = lang === "mr";
+  const isHindi = lang === "hi";
+
+  const labels = {
+    slogan: isMarathi
+      ? "तुमचं काम, तुमची ओळख!"
+      : isHindi
+      ? "आपका काम, आपकी पहचान!"
+      : "Your Work, Your Identity!",
+
+    audioHelp: isMarathi
+      ? "आवाजात मदत"
+      : isHindi
+      ? "आवाज़ में मदद"
+      : "Listen to instructions",
+
+    stopAudio: isMarathi
+      ? "आवाज बंद करा"
+      : isHindi
+      ? "आवाज़ बंद करें"
+      : "Stop audio",
+
+    chooseWork: isMarathi
+      ? "तुम्हाला कोणते काम पाहिजे?"
+      : isHindi
+      ? "आपको कौन सा काम चाहिए?"
+      : "What type of work do you want?",
+
+    tapCategory: isMarathi
+      ? "खालील चित्रावर क्लिक करा"
+      : isHindi
+      ? "नीचे दिए गए चित्र पर क्लिक करें"
+      : "Tap a job category below",
+
+    audioUnavailable: isMarathi
+      ? "या ब्राउझरमध्ये आवाजाची सुविधा उपलब्ध नाही."
+      : isHindi
+      ? "इस ब्राउज़र में ऑडियो सुविधा उपलब्ध नहीं है।"
+      : "Audio instructions are not supported in this browser.",
   };
 
   const categories = [
     {
+      key: "electrician",
       name: t("electrician"),
+      query: "electrician",
       icon: Wrench,
+      emoji: "⚡",
       description: t("electricianDesc"),
       className: "stagger-1",
     },
     {
+      key: "plumber",
       name: t("plumber"),
+      query: "plumber",
       icon: Droplets,
+      emoji: "🚰",
       description: t("plumberDesc"),
       className: "stagger-2",
     },
     {
+      key: "driver",
       name: t("driver"),
+      query: "driver",
       icon: Car,
+      emoji: "🚗",
       description: t("driverDesc"),
       className: "stagger-3",
     },
     {
+      key: "delivery",
       name: t("deliveryPartner"),
+      query: "delivery",
       icon: Package,
+      emoji: "📦",
       description: t("deliveryDesc"),
       className: "stagger-4",
     },
     {
+      key: "construction",
       name: t("constructionWorker"),
+      query: "construction",
       icon: HardHat,
+      emoji: "👷",
       description: t("constructionDesc"),
       className: "stagger-5",
     },
     {
+      key: "security",
       name: t("securityGuard"),
+      query: "security",
       icon: ShieldCheck,
+      emoji: "🛡️",
       description: t("securityDesc"),
       className: "stagger-6",
     },
   ];
 
+  useEffect(() => {
+    return () => {
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+    }
+
+    // Reset the audio button when language changes.
+    setSpeaking(false);
+    setAudioMessage("");
+  }, [language]);
+
+  const handleCategoryClick = (category) => {
+    const params = new URLSearchParams();
+    params.set("query", category.query);
+
+    navigate(`/jobs?${params.toString()}`);
+  };
+
+  const handleAudioHelp = () => {
+    if (!("speechSynthesis" in window)) {
+      setAudioMessage(labels.audioUnavailable);
+      return;
+    }
+
+    if (speaking) {
+      window.speechSynthesis.cancel();
+      setSpeaking(false);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+    setAudioMessage("");
+
+    const instructions = isMarathi
+      ? "लोक रोजगार ए आय मध्ये आपले स्वागत आहे. तुमचं काम, तुमची ओळख! नोकरी शोधण्यासाठी नोकरी शोधा या पानावर जा. तुम्ही खाली दिलेल्या कामाच्या चित्रावर क्लिक करून नोकऱ्या शोधू शकता. तुमच्या प्रोफाइलमध्ये तुमची माहिती आणि कौशल्ये भरू शकता."
+      : isHindi
+      ? "लोक रोजगार ए आई में आपका स्वागत है। आपका काम, आपकी पहचान! नौकरी खोजने के लिए नौकरी खोजें पेज पर जाएं। आप नीचे दिए गए काम के चित्र पर क्लिक करके नौकरी खोज सकते हैं। अपनी प्रोफ़ाइल में जानकारी और कौशल जोड़ सकते हैं।"
+      : "Welcome to Lokrozgar AI. Your Work, Your Identity! To find a job, open the Find Jobs page. You can also select a job category below. Complete your profile to show employers your skills and experience.";
+
+    const utterance = new SpeechSynthesisUtterance(
+      instructions
+    );
+
+    utterance.lang = LANGUAGE_CODES[lang] || "en-IN";
+    utterance.rate = 0.85;
+
+    utterance.onstart = () => setSpeaking(true);
+    utterance.onend = () => setSpeaking(false);
+    utterance.onerror = () => setSpeaking(false);
+
+    window.speechSynthesis.speak(utterance);
+  };
+
   return (
     <div className="home-page page-animate">
       {/* HERO SECTION */}
       <section className="hero visual-hero">
-        {/* Decorative Wave & Halo Accents */}
-        <div className="hero-wave-accent wave-left" aria-hidden="true" />
-        <div className="hero-wave-accent wave-center" aria-hidden="true" />
-        <div className="hero-worker-halo" aria-hidden="true" />
-
-        <div className="hero-container">
-          <div className="hero-left-content">
+        <div className="hero-content">
+          <div className="hero-text-content">
             <div className="hero-badge fade-in">
-              <Sparkles size={15} />
+              <Sparkles size={17} aria-hidden="true" />
               <span>{t("aiPoweredMatching")}</span>
             </div>
 
+            {/* NEW MULTILINGUAL SLOGAN */}
             <h1 className="hero-title slide-up">
-              {t("home.hero.line1")}
-              <br />
-              <span className="hero-title-highlight">{t("home.hero.line2")}</span>
+              {labels.slogan}
             </h1>
 
             <p className="hero-description fade-in">
               {t("homeDescription")}
             </p>
 
+            {/* AUDIO GUIDANCE */}
             <button
               type="button"
-              className="hero-listen-btn"
-              onClick={handleListen}
-              aria-label={t("listenToInstructions")}
+              className="home-audio-help"
+              onClick={handleAudioHelp}
+              aria-label={
+                speaking
+                  ? labels.stopAudio
+                  : labels.audioHelp
+              }
             >
-              <Volume2 size={17} />
-              <span>{t("listenToInstructions")}</span>
-            </button>
-          </div>
+              {speaking ? (
+                <VolumeX size={21} aria-hidden="true" />
+              ) : (
+                <Volume2 size={21} aria-hidden="true" />
+              )}
 
-          {/* Floating Badges */}
-          <div className="hero-floating-badges" aria-hidden="true">
-            <div className="floating-badge badge-briefcase" title="Jobs">
-              <span className="badge-icon-box">
-                <Briefcase size={16} />
+              <span>
+                {speaking
+                  ? labels.stopAudio
+                  : labels.audioHelp}
               </span>
-              <svg className="badge-dotted-trail" width="60" height="45" viewBox="0 0 60 45" fill="none">
-                <path d="M 8 5 Q 35 15 52 40" stroke="#0284c7" strokeWidth="2" strokeDasharray="3 4" opacity="0.6"/>
-              </svg>
-            </div>
-            <div className="floating-badge badge-pin" title="Location">
-              <MapPin size={22} />
-            </div>
-            <div className="floating-badge badge-wrench" title="Skills">
-              <Wrench size={20} />
-            </div>
-          </div>
-        </div>
-
-        {/* SEARCH BOX & ACTIONS */}
-        <div className="hero-search-wrapper">
-          <form className="search-box visual-search-box slide-up" onSubmit={handleSearchSubmit}>
-            <div className="search-field visual-search-field">
-              <Search size={22} className="search-field-icon" />
-              <div className="search-field-content">
-                <span className="search-label">{t("jobSearchQuestion")}</span>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder={t("jobSearchPlaceholder")}
-                  aria-label={t("jobSearchQuestion")}
-                />
-              </div>
-            </div>
-
-            <div className="search-field-divider" />
-
-            <div className="search-field visual-search-field">
-              <MapPin size={22} className="search-field-icon" />
-              <div className="search-field-content">
-                <span className="search-label">{t("where")}</span>
-                <input
-                  type="text"
-                  value={searchLocation}
-                  onChange={(e) => setSearchLocation(e.target.value)}
-                  placeholder={t("locationPlaceholder")}
-                  aria-label={t("where")}
-                />
-              </div>
-            </div>
-
-            <button type="submit" className="search-btn visual-search-btn animated-button">
-              <Search size={18} />
-              <span>{t("findJobs")}</span>
             </button>
-          </form>
 
-          {/* QUICK ACTIONS */}
-          <div className="hero-quick-actions fade-in">
-            <Link to="/jobs" className="quick-action">
-              <span className="quick-action-icon">
-                <Briefcase size={16} />
-              </span>
-              <span>{t("browseAllJobs")}</span>
-              <ArrowRight size={14} />
-            </Link>
-
-            <Link to="/register" className="quick-action">
-              <span className="quick-action-icon">👷</span>
-              <span>{t("createWorkerAccount")}</span>
-              <ArrowRight size={14} />
-            </Link>
+            {audioMessage && (
+              <p
+                className="home-voice-feedback"
+                role="status"
+              >
+                {audioMessage}
+              </p>
+            )}
           </div>
         </div>
       </section>
 
-      {/* CATEGORIES SECTION */}
+      {/* LARGE PICTURE-BASED CATEGORIES */}
       <section className="categories visual-categories">
         <div className="section-heading">
           <div>
-            <span className="section-eyebrow">{t("exploreOpportunities")}</span>
-            <h2>{t("findJobsByCategory")}</h2>
-            <p>{t("categoryDescription")}</p>
+            <span className="section-eyebrow">
+              {t("exploreOpportunities")}
+            </span>
+
+            <h2>{labels.chooseWork}</h2>
+            <p>{labels.tapCategory}</p>
           </div>
 
           <Link to="/jobs" className="view-all-link">
             <span>{t("viewAllJobs")}</span>
-            <ArrowRight size={18} />
+            <ArrowRight size={18} aria-hidden="true" />
           </Link>
         </div>
 
         <div className="category-grid visual-category-grid">
           {categories.map((category) => {
             const Icon = category.icon;
+
             return (
-              <Link
-                to="/jobs"
-                className={`category-card visual-category-card animated-card fade-in ${category.className}`}
-                key={category.name}
+              <button
+                type="button"
+                key={category.key}
+                className={`category-card visual-category-card home-picture-category animated-card fade-in ${category.className}`}
+                onClick={() => handleCategoryClick(category)}
               >
-                <div className="category-icon animated-icon">
-                  <Icon size={30} />
+                <div
+                  className="home-category-picture"
+                  aria-hidden="true"
+                >
+                  <span>{category.emoji}</span>
+                  <Icon size={31} />
                 </div>
+
                 <div className="category-card-content">
                   <h3>{category.name}</h3>
                   <p>{category.description}</p>
                 </div>
+
                 <div className="category-arrow">
-                  <ArrowRight size={18} />
+                  <ArrowRight
+                    size={23}
+                    aria-hidden="true"
+                  />
                 </div>
-              </Link>
+              </button>
             );
           })}
         </div>
@@ -274,11 +351,20 @@ export function HomePage() {
       {/* FEATURES SECTION */}
       <section className="home-section">
         <div className="container">
-          <h2 className="home-section-title">{t("home.features.title")}</h2>
+          <h2 className="home-section-title">
+            {t("home.features.title")}
+          </h2>
+
           <div className="home-features-grid">
             {FEATURE_KEYS.map((key) => (
-              <div className="home-feature-card animated-card" key={key}>
-                <div className="home-feature-icon">{FEATURE_EMOJI[key]}</div>
+              <div
+                className="home-feature-card animated-card"
+                key={key}
+              >
+                <div className="home-feature-icon">
+                  {FEATURE_EMOJI[key]}
+                </div>
+
                 <h3>{t(`home.features.${key}.title`)}</h3>
                 <p>{t(`home.features.${key}.desc`)}</p>
               </div>
@@ -287,13 +373,19 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* HOW IT WORKS SECTION */}
+      {/* HOW IT WORKS */}
       <section className="home-section home-section-alt">
         <div className="container">
-          <h2 className="home-section-title">{t("home.howItWorks.title")}</h2>
+          <h2 className="home-section-title">
+            {t("home.howItWorks.title")}
+          </h2>
+
           <div className="home-how-grid">
             <div className="home-how-column">
-              <h3>{t("home.howItWorks.workers.title")}</h3>
+              <h3>
+                {t("home.howItWorks.workers.title")}
+              </h3>
+
               <ol>
                 <li>{t("home.howItWorks.workers.step1")}</li>
                 <li>{t("home.howItWorks.workers.step2")}</li>
@@ -301,8 +393,12 @@ export function HomePage() {
                 <li>{t("home.howItWorks.workers.step4")}</li>
               </ol>
             </div>
+
             <div className="home-how-column">
-              <h3>{t("home.howItWorks.employers.title")}</h3>
+              <h3>
+                {t("home.howItWorks.employers.title")}
+              </h3>
+
               <ol>
                 <li>{t("home.howItWorks.employers.step1")}</li>
                 <li>{t("home.howItWorks.employers.step2")}</li>

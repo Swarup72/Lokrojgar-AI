@@ -76,7 +76,7 @@ export function RegisterPage() {
         <h1 className="auth-title">{t("registerTitle")}</h1>
         <p className="auth-subtitle">{t("registerSubtitle")}</p>
 
-        {error && <ErrorBanner error={error} context="auth" />}
+        {error && <ErrorBanner error={error} />}
         {fieldError && <p className="auth-field-error">{fieldError}</p>}
 
         <form onSubmit={handleSubmit} noValidate>

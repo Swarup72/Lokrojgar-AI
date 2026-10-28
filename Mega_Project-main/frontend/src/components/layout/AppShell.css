@@ -1,0 +1,70 @@
+
+/* LOKROZGAR AI - Main Layout */
+
+.app-shell {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  min-width: 0;
+}
+
+/* The body already reserves space for the sidebar
+   through App.css, so do not add another left margin. */
+
+.app-shell-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 100vh;
+  width: 100%;
+  max-width: 100%;
+}
+
+.app-shell-main {
+  flex: 1;
+  min-width: 0;
+  width: 100%;
+  max-width: 100%;
+  padding: 0;
+}
+
+/* Keep the footer within the content area */
+.app-shell-content > footer {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+/* Prevent wide elements from overflowing the page */
+.app-shell-main img,
+.app-shell-main video {
+  max-width: 100%;
+}
+
+.app-shell-main input,
+.app-shell-main textarea,
+.app-shell-main select {
+  max-width: 100%;
+}
+
+/* Tablet */
+@media (max-width: 900px) {
+  .app-shell-content,
+  .app-shell-main {
+    min-width: 0;
+  }
+}
+
+/* Mobile - Sidebar remains visible */
+@media (max-width: 600px) {
+  .app-shell-content {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .app-shell-main {
+    width: 100%;
+    min-width: 0;
+  }
+}

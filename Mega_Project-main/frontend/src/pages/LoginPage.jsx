@@ -38,8 +38,7 @@ export function LoginPage() {
 
     setSubmitting(true);
     try {
-      const sanitizedPhone = phone.trim().replace(/[\s-]/g, "");
-      await login(sanitizedPhone, password);
+      await login(phone.trim(), password);
       navigate(location.state?.from?.pathname || "/", { replace: true });
     } catch (err) {
       setError(err);
@@ -58,7 +57,7 @@ export function LoginPage() {
         <h1 className="auth-title">{t("welcomeBack")}</h1>
         <p className="auth-subtitle">{t("loginSubtitle")}</p>
 
-        {error && <ErrorBanner error={error} context="auth" />}
+        {error && <ErrorBanner error={error} />}
         {fieldError && <p className="auth-field-error">{fieldError}</p>}
 
         <form onSubmit={handleSubmit} noValidate>

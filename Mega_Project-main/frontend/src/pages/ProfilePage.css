@@ -1,59 +1,240 @@
+
+/* =========================================
+   LOKROZGAR AI - PROFILE PAGE
+   ========================================= */
+
 .profile-page {
-  max-width: 800px;
+  width: 94%;
+  max-width: 850px;
+  min-width: 0;
+  margin: 0 auto;
   padding: 32px 0 60px;
 }
 
 .profile-page-title {
-  font-size: var(--text-2xl);
-  margin-bottom: 20px;
+  font-size: var(--text-2xl, 28px);
+  color: var(--color-ink, #14213d);
+  margin-bottom: 22px;
 }
+
+/* PROFILE TABS */
 
 .profile-tabs {
   display: flex;
-  gap: 4px;
-  background: var(--color-surface-alt);
-  padding: 4px;
-  border-radius: var(--radius-pill);
+  gap: 5px;
   width: fit-content;
-  margin-bottom: 20px;
+  max-width: 100%;
+  padding: 5px;
+  margin-bottom: 22px;
+  border-radius: 999px;
+  background: #eff6ff;
 }
 
 .profile-tabs button {
+  padding: 10px 18px;
+  border: none;
+  border-radius: 999px;
   background: transparent;
-  color: var(--color-text-3);
-  padding: 8px 18px;
-  border-radius: var(--radius-pill);
-  font-size: var(--text-sm);
-  font-weight: 700;
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
 }
 
 .profile-tabs button.active {
-  background: var(--color-primary);
-  color: #fff;
+  background: #2563eb;
+  color: #ffffff;
 }
+
+/* PROFILE PICTURE SECTION */
+
+.profile-photo-section {
+  padding: 25px;
+  margin-bottom: 22px;
+  border: 1px solid #dbeafe;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 6px 20px rgba(15, 23, 42, 0.05);
+}
+
+.profile-photo-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 23px;
+  color: #2563eb;
+}
+
+.profile-photo-heading h2 {
+  margin: 0;
+  color: #14213d;
+  font-size: 19px;
+  font-weight: 800;
+}
+
+.profile-photo-content {
+  display: flex;
+  align-items: center;
+  gap: 26px;
+  min-width: 0;
+}
+
+.profile-photo-avatar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 145px;
+  height: 145px;
+  border: 4px solid #dbeafe;
+  border-radius: 50%;
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.profile-photo-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-photo-camera {
+  position: absolute;
+  right: 3px;
+  bottom: 5px;
+  display: grid;
+  place-items: center;
+  width: 39px;
+  height: 39px;
+  border: 3px solid #ffffff;
+  border-radius: 50%;
+  background: #2563eb;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.profile-photo-camera:hover {
+  background: #1d4ed8;
+}
+
+.profile-photo-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-photo-details h3 {
+  margin: 0 0 8px;
+  color: #14213d;
+  font-size: 21px;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.profile-photo-role {
+  display: inline-block;
+  padding: 5px 12px;
+  border-radius: 999px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.profile-photo-details > p {
+  margin: 12px 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.profile-photo-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.profile-add-photo-btn,
+.profile-remove-photo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 43px;
+  padding: 10px 16px;
+  border-radius: 11px;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.profile-add-photo-btn {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.profile-add-photo-btn:hover {
+  background: #1d4ed8;
+}
+
+.profile-remove-photo-btn {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.profile-remove-photo-btn:hover {
+  background: #fee2e2;
+}
+
+.profile-photo-file-input {
+  display: none;
+}
+
+.profile-photo-details .profile-photo-error {
+  color: #dc2626;
+  font-weight: 700;
+}
+
+.profile-photo-details .profile-photo-notice {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* VOICE PROFILE */
 
 .profile-voice-cta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
   flex-wrap: wrap;
-  background: var(--gradient-card-blue);
+  gap: 16px;
   margin-bottom: 20px;
+  background: var(
+    --gradient-card-blue,
+    linear-gradient(135deg, #eff6ff, #f8fbff)
+  );
 }
 
 .profile-voice-cta h2 {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--text-md);
-  margin-bottom: 4px;
+  margin-bottom: 5px;
+  font-size: var(--text-md, 18px);
 }
 
 .profile-voice-cta p {
-  color: var(--color-muted);
-  font-size: var(--text-sm);
+  color: var(--color-muted, #64748b);
+  font-size: var(--text-sm, 14px);
 }
+
+/* PROFILE DETAILS */
 
 .profile-section {
   margin-bottom: 20px;
@@ -63,37 +244,150 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--text-md);
   margin-bottom: 18px;
+  font-size: var(--text-md, 18px);
 }
 
-/* Role activation: adding employer (or worker) access to the same account. */
+/* ROLE ACTIVATION */
+
 .profile-role-cta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .profile-role-cta h2 {
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: var(--text-lg);
-  margin: 0 0 4px;
+  margin: 0 0 5px;
+  font-size: var(--text-lg, 20px);
 }
 
 .profile-role-cta p {
-  color: var(--color-muted);
-  font-size: var(--text-sm);
-  margin: 0;
   max-width: 60ch;
+  margin: 0;
+  color: var(--color-muted, #64748b);
+  font-size: var(--text-sm, 14px);
 }
+
+/* TABLET */
+
+@media (max-width: 900px) {
+  .profile-page {
+    width: 95%;
+    padding: 25px 0 50px;
+  }
+
+  .profile-photo-section {
+    padding: 20px;
+  }
+
+  .profile-photo-avatar {
+    width: 120px;
+    height: 120px;
+  }
+
+  .profile-photo-content {
+    gap: 18px;
+  }
+}
+
+/* MOBILE WITH PERMANENT SIDEBAR */
 
 @media (max-width: 700px) {
   .profile-role-cta {
     flex-direction: column;
     align-items: flex-start;
   }
+
+  .profile-photo-content {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .profile-photo-details {
+    width: 100%;
+  }
+
+  .profile-photo-avatar {
+    width: 115px;
+    height: 115px;
+  }
+
+  .profile-photo-details h3 {
+    font-size: 18px;
+  }
+
+  .profile-photo-actions {
+    justify-content: center;
+  }
+
+  .profile-voice-cta {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-page {
+    width: 96%;
+    padding: 18px 0 35px;
+  }
+
+  .profile-page-title {
+    font-size: 23px;
+  }
+
+  .profile-photo-section {
+    padding: 14px;
+    border-radius: 15px;
+  }
+
+  .profile-photo-heading h2 {
+    font-size: 16px;
+  }
+
+  .profile-photo-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .profile-photo-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .profile-add-photo-btn,
+  .profile-remove-photo-btn {
+    width: 100%;
+    font-size: 12px;
+    padding: 9px;
+  }
+
+  .profile-tabs {
+    width: 100%;
+    border-radius: 13px;
+  }
+
+  .profile-tabs button {
+    flex: 1;
+    min-width: 0;
+    padding: 9px 5px;
+    font-size: 12px;
+    border-radius: 10px;
+  }
+}
+
+/* ACCESSIBILITY */
+
+.profile-add-photo-btn:focus-visible,
+.profile-remove-photo-btn:focus-visible,
+.profile-photo-camera:focus-visible,
+.profile-tabs button:focus-visible {
+  outline: 3px solid #93c5fd;
+  outline-offset: 3px;
 }
