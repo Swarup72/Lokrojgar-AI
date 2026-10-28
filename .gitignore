@@ -1,5 +1,8 @@
 .venv/
 _db_backups/
+_recovery_backup_*/
+_quarantine_*/
+_frontend_backup_*/
 __pycache__/
 *.pyc
 .env
