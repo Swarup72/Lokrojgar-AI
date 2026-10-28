@@ -1,0 +1,842 @@
+[
+  {
+    "job_id": "J001",
+    "title": "घरगुती वायरिंगसाठी इलेक्ट्रिशियन हवा",
+    "description": "कोल्हापूर परिसरात घरगुती वायरिंग, फॅन बसवणे आणि दुरुस्तीसाठी अनुभवी इलेक्ट्रिशियन हवा आहे.",
+    "employer_id": "E001",
+    "skills": [
+      "Electrician",
+      "वायरिंग"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 900,
+    "status": "open",
+    "case": "Normal Marathi job",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J002",
+    "title": "Electrician required for residential wiring",
+    "description": "Experienced electrician needed for wiring, fan installation and repairs in Kolhapur.",
+    "employer_id": "E001",
+    "skills": [
+      "Electrician",
+      "Residential wiring"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 900,
+    "status": "open",
+    "case": "English equivalent of J001",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J003",
+    "title": "प्लंबर आवश्यक",
+    "description": "पुण्यातील घरांमध्ये पाईप फिटिंग आणि गळती दुरुस्तीचे काम.",
+    "employer_id": "E002",
+    "skills": [
+      "Plumbing",
+      "Pipe fitting"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 850,
+    "status": "open",
+    "case": "Marathi plumbing job",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J004",
+    "title": "Plumber needed for pipe fitting",
+    "description": "Pipe fitting and leak repair work for residential properties in Pune.",
+    "employer_id": "E002",
+    "skills": [
+      "Plumbing",
+      "Pipe fitting"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 850,
+    "status": "open",
+    "case": "English plumbing job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J005",
+    "title": "गवंडी आणि बांधकाम मजूर पाहिजेत",
+    "description": "सातारा येथे नवीन इमारतीसाठी गवंडी आणि मजूर आवश्यक आहेत.",
+    "employer_id": "E003",
+    "skills": [
+      "Mason",
+      "Construction labour"
+    ],
+    "city": "Satara",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 850,
+    "status": "open",
+    "case": "Construction hiring",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J006",
+    "title": "Construction workers required",
+    "description": "Multiple workers needed for a legitimate construction project in Satara.",
+    "employer_id": "E015",
+    "skills": [
+      "Construction labour"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 800,
+    "status": "open",
+    "case": "Legitimate similar vacancy",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J007",
+    "title": "Welder required",
+    "description": "MIG welding and metal fabrication work in a workshop.",
+    "employer_id": "E004",
+    "skills": [
+      "Welder",
+      "MIG welding"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 24000,
+    "status": "open",
+    "case": "Monthly wage",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J008",
+    "title": "रेस्टॉरंटसाठी स्वयंपाकी हवा",
+    "description": "कोल्हापूरमधील भोजनालयासाठी स्वयंपाकी हवा आहे. मराठी जेवण बनवता आले पाहिजे.",
+    "employer_id": "E005",
+    "skills": [
+      "Cook",
+      "Cooking"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 18000,
+    "status": "open",
+    "case": "Restaurant job",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J009",
+    "title": "Delivery worker required",
+    "description": "Local delivery work in Mumbai. Driving licence required.",
+    "employer_id": "E006",
+    "skills": [
+      "Delivery",
+      "Driving"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 20000,
+    "status": "open",
+    "case": "New employer",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J010",
+    "title": "Cleaning staff needed",
+    "description": "Office cleaning and housekeeping work in Pune.",
+    "employer_id": "E007",
+    "skills": [
+      "Cleaning",
+      "Housekeeping"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 700,
+    "status": "open",
+    "case": "Cleaning job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J011",
+    "title": "Warehouse packing workers needed",
+    "description": "Packing, loading and inventory support in Nashik. Multiple genuine vacancies.",
+    "employer_id": "E008",
+    "skills": [
+      "Warehouse",
+      "Packing"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 650,
+    "status": "open",
+    "case": "Bulk legitimate hiring",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J012",
+    "title": "गोदामात पॅकिंग कामगार पाहिजेत",
+    "description": "नाशिकमध्ये पॅकिंग आणि माल मोजणीचे काम. अनेक कामगारांची गरज आहे.",
+    "employer_id": "E008",
+    "skills": [
+      "Packing",
+      "गोदाम काम"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 650,
+    "status": "open",
+    "case": "Marathi equivalent of J011",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J013",
+    "title": "Security guard required",
+    "description": "Day and night shifts available. Experience preferred.",
+    "employer_id": "E010",
+    "skills": [
+      "Security",
+      "Access control"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 19000,
+    "status": "open",
+    "case": "Security job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J014",
+    "title": "मेकॅनिक आवश्यक",
+    "description": "नाशिकमध्ये दुचाकी सर्व्हिसिंग आणि ब्रेक दुरुस्तीचे काम.",
+    "employer_id": "E012",
+    "skills": [
+      "Mechanic",
+      "दुचाकी दुरुस्ती"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 2500,
+    "status": "open",
+    "case": "Fixed-price job",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J015",
+    "title": "Painter required",
+    "description": "Interior painting, surface preparation and finishing in Pune.",
+    "employer_id": "E015",
+    "skills": [
+      "Painting",
+      "Finishing"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 8000,
+    "status": "open",
+    "case": "Fixed price contract",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J016",
+    "title": "शेतीकामासाठी मजूर पाहिजेत",
+    "description": "कराडजवळ हंगामी शेती आणि सिंचनासाठी कामगार आवश्यक.",
+    "employer_id": "E011",
+    "skills": [
+      "Agriculture",
+      "शेतीकाम"
+    ],
+    "city": "Karad",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 550,
+    "status": "open",
+    "case": "Seasonal work",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J017",
+    "title": "Urgent electrician hiring",
+    "description": "Urgent electrician needed today; contact employer for details.",
+    "employer_id": "E001",
+    "skills": [
+      "Electrician"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 1000,
+    "status": "open",
+    "case": "Urgent but legitimate",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J018",
+    "title": "Electrician required for residential wiring",
+    "description": "Experienced electrician needed for wiring, fan installation and repairs in Kolhapur.",
+    "employer_id": "E001",
+    "skills": [
+      "Electrician",
+      "Residential wiring"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 900,
+    "status": "open",
+    "case": "Exact duplicate of J002",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J019",
+    "title": "Electrician required for residential wiring",
+    "description": "Experienced electrician needed for wiring and fan installation. Repairs in Kolhapur.",
+    "employer_id": "E001",
+    "skills": [
+      "Electrician",
+      "Residential wiring"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 900,
+    "status": "open",
+    "case": "Near duplicate of J002",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J020",
+    "title": "Urgent work: pay registration fee first",
+    "description": "Applicants must pay a registration fee before receiving work details. High earnings guaranteed.",
+    "employer_id": "E013",
+    "skills": [
+      "General labour"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 5000,
+    "status": "open",
+    "case": "Suspicious upfront fee language",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J021",
+    "title": "घरबसल्या काम, आधी पैसे भरा",
+    "description": "काम सुरू करण्यापूर्वी नोंदणी शुल्क भरणे आवश्यक आहे. हमखास मोठी कमाई.",
+    "employer_id": "E013",
+    "skills": [
+      "General work"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 10000,
+    "status": "open",
+    "case": "Suspicious Marathi upfront fee language",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J022",
+    "title": "Construction labourers needed for new site",
+    "description": "Need 12 labourers for a verified construction project starting next week.",
+    "employer_id": "E015",
+    "skills": [
+      "Construction labour"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 850,
+    "status": "open",
+    "case": "Legitimate bulk hiring",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J023",
+    "title": "Construction labourers needed for new site",
+    "description": "Need 12 labourers for a verified construction project starting next week.",
+    "employer_id": "E015",
+    "skills": [
+      "Construction labour"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 850,
+    "status": "cancelled",
+    "case": "Repeated cancelled duplicate",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J024",
+    "title": "AC technician for installation",
+    "description": "Install and service split AC units in Kolhapur; tools preferred.",
+    "employer_id": "E001",
+    "skills": [
+      "AC repair",
+      "Installation"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 1500,
+    "status": "open",
+    "case": "Specialist job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J025",
+    "title": "Cook for weekend catering",
+    "description": "Part-time weekend catering support in Pune.",
+    "employer_id": "E005",
+    "skills": [
+      "Cook",
+      "Catering"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 3000,
+    "status": "open",
+    "case": "Part-time job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J026",
+    "title": "Factory assembly operator",
+    "description": "Assembly line work with safety training provided in Nashik.",
+    "employer_id": "E004",
+    "skills": [
+      "Factory work",
+      "Assembly"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 21000,
+    "status": "open",
+    "case": "Factory job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J027",
+    "title": "घरकाम आणि साफसफाई",
+    "description": "मुंबईमध्ये घर आणि कार्यालय स्वच्छतेचे काम.",
+    "employer_id": "E007",
+    "skills": [
+      "Cleaning",
+      "Housekeeping"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 750,
+    "status": "open",
+    "case": "Cleaning, different city",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J028",
+    "title": "Carpenter needed for door fitting",
+    "description": "Door fitting and furniture repairs in Pune.",
+    "employer_id": "E009",
+    "skills": [
+      "Carpentry",
+      "Door fitting"
+    ],
+    "city": "Sangli",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 3500,
+    "status": "open",
+    "case": "Individual household employer",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J029",
+    "title": "Tailor required",
+    "description": "Garment stitching and alterations in Sangli.",
+    "employer_id": "E015",
+    "skills": [
+      "Tailoring",
+      "Stitching"
+    ],
+    "city": "Sangli",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 17000,
+    "status": "open",
+    "case": "Tailoring",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J030",
+    "title": "Driver for local deliveries",
+    "description": "Local route knowledge and valid licence required in Nashik.",
+    "employer_id": "E006",
+    "skills": [
+      "Driving",
+      "Delivery"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 22000,
+    "status": "open",
+    "case": "Delivery driver",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J031",
+    "title": "Electrician for commercial maintenance",
+    "description": "Commercial wiring maintenance in Pune; separate role from residential jobs.",
+    "employer_id": "E001",
+    "skills": [
+      "Electrician",
+      "Maintenance"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 1200,
+    "status": "open",
+    "case": "Similar skill but distinct job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J032",
+    "title": "प्लंबिंग आणि पाईप फिटिंग",
+    "description": "पुण्यातील नवीन इमारतीसाठी पाईप फिटिंगचे काम.",
+    "employer_id": "E002",
+    "skills": [
+      "Plumbing",
+      "Pipe fitting"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 6000,
+    "status": "open",
+    "case": "Same skills, different pay type",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J033",
+    "title": "Warehouse helper - night shift",
+    "description": "Night shift packing and stock checks in Mumbai.",
+    "employer_id": "E008",
+    "skills": [
+      "Warehouse",
+      "Packing"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 19000,
+    "status": "open",
+    "case": "Shift variation",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J034",
+    "title": "Farm irrigation assistant",
+    "description": "Seasonal irrigation and crop support near Karad.",
+    "employer_id": "E011",
+    "skills": [
+      "Agriculture",
+      "Irrigation"
+    ],
+    "city": "Karad",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 600,
+    "status": "open",
+    "case": "English seasonal job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J035",
+    "title": "Mechanic for motorcycle service",
+    "description": "Two-wheeler servicing and brake maintenance in Nashik.",
+    "employer_id": "E012",
+    "skills": [
+      "Mechanic",
+      "Two-wheeler repair"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 1100,
+    "status": "open",
+    "case": "Mechanic job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J036",
+    "title": "General helper needed",
+    "description": "Entry-level helper required in Kolhapur; training provided.",
+    "employer_id": "E009",
+    "skills": [
+      "General helper"
+    ],
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 500,
+    "status": "open",
+    "case": "Entry-level job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J037",
+    "title": "High-pay factory role",
+    "description": "Factory support role with pay dependent on verified experience and shift.",
+    "employer_id": "E004",
+    "skills": [
+      "Factory work"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 28000,
+    "status": "open",
+    "case": "High but contextual pay",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J038",
+    "title": "Multiple painters required",
+    "description": "A contractor needs 5 painters for separate sites across Pune.",
+    "employer_id": "E015",
+    "skills": [
+      "Painting"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 1000,
+    "status": "open",
+    "case": "Multiple genuine vacancies",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J039",
+    "title": "Housekeeping worker needed",
+    "description": "Commercial building cleaning in Mumbai, morning shift.",
+    "employer_id": "E007",
+    "skills": [
+      "Housekeeping",
+      "Cleaning"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 18000,
+    "status": "open",
+    "case": "Housekeeping role",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J040",
+    "title": "Welding workshop assistant",
+    "description": "Assist with metal preparation and workshop cleanup in Pune.",
+    "employer_id": "E004",
+    "skills": [
+      "Metal fabrication",
+      "General helper"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 700,
+    "status": "open",
+    "case": "Related but distinct role",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J041",
+    "title": "मोटार दुरुस्तीसाठी मेकॅनिक",
+    "description": "दुचाकी आणि स्कूटर सर्व्हिसिंगसाठी अनुभवी मेकॅनिक हवा.",
+    "employer_id": "E012",
+    "skills": [
+      "मेकॅनिक",
+      "दुचाकी दुरुस्ती"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 1100,
+    "status": "open",
+    "case": "Marathi mechanic job",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J042",
+    "title": "Painter needed for wall finishing",
+    "description": "Surface preparation and wall finishing; no upfront payment required.",
+    "employer_id": "E015",
+    "skills": [
+      "Painting",
+      "Finishing"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 7500,
+    "status": "open",
+    "case": "Legitimate painting role",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J043",
+    "title": "Office cleaner - part time",
+    "description": "Evening office cleaning, three hours per day in Pune.",
+    "employer_id": "E007",
+    "skills": [
+      "Cleaning"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 450,
+    "status": "open",
+    "case": "Part-time low daily amount",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J044",
+    "title": "Driver required for local transport",
+    "description": "Driving and daily vehicle checks; job details shared after interview.",
+    "employer_id": "E006",
+    "skills": [
+      "Driving"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 21000,
+    "status": "open",
+    "case": "Normal job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J045",
+    "title": "Security staff for warehouse",
+    "description": "Access control and visitor register duties in Nashik.",
+    "employer_id": "E010",
+    "skills": [
+      "Security",
+      "Access control"
+    ],
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 20000,
+    "status": "open",
+    "case": "Related security role",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J046",
+    "title": "Plumber for emergency leak repair",
+    "description": "Emergency plumbing repairs in Pune; genuine urgent work.",
+    "employer_id": "E002",
+    "skills": [
+      "Plumbing",
+      "Leak repair"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 1200,
+    "status": "open",
+    "case": "Urgent legitimate job",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J047",
+    "title": "General labour for unloading",
+    "description": "Unload materials at a warehouse in Mumbai; one-day assignment.",
+    "employer_id": "E008",
+    "skills": [
+      "Material handling",
+      "General labour"
+    ],
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 700,
+    "status": "open",
+    "case": "One-day assignment",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J048",
+    "title": "AC service technician",
+    "description": "Preventive AC maintenance in Pune. Tools and experience preferred.",
+    "employer_id": "E001",
+    "skills": [
+      "AC repair",
+      "Maintenance"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "fixed",
+    "pay_amount": 2200,
+    "status": "open",
+    "case": "AC skill, different location",
+    "preferred_language": "en"
+  },
+  {
+    "job_id": "J049",
+    "title": "शिवणकामासाठी टेलर हवा",
+    "description": "सांगली येथे कपड्यांची शिवण आणि दुरुस्ती करण्यासाठी टेलर हवा.",
+    "employer_id": "E015",
+    "skills": [
+      "Tailoring",
+      "Stitching"
+    ],
+    "city": "Sangli",
+    "state": "Maharashtra",
+    "pay_type": "monthly",
+    "pay_amount": 17000,
+    "status": "open",
+    "case": "Marathi tailoring job",
+    "preferred_language": "mr"
+  },
+  {
+    "job_id": "J050",
+    "title": "General maintenance worker",
+    "description": "Basic painting, plumbing and minor electrical repairs in Pune.",
+    "employer_id": "E009",
+    "skills": [
+      "Maintenance",
+      "Basic plumbing",
+      "Painting"
+    ],
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pay_type": "daily",
+    "pay_amount": 900,
+    "status": "open",
+    "case": "Multi-skill maintenance job",
+    "preferred_language": "en"
+  }
+]

@@ -1,13 +1,9 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import http from "http";
 import mongoose from "mongoose";
 import { Server } from "socket.io";
 import connectDB from "./db/index.js";
 import { app } from "./app.js";
-
-dotenv.config({
-  path: "./.env",
-});
 
 // Create HTTP Server wrapping Express app
 const server = http.createServer(app);

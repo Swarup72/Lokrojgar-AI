@@ -1,0 +1,112 @@
+[
+  {
+    "case_id": "N001",
+    "entity": "worker",
+    "field": "availability",
+    "value": "sometimes",
+    "expected": "Reject invalid enum"
+  },
+  {
+    "case_id": "N002",
+    "entity": "worker",
+    "field": "experience_years",
+    "value": -1,
+    "expected": "Reject negative experience"
+  },
+  {
+    "case_id": "N003",
+    "entity": "worker",
+    "field": "preferred_language",
+    "value": "xx",
+    "expected": "Reject or documented fallback"
+  },
+  {
+    "case_id": "N004",
+    "entity": "worker",
+    "field": "expected_pay",
+    "value": -500,
+    "expected": "Reject invalid negative pay"
+  },
+  {
+    "case_id": "N005",
+    "entity": "job",
+    "field": "title",
+    "value": "",
+    "expected": "Reject missing/empty title"
+  },
+  {
+    "case_id": "N006",
+    "entity": "job",
+    "field": "description",
+    "value": "[very long string: 20,000 characters]",
+    "expected": "Apply documented max length or reject safely"
+  },
+  {
+    "case_id": "N007",
+    "entity": "job",
+    "field": "pay_type",
+    "value": "hourly-ish",
+    "expected": "Reject unsupported enum"
+  },
+  {
+    "case_id": "N008",
+    "entity": "report",
+    "field": "target_id",
+    "value": "not-an-object-id",
+    "expected": "Return validation error"
+  },
+  {
+    "case_id": "N009",
+    "entity": "report",
+    "field": "description",
+    "value": "<script>alert(1)</script>",
+    "expected": "Store/render safely; no script execution"
+  },
+  {
+    "case_id": "N010",
+    "entity": "job",
+    "field": "extra",
+    "value": {
+      "role": "admin",
+      "isVerified": true
+    },
+    "expected": "Reject/ignore mass-assignment fields"
+  },
+  {
+    "case_id": "N011",
+    "entity": "job",
+    "field": "title",
+    "value": {
+      "$ne": null
+    },
+    "expected": "Reject object where string expected"
+  },
+  {
+    "case_id": "N012",
+    "entity": "admin_action",
+    "field": "status",
+    "value": "permanently_ban_everyone",
+    "expected": "Reject unsupported action"
+  },
+  {
+    "case_id": "N013",
+    "entity": "report",
+    "field": "reporter_id",
+    "value": "fake-admin-id",
+    "expected": "Use authenticated identity, not client-supplied ID"
+  },
+  {
+    "case_id": "N014",
+    "entity": "worker",
+    "field": "skills",
+    "value": [],
+    "expected": "Follow actual schema policy; no crash"
+  },
+  {
+    "case_id": "N015",
+    "entity": "worker",
+    "field": "bio",
+    "value": "मराठी 👷‍♀️ café — test punctuation",
+    "expected": "Preserve Unicode correctly"
+  }
+]

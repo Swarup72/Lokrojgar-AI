@@ -1,0 +1,9 @@
+﻿case_id,target_job,reporter,category,description,expected_manual_check,target_employer
+R001,J020,W001,potential_scam,The listing asks applicants to pay a registration fee before work is offered.,Flag for review; do not auto-ban.,
+R002,J020,W003,potential_scam,काम सुरू करण्यापूर्वी पैसे मागितले जात आहेत.,Distinct reporter; assess corroborating evidence.,
+R003,J020,W001,potential_scam,Repeated report by same synthetic reporter.,Check duplicate-report behavior.,
+R004,J018,W005,duplicate_job,This looks identical to another listing from the same employer.,Review duplicate evidence.,
+R005,,W008,misleading_details,Employer verification was rejected; please review this listing.,"Verification status is a signal, not proof.",E013
+R006,J022,W006,other,I think this is fake because the employer is hiring many people.,Likely false positive; bulk hiring can be legitimate.,
+R007,,W010,other,Competitor complaint against a legitimate contractor.,Allegation alone must not establish a violation.,E015
+R008,J021,W013,potential_scam,नोंदणी शुल्क भरल्याशिवाय काम देणार नसल्याचे नमूद आहे.,Check Marathi report storage and display.,

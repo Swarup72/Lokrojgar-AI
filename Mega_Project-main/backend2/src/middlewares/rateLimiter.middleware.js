@@ -53,6 +53,7 @@ export const loginRateLimiter = rateLimit({
   max: 5, // 5 attempts max
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
   skip: (req) => req.method === "OPTIONS",
   keyGenerator: (req) => resolveLoginRateLimitKey(req),
   handler: (req, res, next, options) => {

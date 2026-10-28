@@ -1,0 +1,51 @@
+﻿job_id,title,description,employer_id,skills,city,state,pay_type,pay_amount,status,case,preferred_language
+J001,घरगुती वायरिंगसाठी इलेक्ट्रिशियन हवा,"कोल्हापूर परिसरात घरगुती वायरिंग, फॅन बसवणे आणि दुरुस्तीसाठी अनुभवी इलेक्ट्रिशियन हवा आहे.",E001,"[""Electrician"", ""वायरिंग""]",Kolhapur,Maharashtra,daily,900,open,Normal Marathi job,mr
+J002,Electrician required for residential wiring,"Experienced electrician needed for wiring, fan installation and repairs in Kolhapur.",E001,"[""Electrician"", ""Residential wiring""]",Kolhapur,Maharashtra,daily,900,open,English equivalent of J001,en
+J003,प्लंबर आवश्यक,पुण्यातील घरांमध्ये पाईप फिटिंग आणि गळती दुरुस्तीचे काम.,E002,"[""Plumbing"", ""Pipe fitting""]",Pune,Maharashtra,daily,850,open,Marathi plumbing job,mr
+J004,Plumber needed for pipe fitting,Pipe fitting and leak repair work for residential properties in Pune.,E002,"[""Plumbing"", ""Pipe fitting""]",Pune,Maharashtra,daily,850,open,English plumbing job,en
+J005,गवंडी आणि बांधकाम मजूर पाहिजेत,सातारा येथे नवीन इमारतीसाठी गवंडी आणि मजूर आवश्यक आहेत.,E003,"[""Mason"", ""Construction labour""]",Satara,Maharashtra,daily,850,open,Construction hiring,mr
+J006,Construction workers required,Multiple workers needed for a legitimate construction project in Satara.,E015,"[""Construction labour""]",Pune,Maharashtra,daily,800,open,Legitimate similar vacancy,en
+J007,Welder required,MIG welding and metal fabrication work in a workshop.,E004,"[""Welder"", ""MIG welding""]",Pune,Maharashtra,monthly,24000,open,Monthly wage,en
+J008,रेस्टॉरंटसाठी स्वयंपाकी हवा,कोल्हापूरमधील भोजनालयासाठी स्वयंपाकी हवा आहे. मराठी जेवण बनवता आले पाहिजे.,E005,"[""Cook"", ""Cooking""]",Kolhapur,Maharashtra,monthly,18000,open,Restaurant job,mr
+J009,Delivery worker required,Local delivery work in Mumbai. Driving licence required.,E006,"[""Delivery"", ""Driving""]",Mumbai,Maharashtra,monthly,20000,open,New employer,en
+J010,Cleaning staff needed,Office cleaning and housekeeping work in Pune.,E007,"[""Cleaning"", ""Housekeeping""]",Pune,Maharashtra,daily,700,open,Cleaning job,en
+J011,Warehouse packing workers needed,"Packing, loading and inventory support in Nashik. Multiple genuine vacancies.",E008,"[""Warehouse"", ""Packing""]",Nashik,Maharashtra,daily,650,open,Bulk legitimate hiring,en
+J012,गोदामात पॅकिंग कामगार पाहिजेत,नाशिकमध्ये पॅकिंग आणि माल मोजणीचे काम. अनेक कामगारांची गरज आहे.,E008,"[""Packing"", ""गोदाम काम""]",Nashik,Maharashtra,daily,650,open,Marathi equivalent of J011,mr
+J013,Security guard required,Day and night shifts available. Experience preferred.,E010,"[""Security"", ""Access control""]",Pune,Maharashtra,monthly,19000,open,Security job,en
+J014,मेकॅनिक आवश्यक,नाशिकमध्ये दुचाकी सर्व्हिसिंग आणि ब्रेक दुरुस्तीचे काम.,E012,"[""Mechanic"", ""दुचाकी दुरुस्ती""]",Nashik,Maharashtra,fixed,2500,open,Fixed-price job,mr
+J015,Painter required,"Interior painting, surface preparation and finishing in Pune.",E015,"[""Painting"", ""Finishing""]",Pune,Maharashtra,fixed,8000,open,Fixed price contract,en
+J016,शेतीकामासाठी मजूर पाहिजेत,कराडजवळ हंगामी शेती आणि सिंचनासाठी कामगार आवश्यक.,E011,"[""Agriculture"", ""शेतीकाम""]",Karad,Maharashtra,daily,550,open,Seasonal work,mr
+J017,Urgent electrician hiring,Urgent electrician needed today; contact employer for details.,E001,"[""Electrician""]",Kolhapur,Maharashtra,daily,1000,open,Urgent but legitimate,en
+J018,Electrician required for residential wiring,"Experienced electrician needed for wiring, fan installation and repairs in Kolhapur.",E001,"[""Electrician"", ""Residential wiring""]",Kolhapur,Maharashtra,daily,900,open,Exact duplicate of J002,en
+J019,Electrician required for residential wiring,Experienced electrician needed for wiring and fan installation. Repairs in Kolhapur.,E001,"[""Electrician"", ""Residential wiring""]",Kolhapur,Maharashtra,daily,900,open,Near duplicate of J002,en
+J020,Urgent work: pay registration fee first,Applicants must pay a registration fee before receiving work details. High earnings guaranteed.,E013,"[""General labour""]",Mumbai,Maharashtra,daily,5000,open,Suspicious upfront fee language,en
+J021,"घरबसल्या काम, आधी पैसे भरा",काम सुरू करण्यापूर्वी नोंदणी शुल्क भरणे आवश्यक आहे. हमखास मोठी कमाई.,E013,"[""General work""]",Mumbai,Maharashtra,fixed,10000,open,Suspicious Marathi upfront fee language,mr
+J022,Construction labourers needed for new site,Need 12 labourers for a verified construction project starting next week.,E015,"[""Construction labour""]",Pune,Maharashtra,daily,850,open,Legitimate bulk hiring,en
+J023,Construction labourers needed for new site,Need 12 labourers for a verified construction project starting next week.,E015,"[""Construction labour""]",Pune,Maharashtra,daily,850,cancelled,Repeated cancelled duplicate,en
+J024,AC technician for installation,Install and service split AC units in Kolhapur; tools preferred.,E001,"[""AC repair"", ""Installation""]",Kolhapur,Maharashtra,daily,1500,open,Specialist job,en
+J025,Cook for weekend catering,Part-time weekend catering support in Pune.,E005,"[""Cook"", ""Catering""]",Pune,Maharashtra,fixed,3000,open,Part-time job,en
+J026,Factory assembly operator,Assembly line work with safety training provided in Nashik.,E004,"[""Factory work"", ""Assembly""]",Nashik,Maharashtra,monthly,21000,open,Factory job,en
+J027,घरकाम आणि साफसफाई,मुंबईमध्ये घर आणि कार्यालय स्वच्छतेचे काम.,E007,"[""Cleaning"", ""Housekeeping""]",Mumbai,Maharashtra,daily,750,open,"Cleaning, different city",mr
+J028,Carpenter needed for door fitting,Door fitting and furniture repairs in Pune.,E009,"[""Carpentry"", ""Door fitting""]",Sangli,Maharashtra,fixed,3500,open,Individual household employer,en
+J029,Tailor required,Garment stitching and alterations in Sangli.,E015,"[""Tailoring"", ""Stitching""]",Sangli,Maharashtra,monthly,17000,open,Tailoring,en
+J030,Driver for local deliveries,Local route knowledge and valid licence required in Nashik.,E006,"[""Driving"", ""Delivery""]",Nashik,Maharashtra,monthly,22000,open,Delivery driver,en
+J031,Electrician for commercial maintenance,Commercial wiring maintenance in Pune; separate role from residential jobs.,E001,"[""Electrician"", ""Maintenance""]",Pune,Maharashtra,daily,1200,open,Similar skill but distinct job,en
+J032,प्लंबिंग आणि पाईप फिटिंग,पुण्यातील नवीन इमारतीसाठी पाईप फिटिंगचे काम.,E002,"[""Plumbing"", ""Pipe fitting""]",Pune,Maharashtra,fixed,6000,open,"Same skills, different pay type",mr
+J033,Warehouse helper - night shift,Night shift packing and stock checks in Mumbai.,E008,"[""Warehouse"", ""Packing""]",Mumbai,Maharashtra,monthly,19000,open,Shift variation,en
+J034,Farm irrigation assistant,Seasonal irrigation and crop support near Karad.,E011,"[""Agriculture"", ""Irrigation""]",Karad,Maharashtra,daily,600,open,English seasonal job,en
+J035,Mechanic for motorcycle service,Two-wheeler servicing and brake maintenance in Nashik.,E012,"[""Mechanic"", ""Two-wheeler repair""]",Nashik,Maharashtra,daily,1100,open,Mechanic job,en
+J036,General helper needed,Entry-level helper required in Kolhapur; training provided.,E009,"[""General helper""]",Kolhapur,Maharashtra,daily,500,open,Entry-level job,en
+J037,High-pay factory role,Factory support role with pay dependent on verified experience and shift.,E004,"[""Factory work""]",Nashik,Maharashtra,monthly,28000,open,High but contextual pay,en
+J038,Multiple painters required,A contractor needs 5 painters for separate sites across Pune.,E015,"[""Painting""]",Pune,Maharashtra,daily,1000,open,Multiple genuine vacancies,en
+J039,Housekeeping worker needed,"Commercial building cleaning in Mumbai, morning shift.",E007,"[""Housekeeping"", ""Cleaning""]",Mumbai,Maharashtra,monthly,18000,open,Housekeeping role,en
+J040,Welding workshop assistant,Assist with metal preparation and workshop cleanup in Pune.,E004,"[""Metal fabrication"", ""General helper""]",Pune,Maharashtra,daily,700,open,Related but distinct role,en
+J041,मोटार दुरुस्तीसाठी मेकॅनिक,दुचाकी आणि स्कूटर सर्व्हिसिंगसाठी अनुभवी मेकॅनिक हवा.,E012,"[""मेकॅनिक"", ""दुचाकी दुरुस्ती""]",Nashik,Maharashtra,daily,1100,open,Marathi mechanic job,mr
+J042,Painter needed for wall finishing,Surface preparation and wall finishing; no upfront payment required.,E015,"[""Painting"", ""Finishing""]",Pune,Maharashtra,fixed,7500,open,Legitimate painting role,en
+J043,Office cleaner - part time,"Evening office cleaning, three hours per day in Pune.",E007,"[""Cleaning""]",Pune,Maharashtra,daily,450,open,Part-time low daily amount,en
+J044,Driver required for local transport,Driving and daily vehicle checks; job details shared after interview.,E006,"[""Driving""]",Mumbai,Maharashtra,monthly,21000,open,Normal job,en
+J045,Security staff for warehouse,Access control and visitor register duties in Nashik.,E010,"[""Security"", ""Access control""]",Nashik,Maharashtra,monthly,20000,open,Related security role,en
+J046,Plumber for emergency leak repair,Emergency plumbing repairs in Pune; genuine urgent work.,E002,"[""Plumbing"", ""Leak repair""]",Pune,Maharashtra,daily,1200,open,Urgent legitimate job,en
+J047,General labour for unloading,Unload materials at a warehouse in Mumbai; one-day assignment.,E008,"[""Material handling"", ""General labour""]",Mumbai,Maharashtra,daily,700,open,One-day assignment,en
+J048,AC service technician,Preventive AC maintenance in Pune. Tools and experience preferred.,E001,"[""AC repair"", ""Maintenance""]",Pune,Maharashtra,fixed,2200,open,"AC skill, different location",en
+J049,शिवणकामासाठी टेलर हवा,सांगली येथे कपड्यांची शिवण आणि दुरुस्ती करण्यासाठी टेलर हवा.,E015,"[""Tailoring"", ""Stitching""]",Sangli,Maharashtra,monthly,17000,open,Marathi tailoring job,mr
+J050,General maintenance worker,"Basic painting, plumbing and minor electrical repairs in Pune.",E009,"[""Maintenance"", ""Basic plumbing"", ""Painting""]",Pune,Maharashtra,daily,900,open,Multi-skill maintenance job,en

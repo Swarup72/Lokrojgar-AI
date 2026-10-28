@@ -1,0 +1,66 @@
+[
+  {
+    "case_id": "R001",
+    "target_job": "J020",
+    "reporter": "W001",
+    "category": "potential_scam",
+    "description": "The listing asks applicants to pay a registration fee before work is offered.",
+    "expected_manual_check": "Flag for review; do not auto-ban."
+  },
+  {
+    "case_id": "R002",
+    "target_job": "J020",
+    "reporter": "W003",
+    "category": "potential_scam",
+    "description": "काम सुरू करण्यापूर्वी पैसे मागितले जात आहेत.",
+    "expected_manual_check": "Distinct reporter; assess corroborating evidence."
+  },
+  {
+    "case_id": "R003",
+    "target_job": "J020",
+    "reporter": "W001",
+    "category": "potential_scam",
+    "description": "Repeated report by same synthetic reporter.",
+    "expected_manual_check": "Check duplicate-report behavior."
+  },
+  {
+    "case_id": "R004",
+    "target_job": "J018",
+    "reporter": "W005",
+    "category": "duplicate_job",
+    "description": "This looks identical to another listing from the same employer.",
+    "expected_manual_check": "Review duplicate evidence."
+  },
+  {
+    "case_id": "R005",
+    "target_employer": "E013",
+    "reporter": "W008",
+    "category": "misleading_details",
+    "description": "Employer verification was rejected; please review this listing.",
+    "expected_manual_check": "Verification status is a signal, not proof."
+  },
+  {
+    "case_id": "R006",
+    "target_job": "J022",
+    "reporter": "W006",
+    "category": "other",
+    "description": "I think this is fake because the employer is hiring many people.",
+    "expected_manual_check": "Likely false positive; bulk hiring can be legitimate."
+  },
+  {
+    "case_id": "R007",
+    "target_employer": "E015",
+    "reporter": "W010",
+    "category": "other",
+    "description": "Competitor complaint against a legitimate contractor.",
+    "expected_manual_check": "Allegation alone must not establish a violation."
+  },
+  {
+    "case_id": "R008",
+    "target_job": "J021",
+    "reporter": "W013",
+    "category": "potential_scam",
+    "description": "नोंदणी शुल्क भरल्याशिवाय काम देणार नसल्याचे नमूद आहे.",
+    "expected_manual_check": "Check Marathi report storage and display."
+  }
+]

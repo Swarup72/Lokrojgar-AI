@@ -5,7 +5,9 @@
 const PHONE_REGEX = /^(?:\+91)?[6-9]\d{9}$/;
 
 export function isValidPhone(phone) {
-  return typeof phone === "string" && PHONE_REGEX.test(phone.trim());
+  if (typeof phone !== "string") return false;
+  const clean = phone.trim().replace(/[\s-]/g, "");
+  return PHONE_REGEX.test(clean);
 }
 
 export function isValidPassword(password) {

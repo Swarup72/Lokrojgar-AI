@@ -27,13 +27,28 @@ const VOICE_KEYS = {
   503: "error.voice.unavailable",
 };
 
+const AUTH_KEYS = {
+  400: "error.badRequest",
+  401: "error.auth.invalidCredentials",
+  403: "error.auth.blocked",
+  404: "error.auth.userNotFound",
+  409: "error.auth.alreadyExists",
+  429: "error.tooManyAttempts",
+  503: "error.unavailable",
+};
+
+const CONTEXT_KEYS = {
+  voice: VOICE_KEYS,
+  auth: AUTH_KEYS,
+};
+
 const NETWORK_KEY = "error.network";
 const TIMEOUT_KEY = "error.timeout";
 const UNKNOWN_KEY = "error.unknown";
 
 /**
  * @param {{status: number|null, isNetworkError: boolean, isTimeout?: boolean}} normalizedError
- * @param {"voice"|"default"} [context]
+ * @param {"voice"|"auth"|"default"} [context]
  * @returns {string} a translation key to pass to t()
  */
 export function mapErrorToMessageKey(normalizedError, context = "default") {
@@ -44,6 +59,6 @@ export function mapErrorToMessageKey(normalizedError, context = "default") {
     return NETWORK_KEY;
   }
 
-  const contextKeys = context === "voice" ? VOICE_KEYS : {};
+  const contextKeys = CONTEXT_KEYS[context] || {};
   return contextKeys[normalizedError.status] || DEFAULT_KEYS[normalizedError.status] || UNKNOWN_KEY;
 }

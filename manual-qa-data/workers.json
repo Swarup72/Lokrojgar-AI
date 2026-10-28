@@ -1,0 +1,791 @@
+[
+  {
+    "profile_id": "W001",
+    "name": "अमोल पाटील",
+    "preferred_language": "mr",
+    "bio": "मला घरगुती वायरिंग, फॅन बसवणे आणि विद्युत दुरुस्तीचा ४ वर्षांचा अनुभव आहे.",
+    "skills": [
+      "इलेक्ट्रिशियन",
+      "घरगुती वायरिंग",
+      "विद्युत दुरुस्ती"
+    ],
+    "experience_years": 4,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 800,
+    "availability": "available",
+    "rating_avg": 4.6,
+    "email": "w001@example.test",
+    "phone": "+91-90000-00001",
+    "case": "Normal Marathi electrician"
+  },
+  {
+    "profile_id": "W002",
+    "name": "Amit Patil",
+    "preferred_language": "en",
+    "bio": "Experienced electrician specializing in residential wiring, fan installation and electrical repairs.",
+    "skills": [
+      "Electrician",
+      "Residential wiring",
+      "Electrical repair"
+    ],
+    "experience_years": 4,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 800,
+    "availability": "available",
+    "rating_avg": 4.6,
+    "email": "w002@example.test",
+    "phone": "+91-90000-00002",
+    "case": "English equivalent of W001"
+  },
+  {
+    "profile_id": "W003",
+    "name": "स्नेहा शिंदे",
+    "preferred_language": "mr",
+    "bio": "मी घरगुती आणि व्यावसायिक ठिकाणी प्लंबिंग व पाईप फिटिंगचे काम करते.",
+    "skills": [
+      "प्लंबिंग",
+      "पाईप फिटिंग",
+      "गळती दुरुस्ती"
+    ],
+    "experience_years": 3,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 750,
+    "availability": "available",
+    "rating_avg": 4.8,
+    "email": "w003@example.test",
+    "phone": "+91-90000-00003",
+    "case": "Female worker, Marathi"
+  },
+  {
+    "profile_id": "W004",
+    "name": "Rahul Jadhav",
+    "preferred_language": "en",
+    "bio": "Plumber with experience in pipe fitting, bathroom installation and leak repairs.",
+    "skills": [
+      "Plumbing",
+      "Pipe fitting",
+      "Leak repair"
+    ],
+    "experience_years": 6,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 1000,
+    "availability": "busy",
+    "rating_avg": 4.2,
+    "email": "w004@example.test",
+    "phone": "+91-90000-00004",
+    "case": "Experienced, currently busy"
+  },
+  {
+    "profile_id": "W005",
+    "name": "विकास कांबळे",
+    "preferred_language": "mr",
+    "bio": "बांधकामावर गवंडी आणि मजूर म्हणून काम केले आहे. नवीन कामासाठी उपलब्ध आहे.",
+    "skills": [
+      "गवंडी",
+      "बांधकाम",
+      "मजुरी"
+    ],
+    "experience_years": 8,
+    "city": "Satara",
+    "state": "Maharashtra",
+    "expected_pay": 900,
+    "availability": "available",
+    "rating_avg": 4.1,
+    "email": "w005@example.test",
+    "phone": "+91-90000-00005",
+    "case": "Construction worker"
+  },
+  {
+    "profile_id": "W006",
+    "name": "Ramesh More",
+    "preferred_language": "en",
+    "bio": "General construction labourer available for site work and material handling.",
+    "skills": [
+      "Construction labour",
+      "Material handling"
+    ],
+    "experience_years": 1,
+    "city": "Satara",
+    "state": "Maharashtra",
+    "expected_pay": 600,
+    "availability": "available",
+    "rating_avg": 3.7,
+    "email": "w006@example.test",
+    "phone": "+91-90000-00006",
+    "case": "Entry-level worker"
+  },
+  {
+    "profile_id": "W007",
+    "name": "प्रिया कदम",
+    "preferred_language": "mr",
+    "bio": "मला घर रंगवणे, पुट्टी आणि भिंतींचे फिनिशिंग येते.",
+    "skills": [
+      "रंगकाम",
+      "पुट्टी",
+      "वॉल फिनिशिंग"
+    ],
+    "experience_years": 5,
+    "city": "Sangli",
+    "state": "Maharashtra",
+    "expected_pay": 850,
+    "availability": "unavailable",
+    "rating_avg": 4.5,
+    "email": "w007@example.test",
+    "phone": "+91-90000-00007",
+    "case": "Unavailable worker"
+  },
+  {
+    "profile_id": "W008",
+    "name": "Sahil Shaikh",
+    "preferred_language": "en",
+    "bio": "Welder experienced in MIG welding, metal fabrication and workshop safety.",
+    "skills": [
+      "Welder",
+      "MIG welding",
+      "Metal fabrication"
+    ],
+    "experience_years": 7,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 1400,
+    "availability": "available",
+    "rating_avg": 4.9,
+    "email": "w008@example.test",
+    "phone": "+91-90000-00008",
+    "case": "Highly rated specialist"
+  },
+  {
+    "profile_id": "W009",
+    "name": "नितीन जाधव",
+    "preferred_language": "mr",
+    "bio": "मला वाहन चालवण्याचा परवाना आहे आणि स्थानिक डिलिव्हरीचे काम करता येते.",
+    "skills": [
+      "ड्रायव्हिंग",
+      "डिलिव्हरी",
+      "मार्ग नियोजन"
+    ],
+    "experience_years": 2,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 700,
+    "availability": "available",
+    "rating_avg": 0,
+    "email": "w009@example.test",
+    "phone": "+91-90000-00009",
+    "case": "Cold-start rating"
+  },
+  {
+    "profile_id": "W010",
+    "name": "Kiran Deshmukh",
+    "preferred_language": "en",
+    "bio": "Delivery worker with a valid driving licence and knowledge of local routes.",
+    "skills": [
+      "Delivery",
+      "Driving",
+      "Route planning"
+    ],
+    "experience_years": 0,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 500,
+    "availability": "available",
+    "rating_avg": 0,
+    "email": "w010@example.test",
+    "phone": "+91-90000-00010",
+    "case": "Zero experience, cold-start rating"
+  },
+  {
+    "profile_id": "W011",
+    "name": "माया पवार",
+    "preferred_language": "mr",
+    "bio": "मी घरकाम, स्वच्छता आणि हाऊसकीपिंगची कामे जबाबदारीने करते.",
+    "skills": [
+      "स्वच्छता",
+      "घरकाम",
+      "हाऊसकीपिंग"
+    ],
+    "experience_years": 10,
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "expected_pay": 1200,
+    "availability": "available",
+    "rating_avg": 4.7,
+    "email": "w011@example.test",
+    "phone": "+91-90000-00011",
+    "case": "High experience, different city"
+  },
+  {
+    "profile_id": "W012",
+    "name": "Imran Khan",
+    "preferred_language": "en",
+    "bio": "Mechanic specializing in two-wheeler servicing, brakes and basic engine repairs.",
+    "skills": [
+      "Mechanic",
+      "Two-wheeler repair",
+      "Brake service"
+    ],
+    "experience_years": 5,
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "expected_pay": 1100,
+    "availability": "busy",
+    "rating_avg": 4.3,
+    "email": "w012@example.test",
+    "phone": "+91-90000-00012",
+    "case": "Mechanic, busy"
+  },
+  {
+    "profile_id": "W013",
+    "name": "रोहन पाटील",
+    "preferred_language": "mr",
+    "bio": "मी electrician आहे आणि wiring, installation तसेच maintenance करू शकतो.",
+    "skills": [
+      "Electrician",
+      "वायरिंग",
+      "Maintenance"
+    ],
+    "experience_years": 2,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 650,
+    "availability": "available",
+    "rating_avg": 3.9,
+    "email": "w013@example.test",
+    "phone": "+91-90000-00013",
+    "case": "Mixed Marathi-English"
+  },
+  {
+    "profile_id": "W014",
+    "name": "Neha Salunkhe",
+    "preferred_language": "en",
+    "bio": "Cook experienced in Maharashtrian meals, kitchen hygiene and bulk meal preparation.",
+    "skills": [
+      "Cook",
+      "Maharashtrian cuisine",
+      "Kitchen hygiene"
+    ],
+    "experience_years": 4,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 900,
+    "availability": "available",
+    "rating_avg": 4.4,
+    "email": "w014@example.test",
+    "phone": "+91-90000-00014",
+    "case": "Cook"
+  },
+  {
+    "profile_id": "W015",
+    "name": "सागर माने",
+    "preferred_language": "mr",
+    "bio": "मला गोदामात पॅकिंग, माल चढवणे आणि स्टॉक मोजणीचा अनुभव आहे.",
+    "skills": [
+      "पॅकिंग",
+      "गोदाम काम",
+      "स्टॉक मोजणी"
+    ],
+    "experience_years": 3,
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "expected_pay": 750,
+    "availability": "available",
+    "rating_avg": 4.0,
+    "email": "w015@example.test",
+    "phone": "+91-90000-00015",
+    "case": "Warehouse worker"
+  },
+  {
+    "profile_id": "W016",
+    "name": "Prakash Bhosale",
+    "preferred_language": "en",
+    "bio": "AC technician experienced in installation, preventive maintenance and troubleshooting.",
+    "skills": [
+      "AC repair",
+      "Installation",
+      "Maintenance"
+    ],
+    "experience_years": 9,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 1600,
+    "availability": "available",
+    "rating_avg": 4.8,
+    "email": "w016@example.test",
+    "phone": "+91-90000-00016",
+    "case": "Senior technician"
+  },
+  {
+    "profile_id": "W017",
+    "name": "अजय मोरे",
+    "preferred_language": "mr",
+    "bio": "मी शेतातील कामे, पाणी देणे आणि हंगामी शेतीकाम करू शकतो.",
+    "skills": [
+      "शेतीकाम",
+      "सिंचन",
+      "हंगामी काम"
+    ],
+    "experience_years": 6,
+    "city": "Karad",
+    "state": "Maharashtra",
+    "expected_pay": 550,
+    "availability": "available",
+    "rating_avg": 3.8,
+    "email": "w017@example.test",
+    "phone": "+91-90000-00017",
+    "case": "Agricultural worker"
+  },
+  {
+    "profile_id": "W018",
+    "name": "Pooja Gaikwad",
+    "preferred_language": "en",
+    "bio": "Tailor experienced in alterations, stitching and basic garment finishing.",
+    "skills": [
+      "Tailoring",
+      "Alterations",
+      "Stitching"
+    ],
+    "experience_years": 3,
+    "city": "Sangli",
+    "state": "Maharashtra",
+    "expected_pay": 700,
+    "availability": "available",
+    "rating_avg": 4.1,
+    "email": "w018@example.test",
+    "phone": "+91-90000-00018",
+    "case": "Tailor"
+  },
+  {
+    "profile_id": "W019",
+    "name": "गणेश शिंदे",
+    "preferred_language": "mr",
+    "bio": "मी सुरक्षा रक्षक म्हणून काम केले आहे. दिवसा किंवा रात्रीच्या शिफ्टमध्ये काम करू शकतो.",
+    "skills": [
+      "सुरक्षा रक्षक",
+      "निगराणी",
+      "प्रवेश नियंत्रण"
+    ],
+    "experience_years": 4,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 900,
+    "availability": "available",
+    "rating_avg": 4.2,
+    "email": "w019@example.test",
+    "phone": "+91-90000-00019",
+    "case": "Security guard"
+  },
+  {
+    "profile_id": "W020",
+    "name": "Vijay Pawar",
+    "preferred_language": "en",
+    "bio": "Factory worker with experience in assembly lines, packaging and quality checks.",
+    "skills": [
+      "Factory work",
+      "Assembly",
+      "Quality checks"
+    ],
+    "experience_years": 2,
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "expected_pay": 650,
+    "availability": "unavailable",
+    "rating_avg": 3.6,
+    "email": "w020@example.test",
+    "phone": "+91-90000-00020",
+    "case": "Unavailable factory worker"
+  },
+  {
+    "profile_id": "W021",
+    "name": "अक्षय पाटील",
+    "preferred_language": "mr",
+    "bio": "मी फक्त नवीन काम सुरू करत आहे. शिकण्याची तयारी आहे.",
+    "skills": [
+      "सामान्य काम",
+      "मदतनीस"
+    ],
+    "experience_years": 0,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 450,
+    "availability": "available",
+    "rating_avg": 0,
+    "email": "w021@example.test",
+    "phone": "+91-90000-00021",
+    "case": "No experience, low pay"
+  },
+  {
+    "profile_id": "W022",
+    "name": "Meena Shinde",
+    "preferred_language": "en",
+    "bio": "Experienced cleaner available for offices, homes and post-construction cleaning.",
+    "skills": [
+      "Cleaning",
+      "Office housekeeping",
+      "Deep cleaning"
+    ],
+    "experience_years": 12,
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "expected_pay": 1300,
+    "availability": "available",
+    "rating_avg": 4.5,
+    "email": "w022@example.test",
+    "phone": "+91-90000-00022",
+    "case": "Very experienced cleaner"
+  },
+  {
+    "profile_id": "W023",
+    "name": "सचिन कदम",
+    "preferred_language": "mr",
+    "bio": "मला वेल्डिंगचे काम येते, पण माझ्याकडे अजून ग्राहकांचे रेटिंग नाही.",
+    "skills": [
+      "वेल्डिंग"
+    ],
+    "experience_years": 2,
+    "city": "Satara",
+    "state": "Maharashtra",
+    "expected_pay": 1000,
+    "availability": "available",
+    "rating_avg": 0,
+    "email": "w023@example.test",
+    "phone": "+91-90000-00023",
+    "case": "Single skill, no rating"
+  },
+  {
+    "profile_id": "W024",
+    "name": "Rafiq Shaikh",
+    "preferred_language": "en",
+    "bio": "Carpenter for furniture assembly, door fitting and basic wood repairs.",
+    "skills": [
+      "Carpentry",
+      "Furniture assembly",
+      "Door fitting"
+    ],
+    "experience_years": 5,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 1100,
+    "availability": "available",
+    "rating_avg": 2.8,
+    "email": "w024@example.test",
+    "phone": "+91-90000-00024",
+    "case": "Low rating but legitimate"
+  },
+  {
+    "profile_id": "W025",
+    "name": "अनिता जाधव",
+    "preferred_language": "mr",
+    "bio": "मी घरगुती आणि कार्यालयीन साफसफाई करते. वेळेचे पालन करते.",
+    "skills": [
+      "साफसफाई",
+      "कार्यालयीन स्वच्छता"
+    ],
+    "experience_years": 3,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 600,
+    "availability": "busy",
+    "rating_avg": 4.0,
+    "email": "w025@example.test",
+    "phone": "+91-90000-00025",
+    "case": "Busy, two skills"
+  },
+  {
+    "profile_id": "W026",
+    "name": "Omkar Kulkarni",
+    "preferred_language": "en",
+    "bio": "General maintenance worker with basic plumbing, painting and electrical repair skills.",
+    "skills": [
+      "Maintenance",
+      "Basic plumbing",
+      "Painting",
+      "Basic electrical"
+    ],
+    "experience_years": 3,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 850,
+    "availability": "available",
+    "rating_avg": 4.0,
+    "email": "w026@example.test",
+    "phone": "+91-90000-00026",
+    "case": "Multi-skill worker"
+  },
+  {
+    "profile_id": "W027",
+    "name": "अभिजित माने",
+    "preferred_language": "mr",
+    "bio": "मला पगार महिन्याला हवा आहे. मी पूर्णवेळ काम करू शकतो.",
+    "skills": [
+      "गोदाम काम",
+      "पॅकिंग"
+    ],
+    "experience_years": 2,
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "expected_pay": 18000,
+    "availability": "available",
+    "rating_avg": 3.9,
+    "email": "w027@example.test",
+    "phone": "+91-90000-00027",
+    "case": "Monthly pay expectation"
+  },
+  {
+    "profile_id": "W028",
+    "name": "Rutuja Patil",
+    "preferred_language": "en",
+    "bio": "Part-time kitchen assistant available on weekends and evenings.",
+    "skills": [
+      "Kitchen assistant",
+      "Food preparation"
+    ],
+    "experience_years": 1,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 500,
+    "availability": "available",
+    "rating_avg": 4.0,
+    "email": "w028@example.test",
+    "phone": "+91-90000-00028",
+    "case": "Part-time preference"
+  },
+  {
+    "profile_id": "W029",
+    "name": "मिलिंद कांबळे",
+    "preferred_language": "mr",
+    "bio": "मला बांधकाम, साहित्य हाताळणे आणि साइट साफसफाईचा अनुभव आहे.",
+    "skills": [
+      "बांधकाम",
+      "साहित्य हाताळणे",
+      "साइट साफसफाई"
+    ],
+    "experience_years": 4,
+    "city": "Sangli",
+    "state": "Maharashtra",
+    "expected_pay": 700,
+    "availability": "available",
+    "rating_avg": 3.5,
+    "email": "w029@example.test",
+    "phone": "+91-90000-00029",
+    "case": "Mid-experience labourer"
+  },
+  {
+    "profile_id": "W030",
+    "name": "Deepak Sawant",
+    "preferred_language": "en",
+    "bio": "Experienced driver familiar with city deliveries and basic vehicle checks.",
+    "skills": [
+      "Driving",
+      "Delivery",
+      "Vehicle checks"
+    ],
+    "experience_years": 8,
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "expected_pay": 1000,
+    "availability": "available",
+    "rating_avg": 4.4,
+    "email": "w030@example.test",
+    "phone": "+91-90000-00030",
+    "case": "Experienced driver"
+  },
+  {
+    "profile_id": "W031",
+    "name": "स्मिता पवार",
+    "preferred_language": "mr",
+    "bio": "मला शिवणकाम, कपड्यांची दुरुस्ती आणि माप घेण्याचा अनुभव आहे.",
+    "skills": [
+      "शिवणकाम",
+      "कपड्यांची दुरुस्ती"
+    ],
+    "experience_years": 7,
+    "city": "Karad",
+    "state": "Maharashtra",
+    "expected_pay": 850,
+    "availability": "unavailable",
+    "rating_avg": 4.6,
+    "email": "w031@example.test",
+    "phone": "+91-90000-00031",
+    "case": "Unavailable tailor"
+  },
+  {
+    "profile_id": "W032",
+    "name": "Arjun More",
+    "preferred_language": "en",
+    "bio": "Security guard with experience in visitor registers and access control.",
+    "skills": [
+      "Security",
+      "Access control"
+    ],
+    "experience_years": 2,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 750,
+    "availability": "available",
+    "rating_avg": 3.8,
+    "email": "w032@example.test",
+    "phone": "+91-90000-00032",
+    "case": "Security guard, entry-level"
+  },
+  {
+    "profile_id": "W033",
+    "name": "निखिल शिंदे",
+    "preferred_language": "mr",
+    "bio": "मला मोटार दुरुस्तीचा अनुभव आहे. दोनचाकी आणि स्कूटरची सर्व्हिसिंग करतो.",
+    "skills": [
+      "मेकॅनिक",
+      "दुचाकी दुरुस्ती",
+      "सर्व्हिसिंग"
+    ],
+    "experience_years": 5,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 1200,
+    "availability": "available",
+    "rating_avg": 4.3,
+    "email": "w033@example.test",
+    "phone": "+91-90000-00033",
+    "case": "Marathi mechanic"
+  },
+  {
+    "profile_id": "W034",
+    "name": "Farida Shaikh",
+    "preferred_language": "en",
+    "bio": "Housekeeping worker experienced in hotels and commercial buildings.",
+    "skills": [
+      "Housekeeping",
+      "Cleaning",
+      "Hygiene"
+    ],
+    "experience_years": 4,
+    "city": "Mumbai",
+    "state": "Maharashtra",
+    "expected_pay": 950,
+    "availability": "available",
+    "rating_avg": 4.2,
+    "email": "w034@example.test",
+    "phone": "+91-90000-00034",
+    "case": "Housekeeping"
+  },
+  {
+    "profile_id": "W035",
+    "name": "किशोर पाटील",
+    "preferred_language": "mr",
+    "bio": "मला अनुभव आहे आणि मी अनेक कौशल्यांमध्ये काम करू शकतो: रंगकाम, प्लंबिंग, देखभाल.",
+    "skills": [
+      "रंगकाम",
+      "प्लंबिंग",
+      "देखभाल"
+    ],
+    "experience_years": 15,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 1500,
+    "availability": "available",
+    "rating_avg": 4.7,
+    "email": "w035@example.test",
+    "phone": "+91-90000-00035",
+    "case": "High experience, multiple skills"
+  },
+  {
+    "profile_id": "W036",
+    "name": "Nilesh Pawar",
+    "preferred_language": "en",
+    "bio": "Factory maintenance assistant with experience in preventive checks and packaging equipment.",
+    "skills": [
+      "Factory maintenance",
+      "Equipment checks",
+      "Packaging"
+    ],
+    "experience_years": 3,
+    "city": "Nashik",
+    "state": "Maharashtra",
+    "expected_pay": 900,
+    "availability": "busy",
+    "rating_avg": 4.0,
+    "email": "w036@example.test",
+    "phone": "+91-90000-00036",
+    "case": "Factory maintenance"
+  },
+  {
+    "profile_id": "W037",
+    "name": "स्वप्निल कदम",
+    "preferred_language": "mr",
+    "bio": "मी कामासाठी उपलब्ध आहे. मला नवीन कौशल्ये शिकायला आवडतात.",
+    "skills": [
+      "मदतनीस"
+    ],
+    "experience_years": 0,
+    "city": "Sangli",
+    "state": "Maharashtra",
+    "expected_pay": 400,
+    "availability": "available",
+    "rating_avg": 0,
+    "email": "w037@example.test",
+    "phone": "+91-90000-00037",
+    "case": "Minimal valid profile"
+  },
+  {
+    "profile_id": "W038",
+    "name": "Tanvi Desai",
+    "preferred_language": "en",
+    "bio": "Experienced painter for interior walls, surface preparation and finishing.",
+    "skills": [
+      "Painting",
+      "Surface preparation",
+      "Finishing"
+    ],
+    "experience_years": 6,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 1050,
+    "availability": "available",
+    "rating_avg": 4.6,
+    "email": "w038@example.test",
+    "phone": "+91-90000-00038",
+    "case": "Painter"
+  },
+  {
+    "profile_id": "W039",
+    "name": "प्रवीण मोरे",
+    "preferred_language": "mr",
+    "bio": "मला कोल्हापूर आणि जवळच्या भागात रोजंदारीचे काम हवे आहे.",
+    "skills": [
+      "मजुरी",
+      "साहित्य वाहतूक"
+    ],
+    "experience_years": 3,
+    "city": "Kolhapur",
+    "state": "Maharashtra",
+    "expected_pay": 500,
+    "availability": "available",
+    "rating_avg": 3.4,
+    "email": "w039@example.test",
+    "phone": "+91-90000-00039",
+    "case": "Local daily-wage worker"
+  },
+  {
+    "profile_id": "W040",
+    "name": "Joseph D'Souza",
+    "preferred_language": "en",
+    "bio": "Experienced cook for small restaurants, catering events and bulk meal preparation.",
+    "skills": [
+      "Cooking",
+      "Catering",
+      "Food preparation"
+    ],
+    "experience_years": 11,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "expected_pay": 1400,
+    "availability": "available",
+    "rating_avg": 4.8,
+    "email": "w040@example.test",
+    "phone": "+91-90000-00040",
+    "case": "Senior cook"
+  }
+]

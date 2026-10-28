@@ -1,0 +1,72 @@
+[
+  {
+    "application_id": "A001",
+    "worker_id": "W001",
+    "job_id": "J001",
+    "status": "pending",
+    "case": "Normal application"
+  },
+  {
+    "application_id": "A002",
+    "worker_id": "W002",
+    "job_id": "J002",
+    "status": "accepted",
+    "case": "Accepted application"
+  },
+  {
+    "application_id": "A003",
+    "worker_id": "W003",
+    "job_id": "J003",
+    "status": "rejected",
+    "case": "Rejected application"
+  },
+  {
+    "application_id": "A004",
+    "worker_id": "W008",
+    "job_id": "J007",
+    "status": "pending",
+    "case": "Skilled worker application"
+  },
+  {
+    "application_id": "A005",
+    "worker_id": "W015",
+    "job_id": "J011",
+    "status": "pending",
+    "case": "Warehouse application"
+  },
+  {
+    "application_id": "A006",
+    "worker_id": "W033",
+    "job_id": "J041",
+    "status": "completed",
+    "case": "Completed application"
+  },
+  {
+    "application_id": "A007",
+    "worker_id": "W021",
+    "job_id": "J036",
+    "status": "pending",
+    "case": "Entry-level application"
+  },
+  {
+    "application_id": "A008",
+    "worker_id": "W024",
+    "job_id": "J015",
+    "status": "rejected",
+    "case": "Poor skill match"
+  },
+  {
+    "application_id": "A009",
+    "worker_id": "W040",
+    "job_id": "J008",
+    "status": "pending",
+    "case": "Cross-language cook application"
+  },
+  {
+    "application_id": "A010",
+    "worker_id": "W013",
+    "job_id": "J002",
+    "status": "pending",
+    "case": "Mixed-language application"
+  }
+]

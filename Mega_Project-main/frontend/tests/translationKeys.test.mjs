@@ -126,7 +126,7 @@ test("every enum label key maps to a real translation", async () => {
 test("every error key the error mapper can return is defined", async () => {
   const { mapErrorToMessageKey } = await import(path.join(SRC, "utils/errorMessages.js"));
   const statuses = [400, 401, 403, 404, 409, 413, 429, 503, 500, null];
-  for (const context of ["default", "voice"]) {
+  for (const context of ["default", "voice", "auth"]) {
     for (const status of statuses) {
       for (const isTimeout of [false, true]) {
         const key = mapErrorToMessageKey({ status, isNetworkError: status === null, isTimeout }, context);

@@ -1,0 +1,296 @@
+[
+  {
+    "pair_id": "M001",
+    "worker_id": "W001",
+    "job_id": "J001",
+    "case": "Exact skill, location and language match",
+    "expected": "Strong candidate; calculate score in app"
+  },
+  {
+    "pair_id": "M002",
+    "worker_id": "W002",
+    "job_id": "J001",
+    "case": "English worker against Marathi job",
+    "expected": "Check cross-language skill matching"
+  },
+  {
+    "pair_id": "M003",
+    "worker_id": "W013",
+    "job_id": "J002",
+    "case": "Mixed-language skills against English job",
+    "expected": "Check mixed-language normalization"
+  },
+  {
+    "pair_id": "M004",
+    "worker_id": "W003",
+    "job_id": "J003",
+    "case": "Exact plumbing skills and location",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M005",
+    "worker_id": "W004",
+    "job_id": "J003",
+    "case": "Exact skill/location but busy status",
+    "expected": "Availability factor should reflect busy status"
+  },
+  {
+    "pair_id": "M006",
+    "worker_id": "W005",
+    "job_id": "J005",
+    "case": "Construction skill and location match",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M007",
+    "worker_id": "W006",
+    "job_id": "J005",
+    "case": "Entry-level worker vs construction job",
+    "expected": "Check skill relevance and experience"
+  },
+  {
+    "pair_id": "M008",
+    "worker_id": "W007",
+    "job_id": "J015",
+    "case": "Painter skill match but unavailable",
+    "expected": "Availability should be reflected"
+  },
+  {
+    "pair_id": "M009",
+    "worker_id": "W008",
+    "job_id": "J007",
+    "case": "Welder skill, location and monthly pay",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M010",
+    "worker_id": "W009",
+    "job_id": "J009",
+    "case": "Delivery worker, location differs",
+    "expected": "Check location factor"
+  },
+  {
+    "pair_id": "M011",
+    "worker_id": "W010",
+    "job_id": "J009",
+    "case": "Zero experience and cold-start rating",
+    "expected": "No crash; handle cold-start factors"
+  },
+  {
+    "pair_id": "M012",
+    "worker_id": "W011",
+    "job_id": "J027",
+    "case": "Cleaning skill and different city",
+    "expected": "Location factor should reflect city"
+  },
+  {
+    "pair_id": "M013",
+    "worker_id": "W012",
+    "job_id": "J035",
+    "case": "Mechanic skill match but busy",
+    "expected": "Availability factor should reflect busy status"
+  },
+  {
+    "pair_id": "M014",
+    "worker_id": "W014",
+    "job_id": "J008",
+    "case": "Cook role, Marathi listing",
+    "expected": "Check semantic cross-language match"
+  },
+  {
+    "pair_id": "M015",
+    "worker_id": "W015",
+    "job_id": "J011",
+    "case": "Warehouse skills and location match",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M016",
+    "worker_id": "W016",
+    "job_id": "J024",
+    "case": "AC technician and local job",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M017",
+    "worker_id": "W017",
+    "job_id": "J016",
+    "case": "Agriculture skills and location",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M018",
+    "worker_id": "W018",
+    "job_id": "J029",
+    "case": "Tailor skill and location",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M019",
+    "worker_id": "W019",
+    "job_id": "J013",
+    "case": "Security skill and location",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M020",
+    "worker_id": "W020",
+    "job_id": "J026",
+    "case": "Factory skills but unavailable",
+    "expected": "Availability factor should reflect unavailable status"
+  },
+  {
+    "pair_id": "M021",
+    "worker_id": "W021",
+    "job_id": "J036",
+    "case": "No experience and minimal skills",
+    "expected": "Consider entry-level suitability"
+  },
+  {
+    "pair_id": "M022",
+    "worker_id": "W022",
+    "job_id": "J039",
+    "case": "High experience cleaner, different city",
+    "expected": "Check location/pay"
+  },
+  {
+    "pair_id": "M023",
+    "worker_id": "W023",
+    "job_id": "J007",
+    "case": "One skill and no rating",
+    "expected": "No crash; cold-start rating behavior"
+  },
+  {
+    "pair_id": "M024",
+    "worker_id": "W024",
+    "job_id": "J015",
+    "case": "Low-rated carpenter vs painter job",
+    "expected": "Weak skill match; low rating is not fraud"
+  },
+  {
+    "pair_id": "M025",
+    "worker_id": "W025",
+    "job_id": "J010",
+    "case": "Cleaning skill, busy status",
+    "expected": "Availability reflected"
+  },
+  {
+    "pair_id": "M026",
+    "worker_id": "W026",
+    "job_id": "J050",
+    "case": "Multiple overlapping skills",
+    "expected": "Strong skill relevance"
+  },
+  {
+    "pair_id": "M027",
+    "worker_id": "W027",
+    "job_id": "J033",
+    "case": "Monthly pay expectation and monthly job",
+    "expected": "Compare compatible pay units"
+  },
+  {
+    "pair_id": "M028",
+    "worker_id": "W028",
+    "job_id": "J025",
+    "case": "Part-time profile and fixed-price job",
+    "expected": "Check schedule preference support"
+  },
+  {
+    "pair_id": "M029",
+    "worker_id": "W029",
+    "job_id": "J006",
+    "case": "Construction skills but different city",
+    "expected": "Location factor reflected"
+  },
+  {
+    "pair_id": "M030",
+    "worker_id": "W030",
+    "job_id": "J030",
+    "case": "Driving/delivery skills and location mismatch",
+    "expected": "Check location and skills"
+  },
+  {
+    "pair_id": "M031",
+    "worker_id": "W031",
+    "job_id": "J029",
+    "case": "Tailoring skill but unavailable",
+    "expected": "Availability reflected"
+  },
+  {
+    "pair_id": "M032",
+    "worker_id": "W032",
+    "job_id": "J013",
+    "case": "Security role with partial skill overlap",
+    "expected": "Partial skill match"
+  },
+  {
+    "pair_id": "M033",
+    "worker_id": "W033",
+    "job_id": "J041",
+    "case": "Marathi mechanic to Marathi job",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M034",
+    "worker_id": "W033",
+    "job_id": "J035",
+    "case": "Marathi mechanic to English job",
+    "expected": "Cross-language matching"
+  },
+  {
+    "pair_id": "M035",
+    "worker_id": "W034",
+    "job_id": "J039",
+    "case": "Housekeeping skills and location",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M036",
+    "worker_id": "W035",
+    "job_id": "J050",
+    "case": "High experience, multi-skill profile",
+    "expected": "Strong skill relevance"
+  },
+  {
+    "pair_id": "M037",
+    "worker_id": "W036",
+    "job_id": "J026",
+    "case": "Factory maintenance and factory job",
+    "expected": "Partial skill match"
+  },
+  {
+    "pair_id": "M038",
+    "worker_id": "W037",
+    "job_id": "J036",
+    "case": "Minimal valid profile, zero experience",
+    "expected": "No crash; entry-level suitability"
+  },
+  {
+    "pair_id": "M039",
+    "worker_id": "W038",
+    "job_id": "J042",
+    "case": "Painter with finishing skill",
+    "expected": "Strong candidate"
+  },
+  {
+    "pair_id": "M040",
+    "worker_id": "W039",
+    "job_id": "J001",
+    "case": "Low daily pay expectation, same city but unrelated skill",
+    "expected": "Pay/location should not override poor skill relevance"
+  },
+  {
+    "pair_id": "M041",
+    "worker_id": "W040",
+    "job_id": "J008",
+    "case": "Experienced cook to Marathi job",
+    "expected": "Cross-language matching"
+  },
+  {
+    "pair_id": "M042",
+    "worker_id": "W001",
+    "job_id": "J002",
+    "case": "Same worker against English equivalent job",
+    "expected": "Compare with J001 for language bias"
+  }
+]

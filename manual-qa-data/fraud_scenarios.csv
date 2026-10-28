@@ -1,0 +1,13 @@
+﻿case_id,job_id,label,expected
+F001,J018,exact duplicate,Review duplicate evidence; no automatic ban
+F002,J019,near duplicate,Check text similarity
+F003,J022,legitimate bulk hiring,Avoid false positive based on volume alone
+F004,J020,upfront fee language,Flag for human review
+F005,J021,Marathi upfront fee language,Check multilingual risk rules
+F006,J017,urgent but legitimate job,Urgency alone should not prove fraud
+F007,J037,unusually high but contextual pay,Do not auto-label fraud based on pay alone
+F008,J023,repeat cancelled listing,Review posting history
+F009,J011,multiple genuine vacancies,Should remain legitimate absent other evidence
+F010,J002,English equivalent of Marathi job,Language variation should not hide duplicates
+F011,J001,Marathi equivalent of English job,Language variation should not hide duplicates
+F012,J028,individual household employer,New/small employer is not inherently suspicious

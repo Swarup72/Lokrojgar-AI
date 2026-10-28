@@ -1,0 +1,43 @@
+﻿pair_id,worker_id,job_id,case,expected
+M001,W001,J001,"Exact skill, location and language match",Strong candidate; calculate score in app
+M002,W002,J001,English worker against Marathi job,Check cross-language skill matching
+M003,W013,J002,Mixed-language skills against English job,Check mixed-language normalization
+M004,W003,J003,Exact plumbing skills and location,Strong candidate
+M005,W004,J003,Exact skill/location but busy status,Availability factor should reflect busy status
+M006,W005,J005,Construction skill and location match,Strong candidate
+M007,W006,J005,Entry-level worker vs construction job,Check skill relevance and experience
+M008,W007,J015,Painter skill match but unavailable,Availability should be reflected
+M009,W008,J007,"Welder skill, location and monthly pay",Strong candidate
+M010,W009,J009,"Delivery worker, location differs",Check location factor
+M011,W010,J009,Zero experience and cold-start rating,No crash; handle cold-start factors
+M012,W011,J027,Cleaning skill and different city,Location factor should reflect city
+M013,W012,J035,Mechanic skill match but busy,Availability factor should reflect busy status
+M014,W014,J008,"Cook role, Marathi listing",Check semantic cross-language match
+M015,W015,J011,Warehouse skills and location match,Strong candidate
+M016,W016,J024,AC technician and local job,Strong candidate
+M017,W017,J016,Agriculture skills and location,Strong candidate
+M018,W018,J029,Tailor skill and location,Strong candidate
+M019,W019,J013,Security skill and location,Strong candidate
+M020,W020,J026,Factory skills but unavailable,Availability factor should reflect unavailable status
+M021,W021,J036,No experience and minimal skills,Consider entry-level suitability
+M022,W022,J039,"High experience cleaner, different city",Check location/pay
+M023,W023,J007,One skill and no rating,No crash; cold-start rating behavior
+M024,W024,J015,Low-rated carpenter vs painter job,Weak skill match; low rating is not fraud
+M025,W025,J010,"Cleaning skill, busy status",Availability reflected
+M026,W026,J050,Multiple overlapping skills,Strong skill relevance
+M027,W027,J033,Monthly pay expectation and monthly job,Compare compatible pay units
+M028,W028,J025,Part-time profile and fixed-price job,Check schedule preference support
+M029,W029,J006,Construction skills but different city,Location factor reflected
+M030,W030,J030,Driving/delivery skills and location mismatch,Check location and skills
+M031,W031,J029,Tailoring skill but unavailable,Availability reflected
+M032,W032,J013,Security role with partial skill overlap,Partial skill match
+M033,W033,J041,Marathi mechanic to Marathi job,Strong candidate
+M034,W033,J035,Marathi mechanic to English job,Cross-language matching
+M035,W034,J039,Housekeeping skills and location,Strong candidate
+M036,W035,J050,"High experience, multi-skill profile",Strong skill relevance
+M037,W036,J026,Factory maintenance and factory job,Partial skill match
+M038,W037,J036,"Minimal valid profile, zero experience",No crash; entry-level suitability
+M039,W038,J042,Painter with finishing skill,Strong candidate
+M040,W039,J001,"Low daily pay expectation, same city but unrelated skill",Pay/location should not override poor skill relevance
+M041,W040,J008,Experienced cook to Marathi job,Cross-language matching
+M042,W001,J002,Same worker against English equivalent job,Compare with J001 for language bias

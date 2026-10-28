@@ -1,0 +1,74 @@
+[
+  {
+    "case_id": "F001",
+    "job_id": "J018",
+    "label": "exact duplicate",
+    "expected": "Review duplicate evidence; no automatic ban"
+  },
+  {
+    "case_id": "F002",
+    "job_id": "J019",
+    "label": "near duplicate",
+    "expected": "Check text similarity"
+  },
+  {
+    "case_id": "F003",
+    "job_id": "J022",
+    "label": "legitimate bulk hiring",
+    "expected": "Avoid false positive based on volume alone"
+  },
+  {
+    "case_id": "F004",
+    "job_id": "J020",
+    "label": "upfront fee language",
+    "expected": "Flag for human review"
+  },
+  {
+    "case_id": "F005",
+    "job_id": "J021",
+    "label": "Marathi upfront fee language",
+    "expected": "Check multilingual risk rules"
+  },
+  {
+    "case_id": "F006",
+    "job_id": "J017",
+    "label": "urgent but legitimate job",
+    "expected": "Urgency alone should not prove fraud"
+  },
+  {
+    "case_id": "F007",
+    "job_id": "J037",
+    "label": "unusually high but contextual pay",
+    "expected": "Do not auto-label fraud based on pay alone"
+  },
+  {
+    "case_id": "F008",
+    "job_id": "J023",
+    "label": "repeat cancelled listing",
+    "expected": "Review posting history"
+  },
+  {
+    "case_id": "F009",
+    "job_id": "J011",
+    "label": "multiple genuine vacancies",
+    "expected": "Should remain legitimate absent other evidence"
+  },
+  {
+    "case_id": "F010",
+    "job_id": "J002",
+    "label": "English equivalent of Marathi job",
+    "expected": "Language variation should not hide duplicates"
+  },
+  {
+    "case_id": "F011",
+    "job_id": "J001",
+    "label": "Marathi equivalent of English job",
+    "expected": "Language variation should not hide duplicates"
+  },
+  {
+    "case_id": "F012",
+    "job_id": "J028",
+    "label": "individual household employer",
+    "expected": "New/small employer is not inherently suspicious"
+  }
+]

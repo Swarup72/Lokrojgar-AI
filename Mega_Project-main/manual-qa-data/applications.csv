@@ -1,0 +1,11 @@
+﻿application_id,worker_id,job_id,status,case
+A001,W001,J001,pending,Normal application
+A002,W002,J002,accepted,Accepted application
+A003,W003,J003,rejected,Rejected application
+A004,W008,J007,pending,Skilled worker application
+A005,W015,J011,pending,Warehouse application
+A006,W033,J041,completed,Completed application
+A007,W021,J036,pending,Entry-level application
+A008,W024,J015,rejected,Poor skill match
+A009,W040,J008,pending,Cross-language cook application
+A010,W013,J002,pending,Mixed-language application

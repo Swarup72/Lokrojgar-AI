@@ -1,0 +1,16 @@
+﻿case_id,entity,field,value,expected
+N001,worker,availability,sometimes,Reject invalid enum
+N002,worker,experience_years,-1,Reject negative experience
+N003,worker,preferred_language,xx,Reject or documented fallback
+N004,worker,expected_pay,-500,Reject invalid negative pay
+N005,job,title,,Reject missing/empty title
+N006,job,description,"[very long string: 20,000 characters]",Apply documented max length or reject safely
+N007,job,pay_type,hourly-ish,Reject unsupported enum
+N008,report,target_id,not-an-object-id,Return validation error
+N009,report,description,<script>alert(1)</script>,Store/render safely; no script execution
+N010,job,extra,"{""role"": ""admin"", ""isVerified"": true}",Reject/ignore mass-assignment fields
+N011,job,title,"{""$ne"": null}",Reject object where string expected
+N012,admin_action,status,permanently_ban_everyone,Reject unsupported action
+N013,report,reporter_id,fake-admin-id,"Use authenticated identity, not client-supplied ID"
+N014,worker,skills,[],Follow actual schema policy; no crash
+N015,worker,bio,मराठी 👷‍♀️ café — test punctuation,Preserve Unicode correctly

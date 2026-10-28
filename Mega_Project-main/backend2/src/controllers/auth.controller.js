@@ -85,7 +85,21 @@ export const register = asyncHandler(async (req, res) => {
 export const login = asyncHandler(async (req, res) => {
   const { phone, password } = req.body;
 
-  const user = await User.findOne({ phone });
+  const trimmedPhone = phone ? String(phone).trim() : "";
+  const phoneVariants = [trimmedPhone];
+  if (trimmedPhone.startsWith("+91")) {
+    phoneVariants.push(trimmedPhone.slice(3).trim());
+  } else if (/^[6-9]\d{9}$/.test(trimmedPhone)) {
+    phoneVariants.push(`+91${trimmedPhone}`);
+  }
+  const digits = trimmedPhone.replace(/\D/g, "");
+  const normalized10 = digits.length > 10 ? digits.slice(-10) : digits;
+  if (/^[6-9]\d{9}$/.test(normalized10)) {
+    if (!phoneVariants.includes(normalized10)) phoneVariants.push(normalized10);
+    if (!phoneVariants.includes(`+91${normalized10}`)) phoneVariants.push(`+91${normalized10}`);
+  }
+
+  const user = await User.findOne({ phone: { $in: phoneVariants } });
   if (!user) {
     throw new ApiError(404, "User not found with this phone number");
   }

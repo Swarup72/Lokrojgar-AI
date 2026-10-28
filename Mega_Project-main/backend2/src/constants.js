@@ -1,4 +1,4 @@
-export const DB_NAME = "LokRozgar_AI";
+export const DB_NAME = process.env.DB_NAME || "LokRozgar_AI";
 
 export const USER_ROLES = {
   WORKER: "worker",
