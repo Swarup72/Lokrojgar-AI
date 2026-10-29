@@ -6,6 +6,11 @@ import {
   PROD_RATE_LIMIT_MAX,
   globalRateLimiter,
   loginRateLimiter,
+  createLoginRateLimiter,
+  otpRateLimiter,
+  apiRateLimiter,
+  LOGIN_RATE_LIMIT_MAX,
+  LOGIN_RATE_LIMIT_WINDOW_MS,
   resolveRateLimitMax,
   resolveLoginRateLimitKey,
 } from "../src/middlewares/rateLimiter.middleware.js";
@@ -297,15 +302,15 @@ test("login endpoint still rate limits repeated failed attempts on the same phon
 
   const targetPhone = "9998887776";
 
-  // Send 5 failed attempts (max is 5)
-  for (let i = 0; i < 5; i++) {
+  // Send 15 failed attempts (max is 15)
+  for (let i = 0; i < 15; i++) {
     const res = await postLogin(targetPhone);
     assert.notStrictEqual(res.status, 429, `Attempt ${i + 1} within quota`);
   }
 
-  // 6th attempt should be blocked with 429
+  // 16th attempt should be blocked with 429
   const blocked = await postLogin(targetPhone);
-  assert.strictEqual(blocked.status, 429, "6th attempt on the same account must be rate limited");
+  assert.strictEqual(blocked.status, 429, "16th attempt on the same account must be rate limited");
   const body = await blocked.json();
   assert.match(body.message, /too many login attempts/i);
 });
@@ -338,4 +343,121 @@ test("login endpoint preflight does not consume login attempt quota", async (t) 
   const phone = "9112233445";
   const res = await postLogin(phone);
   assert.notStrictEqual(res.status, 429, "preflights must not consume login quota");
+});
+
+// --- Login limit: 15 attempts / 10 minutes -----------------------------------
+
+test("login limiter is configured for 15 attempts per 10 minutes", () => {
+  assert.strictEqual(LOGIN_RATE_LIMIT_MAX, 15);
+  assert.strictEqual(LOGIN_RATE_LIMIT_WINDOW_MS, 600_000);
+});
+
+test("login limiter counts failed attempts only; successful logins do not consume quota", async () => {
+  const { default: express } = await import("express");
+  const limiter = createLoginRateLimiter({ max: 3, windowMs: 60_000 });
+  const mini = express();
+  mini.use(express.json());
+  mini.post("/login", limiter, (req, res) =>
+    req.body.password === "right" ? res.status(200).json({ ok: true }) : res.status(401).json({ ok: false })
+  );
+  const srv = mini.listen(0, "127.0.0.1");
+  await new Promise((r) => srv.once("listening", r));
+  const url = `http://127.0.0.1:${srv.address().port}/login`;
+  const post = (password) =>
+    fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone: "9000000001", password }) });
+  try {
+    assert.strictEqual((await post("wrong")).status, 401); // failure 1
+    assert.strictEqual((await post("wrong")).status, 401); // failure 2
+    for (let i = 0; i < 10; i++) {
+      assert.strictEqual((await post("right")).status, 200, `success ${i + 1} must not be limited or consume quota`);
+    }
+    assert.strictEqual((await post("wrong")).status, 401); // failure 3 (still within max 3)
+    assert.strictEqual((await post("wrong")).status, 429, "4th failure exceeds max 3");
+  } finally {
+    srv.close();
+  }
+});
+
+test("parallel failed guesses cannot exceed the limit (no race)", async () => {
+  const { default: express } = await import("express");
+  const limiter = createLoginRateLimiter({ max: 5, windowMs: 60_000 });
+  const mini = express();
+  mini.use(express.json());
+  mini.post("/login", limiter, async (req, res) => {
+    await new Promise((r) => setTimeout(r, 20)); // slow handler widens any race window
+    res.status(401).json({ ok: false });
+  });
+  const srv = mini.listen(0, "127.0.0.1");
+  await new Promise((r) => srv.once("listening", r));
+  const url = `http://127.0.0.1:${srv.address().port}/login`;
+  try {
+    const results = await Promise.all(
+      Array.from({ length: 30 }, () =>
+        fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone: "9000000003", password: "x" }) }).then((r) => r.status)
+      )
+    );
+    assert.strictEqual(results.filter((c) => c === 401).length, 5, "exactly max attempts reach the handler");
+    assert.strictEqual(results.filter((c) => c === 429).length, 25);
+  } finally {
+    srv.close();
+  }
+});
+
+test("login limiter quota resets after the window expires", async () => {
+  const { default: express } = await import("express");
+  const limiter = createLoginRateLimiter({ max: 2, windowMs: 400 });
+  const mini = express();
+  mini.use(express.json());
+  mini.post("/login", limiter, (req, res) => res.status(401).json({ ok: false }));
+  const srv = mini.listen(0, "127.0.0.1");
+  await new Promise((r) => srv.once("listening", r));
+  const url = `http://127.0.0.1:${srv.address().port}/login`;
+  const post = () =>
+    fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ phone: "9000000002", password: "x" }) });
+  try {
+    assert.strictEqual((await post()).status, 401);
+    assert.strictEqual((await post()).status, 401);
+    assert.strictEqual((await post()).status, 429);
+    await new Promise((r) => setTimeout(r, 600));
+    assert.strictEqual((await post()).status, 401, "quota must be available again after the window");
+  } finally {
+    srv.close();
+  }
+});
+
+test("login endpoint allows exactly 15 attempts then blocks the 16th (real route)", async (t) => {
+  const userFindMock = mock.method(User, "findOne", async () => null);
+  t.after(() => {
+    userFindMock.mock.restore();
+    loginRateLimiter.resetKey("::1_9876543299");
+    loginRateLimiter.resetKey("::ffff:127.0.0.1_9876543299");
+    loginRateLimiter.resetKey("127.0.0.1_9876543299");
+  });
+  for (let i = 1; i <= 15; i++) {
+    const res = await postLogin("9876543299");
+    assert.notStrictEqual(res.status, 429, `attempt ${i} must be within the limit`);
+  }
+  const res = await postLogin("9876543299");
+  assert.strictEqual(res.status, 429);
+  assert.match((await res.json()).message, /10 minutes/);
+});
+
+test("other auth/API limiters keep their existing limits", async () => {
+  const probe = async (limiter, limitMax) => {
+    const { default: express } = await import("express");
+    const mini = express();
+    mini.use(limiter);
+    mini.get("/", (req, res) => res.sendStatus(200));
+    const srv = mini.listen(0, "127.0.0.1");
+    await new Promise((r) => srv.once("listening", r));
+    const url = `http://127.0.0.1:${srv.address().port}/`;
+    try {
+      for (let i = 0; i < limitMax; i++) assert.strictEqual((await fetch(url)).status, 200);
+      assert.strictEqual((await fetch(url)).status, 429);
+    } finally {
+      srv.close();
+    }
+  };
+  await probe(otpRateLimiter, 5); // OTP: 5 per 15 min, unchanged
+  await probe(apiRateLimiter, 100); // general API: 100 per 15 min, unchanged
 });

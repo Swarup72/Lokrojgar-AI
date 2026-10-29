@@ -42,29 +42,58 @@ export const otpRateLimiter = rateLimit({
   },
 });
 
+export const LOGIN_RATE_LIMIT_WINDOW_MS = 10 * 60 * 1000; // 10 minutes
+export const LOGIN_RATE_LIMIT_MAX = 15; // attempts per window
+
+/**
+ * Builds the login limiter. Exposed as a factory only so tests can exercise
+ * window expiry with a short window; the exported loginRateLimiter below always
+ * uses the production constants.
+ *
+ * Only FAILED attempts consume quota: skipSuccessfulRequests is on, so a
+ * response with status < 400 is refunded once it finishes. Every non-2xx/3xx
+ * outcome of the login handler (404 unknown phone, 401 bad password, 403
+ * blocked account, 400 validation) still counts. The hit is registered BEFORE
+ * the handler runs and the in-memory increment is synchronous, so a burst of
+ * parallel guesses cannot slip past the limit; only a success refunds its own
+ * hit. In non-production the key is IP + phone (see
+ * resolveLoginRateLimitKey); in production it is the IP.
+ *
+ * Storage is express-rate-limit's default in-process MemoryStore: counters are
+ * per server instance, reset on restart, and are NOT shared across multiple
+ * instances/processes (N instances allow up to N x 15 attempts per window). A
+ * shared store (e.g. Redis) is required for horizontal scaling.
+ */
+export function createLoginRateLimiter({
+  windowMs = LOGIN_RATE_LIMIT_WINDOW_MS,
+  max = LOGIN_RATE_LIMIT_MAX,
+} = {}) {
+  return rateLimit({
+    windowMs,
+    max,
+    standardHeaders: true,
+    legacyHeaders: false,
+    skipSuccessfulRequests: true,
+    skip: (req) => req.method === "OPTIONS",
+    keyGenerator: (req) => resolveLoginRateLimitKey(req),
+    handler: (req, res, next, options) => {
+      next(
+        new ApiError(
+          429,
+          "Too many login attempts. Please wait 10 minutes before trying again."
+        )
+      );
+    },
+  });
+}
+
 /**
  * Rate Limiter for Login Endpoint.
- * Limits to 5 attempts per 15 minutes window.
+ * Limits to 15 attempts per 10 minute window (previously 5 per 15 minutes).
  * In development, uses per-account keying (IP + normalized phone) to allow demoing
  * multiple user personas seamlessly.
  */
-export const loginRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 5, // 5 attempts max
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true,
-  skip: (req) => req.method === "OPTIONS",
-  keyGenerator: (req) => resolveLoginRateLimitKey(req),
-  handler: (req, res, next, options) => {
-    next(
-      new ApiError(
-        429,
-        "Too many login attempts. Please wait 15 minutes before trying again."
-      )
-    );
-  },
-});
+export const loginRateLimiter = createLoginRateLimiter();
 
 export const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
