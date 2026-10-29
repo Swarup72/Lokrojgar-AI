@@ -239,6 +239,7 @@ export function ApplicantsPage() {
             <WorkerCard
               key={application._id}
               worker={application.workerId}
+              jobId={jobId}
               matchScore={application.matchScore}
               matchFactors={application.matchFactors}
               actions={

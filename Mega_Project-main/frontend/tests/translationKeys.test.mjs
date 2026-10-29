@@ -139,7 +139,12 @@ test("every error key the error mapper can return is defined", async () => {
 test("interpolated keys declare every placeholder their call site passes", () => {
   // t(key, vars) substitutes {{name}}. A key whose text lacks the placeholder
   // silently drops the value.
-  const expected = { "dashboard.greeting": "name", noJobsMatchFilter: "filter" };
+  const expected = {
+    "dashboard.greeting": "name",
+    noJobsMatchFilter: "filter",
+    "scheduling.durationMinutes": "minutes",
+    "scheduling.bookingModalTitle": "workerName",
+  };
   for (const [key, placeholder] of Object.entries(expected)) {
     for (const lang of ["en", "mr", "hi"]) {
       assert.match(

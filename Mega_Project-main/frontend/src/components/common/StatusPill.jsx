@@ -5,6 +5,8 @@ import "./StatusPill.css";
 
 
 const TONES = {
+  pending: "warning",
+  confirmed: "success",
   applied: "info",
   shortlisted: "info",
   accepted: "success",

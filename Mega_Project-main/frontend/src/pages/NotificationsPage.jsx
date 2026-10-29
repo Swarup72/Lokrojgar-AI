@@ -133,6 +133,9 @@ export function NotificationsPage() {
   };
 
   const getTargetLink = (item) => {
+    if (item?.data?.link && typeof item.data.link === "string") {
+      return item.data.link;
+    }
     if (!item.refId) return null;
     switch (item.type) {
       case "job_alert":

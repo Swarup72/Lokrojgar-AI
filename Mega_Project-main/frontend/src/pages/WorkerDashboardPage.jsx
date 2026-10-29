@@ -18,6 +18,7 @@ import {
   ClipboardList,
   ShieldCheck,
   Wrench,
+  Calendar,
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
@@ -265,6 +266,13 @@ export function WorkerDashboardPage() {
       label: ui.requests,
       path: "/job-requests",
       className: "action-requests",
+    },
+    {
+      id: "availability",
+      icon: Calendar,
+      label: t("nav.myAvailability"),
+      path: "/worker-availability",
+      className: "action-profile",
     },
     {
       id: "messages",

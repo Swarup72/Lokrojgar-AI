@@ -88,6 +88,7 @@ export function RecommendedWorkersPage() {
             <WorkerCard
               key={match.worker._id}
               worker={match.worker}
+              jobId={jobId}
               matchScore={match.matchScore}
               matchFactors={match.matchFactors}
               explanation={match.explanation}

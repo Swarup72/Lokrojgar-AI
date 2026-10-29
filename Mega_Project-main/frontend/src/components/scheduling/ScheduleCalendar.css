@@ -1,0 +1,316 @@
+.sched-calendar-wrapper {
+  background: #ffffff;
+  border: 1px solid #dbe4f0;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.sched-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.sched-nav-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sched-heading {
+  margin: 0 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.sched-view-switcher {
+  display: inline-flex;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 3px;
+  gap: 4px;
+}
+
+.sched-view-btn {
+  border: none;
+  background: transparent;
+  color: #334155;
+  font-weight: 700;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.sched-view-btn.active {
+  background: #1d4ed8;
+  color: #ffffff;
+}
+
+.sched-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  color: #334155;
+}
+
+.sched-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+}
+
+.sched-weekday-header {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+  margin-bottom: 6px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.sched-grid-month,
+.sched-grid-week {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.sched-day-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 82px;
+  padding: 8px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #ffffff;
+  color: #0f172a;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.sched-day-cell:hover {
+  border-color: #2563eb;
+  background: #f8fbff;
+}
+
+.sched-day-cell.outside-month {
+  opacity: 0.5;
+  background: #f8fafc;
+}
+
+.sched-day-cell.selected {
+  border: 2px solid #1d4ed8;
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(29, 78, 216, 0.15);
+}
+
+.sched-day-cell.today .sched-day-number {
+  background: #1d4ed8;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 2px 7px;
+}
+
+.sched-day-cell.blocked {
+  background: #fef2f2;
+  border-color: #fecaca;
+}
+
+.sched-day-top {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 0.88rem;
+}
+
+.sched-day-badges {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.sched-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sched-chip-available {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.sched-chip-unavailable {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.sched-chip-blocked {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.sched-chip-pending {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.sched-chip-confirmed {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.sched-selected-panel {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.sched-selected-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sched-selected-header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  color: #0f172a;
+}
+
+.sched-hours-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  font-size: 0.86rem;
+  color: #334155;
+  margin-bottom: 12px;
+}
+
+.appointment-card {
+  border: 1px solid #dbe4f0;
+  border-radius: 14px;
+  padding: 16px;
+  background: #ffffff;
+  margin-bottom: 12px;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.04);
+}
+
+.appointment-card-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.appointment-card-title {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.appointment-card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  font-size: 0.86rem;
+  color: #334155;
+  margin-bottom: 10px;
+}
+
+.appointment-card-meta span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.appointment-card-purpose {
+  margin: 8px 0;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-left: 3px solid #2563eb;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  color: #1e293b;
+}
+
+.appointment-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.appointment-confirm-box {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  font-size: 0.86rem;
+  color: #92400e;
+}
+
+@media (max-width: 720px) {
+  .sched-calendar-wrapper {
+    overflow-x: auto;
+    padding: 12px;
+  }
+  .sched-grid-month,
+  .sched-grid-week,
+  .sched-weekday-header {
+    min-width: 310px;
+  }
+  .sched-grid-month,
+  .sched-grid-week {
+    gap: 4px;
+  }
+  .sched-day-cell {
+    min-height: 60px;
+    padding: 4px;
+  }
+  .sched-chip span {
+    display: none;
+  }
+}
+

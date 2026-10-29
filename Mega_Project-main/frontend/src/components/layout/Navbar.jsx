@@ -16,6 +16,7 @@ import {
   Languages,
   Bell,
   Shield,
+  Calendar,
 } from "lucide-react";
 
 import { useAuth } from "../../hooks/useAuth";
@@ -308,6 +309,19 @@ export function Navbar() {
                     {t("nav.jobRequests")}
                   </span>
                 </NavLink>
+
+                <NavLink
+                  to="/worker-availability"
+                  className={navLinkClass}
+                >
+                  <Calendar
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>
+                    {t("nav.myAvailability")}
+                  </span>
+                </NavLink>
               </>
             )}
 
@@ -337,6 +351,17 @@ export function Navbar() {
                     aria-hidden="true"
                   />
                   <span>{t("postJob")}</span>
+                </NavLink>
+
+                <NavLink
+                  to="/employer-appointments"
+                  className={navLinkClass}
+                >
+                  <Calendar
+                    size={22}
+                    aria-hidden="true"
+                  />
+                  <span>{t("nav.myAppointments")}</span>
                 </NavLink>
               </>
             )}

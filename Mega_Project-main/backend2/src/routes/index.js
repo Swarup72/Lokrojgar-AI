@@ -20,6 +20,7 @@ import disputeRoutes from "./dispute.routes.js";
 import chatRoutes from "./chat.routes.js";
 import notificationRoutes from "./notification.routes.js";
 import adminRoutes from "./admin.routes.js";
+import { workerAvailabilityRouter, appointmentRouter } from "./scheduling.routes.js";
 
 const router = Router();
 
@@ -69,5 +70,7 @@ router.use("/disputes", disputeRoutes);
 router.use("/chat", chatRoutes);
 router.use("/notifications", notificationRoutes);
 router.use("/admin", adminRoutes);
+router.use("/workers", workerAvailabilityRouter);
+router.use("/appointments", appointmentRouter);
 
 export default router;

@@ -33,7 +33,9 @@ export const PROFICIENCY_KEYS = {
 };
 
 export const STATUS_KEYS = {
-  // Application statuses
+  // Application & Appointment statuses
+  pending: "appointments.status.pending",
+  confirmed: "appointments.status.confirmed",
   applied: "common.applied",
   shortlisted: "common.shortlisted",
   accepted: "common.accepted",

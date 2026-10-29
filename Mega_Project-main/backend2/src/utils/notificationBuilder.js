@@ -146,6 +146,71 @@ const NOTIFICATION_TEMPLATES = {
       en: data.messageTextEn || data.messageText || "You have received a new message.",
     },
   }),
+
+  APPOINTMENT_REQUESTED: (data = {}) => ({
+    title: {
+      mr: "नवीन अपॉइंटमेंट विनंती",
+      hi: "नया अपॉइंटमेंट अनुरोध",
+      en: "New Appointment Request",
+    },
+    body: {
+      mr: `${data.employerName || "एका नियोक्त्याने"} ${data.when || ""} (${data.durationMinutes || 30} मिनिटे) साठी अपॉइंटमेंटची विनंती केली आहे.`,
+      hi: `${data.employerName || "एक नियोक्ता"} ने ${data.when || ""} (${data.durationMinutes || 30} मिनट) के लिए अपॉइंटमेंट का अनुरोध किया है।`,
+      en: `${data.employerName || "An employer"} requested an appointment for ${data.when || ""} (${data.durationMinutes || 30} min).`,
+    },
+  }),
+
+  APPOINTMENT_CONFIRMED: (data = {}) => ({
+    title: {
+      mr: "अपॉइंटमेंट निश्चित झाली",
+      hi: "अपॉइंटमेंट की पुष्टि हुई",
+      en: "Appointment Confirmed",
+    },
+    body: {
+      mr: `${data.workerName || "कामगाराने"} ${data.when || ""} साठी तुमची अपॉइंटमेंट स्वीकारली आहे.`,
+      hi: `${data.workerName || "कामगार"} ने ${data.when || ""} के लिए आपका अपॉइंटमेंट स्वीकार कर लिया है।`,
+      en: `${data.workerName || "The worker"} confirmed your appointment for ${data.when || ""}.`,
+    },
+  }),
+
+  APPOINTMENT_REJECTED: (data = {}) => ({
+    title: {
+      mr: "अपॉइंटमेंट नाकारली",
+      hi: "अपॉइंटमेंट अस्वीकार किया गया",
+      en: "Appointment Declined",
+    },
+    body: {
+      mr: `${data.workerName || "कामगाराने"} ${data.when || ""} साठी अपॉइंटमेंट विनंती नाकारली आहे.`,
+      hi: `${data.workerName || "कामगार"} ने ${data.when || ""} के लिए अपॉइंटमेंट अनुरोध अस्वीकार कर दिया है।`,
+      en: `${data.workerName || "The worker"} declined your appointment request for ${data.when || ""}.`,
+    },
+  }),
+
+  APPOINTMENT_CANCELLED: (data = {}) => ({
+    title: {
+      mr: "अपॉइंटमेंट रद्द झाली",
+      hi: "अपॉइंटमेंट रद्द किया गया",
+      en: "Appointment Cancelled",
+    },
+    body: {
+      mr: `${data.when || ""} ची अपॉइंटमेंट ${data.actorName || "सहभागी"} द्वारे रद्द करण्यात आली आहे.`,
+      hi: `${data.when || ""} का अपॉइंटमेंट ${data.actorName || "प्रतिभागी"} द्वारा रद्द कर दिया गया है।`,
+      en: `The appointment for ${data.when || ""} was cancelled by ${data.actorName || "participant"}.`,
+    },
+  }),
+
+  APPOINTMENT_EXPIRED: (data = {}) => ({
+    title: {
+      mr: "अपॉइंटमेंट विनंतीची मुदत संपली",
+      hi: "अपॉइंटमेंट अनुरोध की समय-सीमा समाप्त",
+      en: "Appointment Request Expired",
+    },
+    body: {
+      mr: `${data.when || ""} साठी प्रलंबित अपॉइंटमेंट विनंतीची वेळ संपली आहे.`,
+      hi: `${data.when || ""} के लिए लंबित अपॉइंटमेंट अनुरोध की समय-सीमा समाप्त हो गई है।`,
+      en: `The pending appointment request for ${data.when || ""} has expired.`,
+    },
+  }),
 };
 
 /**

@@ -16,6 +16,7 @@ import {
   Wallet,
   Building2,
   ClipboardList,
+  Calendar,
 } from "lucide-react";
 
 import { useAuth } from "../hooks/useAuth";
@@ -186,6 +187,13 @@ export function EmployerDashboardPage() {
       icon: BriefcaseBusiness,
       label: ui.myJobs,
       path: "#employer-jobs",
+      className: "employer-action-jobs",
+    },
+    {
+      id: "appointments",
+      icon: Calendar,
+      label: t("nav.myAppointments"),
+      path: "/employer-appointments",
       className: "employer-action-jobs",
     },
     {

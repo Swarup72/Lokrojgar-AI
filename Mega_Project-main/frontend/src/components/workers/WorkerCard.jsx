@@ -1,14 +1,28 @@
-import { User, MapPin, Briefcase } from "lucide-react";
+import { useState } from "react";
+import { User, MapPin, Briefcase, CalendarPlus } from "lucide-react";
+import { useLanguage } from "../../hooks/useLanguage";
 import { RatingStars } from "../common/RatingStars";
 import { StatusPill } from "../common/StatusPill";
 import { MatchScoreBadge } from "../recommendations/MatchScoreBadge";
 import { MatchFactorsList } from "../recommendations/MatchFactorsList";
+import { AppointmentBookingModal } from "../scheduling/AppointmentBookingModal";
 import "./WorkerCard.css";
 
 /**
- * @param {{worker: object, matchScore?: number|null, matchFactors?: object, explanation?: object, actions?: React.ReactNode}} props
+ * @param {{worker: object, jobId?: string|null, matchScore?: number|null, matchFactors?: object, explanation?: object, actions?: React.ReactNode, showBookAppointment?: boolean}} props
  */
-export function WorkerCard({ worker, matchScore, matchFactors, explanation, actions }) {
+export function WorkerCard({
+  worker,
+  jobId = null,
+  matchScore,
+  matchFactors,
+  explanation,
+  actions,
+  showBookAppointment = true,
+}) {
+  const { t } = useLanguage();
+  const [bookingOpen, setBookingOpen] = useState(false);
+
   return (
     <div className="worker-card">
       <div className="worker-card-icon">
@@ -36,8 +50,30 @@ export function WorkerCard({ worker, matchScore, matchFactors, explanation, acti
           <StatusPill status={worker.availability} />
         </div>
         {matchFactors && <MatchFactorsList matchFactors={matchFactors} explanation={explanation} />}
-        {actions && <div className="worker-card-actions">{actions}</div>}
+        {(actions || (showBookAppointment && worker?._id)) && (
+          <div className="worker-card-actions">
+            {actions}
+            {showBookAppointment && worker?._id && (
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => setBookingOpen(true)}
+              >
+                <CalendarPlus size={16} aria-hidden="true" />
+                <span>{t("scheduling.requestAppointmentBtn")}</span>
+              </button>
+            )}
+          </div>
+        )}
       </div>
+
+      {bookingOpen && (
+        <AppointmentBookingModal
+          worker={worker}
+          jobId={jobId}
+          onClose={() => setBookingOpen(false)}
+        />
+      )}
     </div>
   );
 }

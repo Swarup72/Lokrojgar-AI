@@ -19,6 +19,8 @@ import { ChatPage } from "../pages/ChatPage";
 import { ApplicantsPage } from "../pages/ApplicantsPage";
 import { RecommendedWorkersPage } from "../pages/RecommendedWorkersPage";
 import { NotificationsPage } from "../pages/NotificationsPage";
+import { WorkerAvailabilityPage } from "../pages/WorkerAvailabilityPage";
+import { EmployerAppointmentsPage } from "../pages/EmployerAppointmentsPage";
 import { NotFoundPage } from "../pages/NotFoundPage";
 
 // Admin Panel Module
@@ -191,6 +193,14 @@ export function AppRoutes() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/worker-availability"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.WORKER]}>
+              <WorkerAvailabilityPage />
+            </ProtectedRoute>
+          }
+        />
         {/* Any authenticated user: a dual-role account can be the worker in one
             conversation and the employer in another, and the server authorizes
             per conversation, not by role. */}
@@ -248,6 +258,14 @@ export function AppRoutes() {
           element={
             <ProtectedRoute allowedRoles={[USER_ROLES.EMPLOYER]}>
               <RecommendedWorkersPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/employer-appointments"
+          element={
+            <ProtectedRoute allowedRoles={[USER_ROLES.EMPLOYER]}>
+              <EmployerAppointmentsPage />
             </ProtectedRoute>
           }
         />
