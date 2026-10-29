@@ -19,6 +19,13 @@ export function AdminLoginPage() {
 
   // If already authenticated with admin role, redirect to /admin immediately
   useEffect(() => {
+    document.body.classList.add("admin-body");
+    return () => {
+      document.body.classList.remove("admin-body");
+    };
+  }, []);
+
+  useEffect(() => {
     if (isAuthenticated && user?.roles?.includes(USER_ROLES.ADMIN)) {
       const target = location.state?.from?.pathname || "/admin";
       navigate(target, { replace: true });

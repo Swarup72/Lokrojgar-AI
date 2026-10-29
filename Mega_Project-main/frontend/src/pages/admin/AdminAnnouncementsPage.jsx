@@ -31,6 +31,14 @@ export function AdminAnnouncementsPage() {
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [sending, setSending] = useState(false);
 
+  const sanitizeErrorMessage = (err, fallback) => {
+    const raw = typeof err?.message === "string" ? err.message.trim() : "";
+    if (!raw || /E11000|Mongo|collection:|dup key|index:/i.test(raw)) {
+      return fallback;
+    }
+    return raw;
+  };
+
   const fetchStats = async () => {
     setLoading(true);
     setError(null);
@@ -38,7 +46,7 @@ export function AdminAnnouncementsPage() {
       const data = await adminApi.getNotificationStats();
       setStats(data);
     } catch (err) {
-      setError(err?.message || t("admin.announcements.fetchError"));
+      setError(sanitizeErrorMessage(err, t("admin.announcements.fetchError")));
     } finally {
       setLoading(false);
     }
@@ -87,7 +95,7 @@ export function AdminAnnouncementsPage() {
 
       fetchStats();
     } catch (err) {
-      setError(err?.message || t("admin.announcements.sendError"));
+      setError(sanitizeErrorMessage(err, t("admin.announcements.sendError")));
       setConfirmOpen(false);
     } finally {
       setSending(false);

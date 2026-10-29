@@ -98,32 +98,55 @@ export function AdminRatingsPage() {
     {
       key: "fromUser",
       header: t("admin.ratings.colFrom"),
-      render: (row) => row.fromUserId?.fullName || row.fromUserId?.phone || "User",
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#334155", fontWeight: 500 }}>
+          {row.fromUserId?.fullName || row.fromUserId?.phone || "User"}
+        </span>
+      ),
     },
     {
       key: "toUser",
       header: t("admin.ratings.colTo"),
-      render: (row) => row.toUserId?.fullName || row.toUserId?.phone || "User",
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#334155", fontWeight: 500 }}>
+          {row.toUserId?.fullName || row.toUserId?.phone || "User"}
+        </span>
+      ),
     },
     {
       key: "job",
       header: t("admin.ratings.colJob"),
-      render: (row) => getJobTitle(row.jobId?.title),
+      render: (row) => (
+        <span
+          style={{
+            fontWeight: 600,
+            color: "#0f172a",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "180px",
+            display: "inline-block",
+          }}
+          title={getJobTitle(row.jobId?.title)}
+        >
+          {getJobTitle(row.jobId?.title)}
+        </span>
+      ),
     },
     {
       key: "rating",
       header: t("admin.ratings.colScore"),
       render: (row) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "2px" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "2px", whiteSpace: "nowrap" }}>
           {[...Array(5)].map((_, i) => (
             <Star
               key={i}
-              size={13}
-              color={i < row.rating ? "#f59e0b" : "var(--color-border-strong)"}
+              size={12}
+              color={i < row.rating ? "#f59e0b" : "#cbd5e1"}
               fill={i < row.rating ? "#f59e0b" : "none"}
             />
           ))}
-          <span style={{ marginLeft: "4px", fontWeight: 700 }}>{row.rating}</span>
+          <span style={{ marginLeft: "4px", fontWeight: 700, fontSize: "0.82rem", color: "#0f172a" }}>{row.rating}</span>
         </div>
       ),
     },
@@ -132,8 +155,18 @@ export function AdminRatingsPage() {
       header: t("admin.ratings.colReview"),
       render: (row) => (
         <div style={{ maxWidth: "260px" }}>
-          <p style={{ margin: 0, fontSize: "13px", color: row.isModerated ? "var(--color-muted)" : "var(--color-text)" }}>
-            {row.review || <span style={{ color: "var(--color-muted)" }}>{t("admin.ratings.noReviewText")}</span>}
+          <p
+            style={{
+              margin: 0,
+              fontSize: "0.82rem",
+              color: row.isModerated ? "#94a3b8" : "#334155",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+            title={row.review || ""}
+          >
+            {row.review || <span style={{ color: "#94a3b8" }}>{t("admin.ratings.noReviewText")}</span>}
           </p>
         </div>
       ),
@@ -156,6 +189,7 @@ export function AdminRatingsPage() {
           className="admin-btn-sm admin-btn-outline"
           onClick={() => openModeration(row)}
           title={t("admin.ratings.moderateAction")}
+          aria-label={`${t("admin.ratings.moderateAction")} rating`}
         >
           <ShieldAlert size={13} />
           <span>{t("admin.ratings.moderateAction")}</span>

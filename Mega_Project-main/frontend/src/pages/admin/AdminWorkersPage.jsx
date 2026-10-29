@@ -113,17 +113,19 @@ export function AdminWorkersPage() {
       key: "fullName",
       header: t("admin.workers.colName"),
       render: (row) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: "170px" }}>
           <div
             style={{
-              width: "32px",
-              height: "32px",
+              width: "34px",
+              height: "34px",
               borderRadius: "50%",
-              backgroundColor: "var(--color-primary-50)",
+              backgroundColor: "#eff6ff",
+              border: "1px solid #bfdbfe",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--color-primary)",
+              color: "#2563eb",
+              flexShrink: 0,
               overflow: "hidden",
             }}
           >
@@ -133,19 +135,54 @@ export function AdminWorkersPage() {
               <User size={16} />
             )}
           </div>
-          <span style={{ fontWeight: 600 }}>{row.fullName}</span>
+          <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+            <span
+              style={{
+                fontWeight: 600,
+                color: "#0f172a",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "220px",
+              }}
+              title={row.fullName}
+            >
+              {row.fullName}
+            </span>
+            {row._id && (
+              <span
+                style={{
+                  fontSize: "0.7rem",
+                  color: "#94a3b8",
+                  fontFamily: "ui-monospace, monospace",
+                  letterSpacing: "0.02em",
+                }}
+                title={row._id}
+              >
+                ID: {row._id.slice(-6).toUpperCase()}
+              </span>
+            )}
+          </div>
         </div>
       ),
     },
     {
       key: "phone",
       header: t("admin.workers.colPhone"),
-      render: (row) => row.userId?.phone || "-",
+      render: (row) => (
+        <span style={{ fontFamily: "ui-monospace, monospace", fontSize: "0.82rem", whiteSpace: "nowrap", color: "#334155" }}>
+          {row.userId?.phone || "-"}
+        </span>
+      ),
     },
     {
       key: "city",
       header: t("admin.workers.colCity"),
-      render: (row) => row.city || "-",
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#334155" }}>
+          {row.city || "-"}
+        </span>
+      ),
     },
     {
       key: "availability",
@@ -156,10 +193,12 @@ export function AdminWorkersPage() {
       key: "ratingAvg",
       header: t("admin.workers.colRating"),
       render: (row) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "4px" }}>
-          <Star size={14} color="#f59e0b" fill="#f59e0b" />
-          <span>{row.ratingAvg ? row.ratingAvg.toFixed(1) : "New"}</span>
-          <span style={{ color: "var(--color-muted)", fontSize: "11px" }}>({row.ratingCount || 0})</span>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "4px", whiteSpace: "nowrap" }}>
+          <Star size={13} color="#f59e0b" fill="#f59e0b" />
+          <span style={{ fontWeight: 600, color: "#0f172a", fontSize: "0.82rem" }}>
+            {row.ratingAvg ? row.ratingAvg.toFixed(1) : "New"}
+          </span>
+          <span style={{ color: "#94a3b8", fontSize: "0.75rem" }}>({row.ratingCount || 0})</span>
         </div>
       ),
     },
@@ -176,12 +215,13 @@ export function AdminWorkersPage() {
       key: "actions",
       header: t("admin.workers.colActions"),
       render: (row) => (
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
           <button
             type="button"
             className="admin-btn-sm admin-btn-outline"
             onClick={() => openInspector(row._id)}
             title={t("common.view")}
+            aria-label={`${t("common.view")} ${row.fullName}`}
           >
             <Eye size={13} />
             <span>{t("common.view")}</span>
@@ -190,6 +230,7 @@ export function AdminWorkersPage() {
             type="button"
             className={`admin-btn-sm ${row.userId?.isBlocked ? "admin-btn-primary" : "admin-btn-danger"}`}
             onClick={() => openConfirmStatus(row)}
+            aria-label={`${row.userId?.isBlocked ? t("admin.actions.activate") : t("admin.actions.suspend")} ${row.fullName}`}
           >
             {row.userId?.isBlocked ? <CheckCircle2 size={13} /> : <AlertOctagon size={13} />}
             <span>{row.userId?.isBlocked ? t("admin.actions.activate") : t("admin.actions.suspend")}</span>

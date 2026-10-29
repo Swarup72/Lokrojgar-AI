@@ -173,16 +173,21 @@ export const applyForJob = asyncHandler(async (req, res) => {
   const employer = await EmployerProfile.findById(job.employerId);
   if (employer) {
     const jobTitle = job.title?.en || job.titleText || "Job";
+    const roundedScore = Math.round(Number(matchScore) || 0);
     await sendNotificationService({
       userId: employer.userId,
       type: "application_update",
       templateKey: "NEW_MESSAGE",
       templateData: {
         senderName: workerProfile.fullName,
-        messageText: `New application for job ${jobTitle} with match score ${matchScore}%`,
-        messageTextEn: `New application for job ${jobTitle} with match score ${matchScore}%`,
-        messageTextMr: `कामगार ${workerProfile.fullName || "कामगार"} कडून "${jobTitle}" साठी नवीन अर्ज आला आहे (साम्य: ${matchScore}%).`,
-        messageTextHi: `श्रमिक ${workerProfile.fullName || "श्रमिक"} से "${jobTitle}" के लिए नया आवेदन आया है (मैच: ${matchScore}%)।`,
+        jobId: String(job._id),
+        applicationId: String(application._id),
+        recipientRole: "employer",
+        link: `/applicants/${job._id}`,
+        messageText: `New application for job ${jobTitle} with match score ${roundedScore}%`,
+        messageTextEn: `New application for job ${jobTitle} with match score ${roundedScore}%`,
+        messageTextMr: `कामगार ${workerProfile.fullName || "कामगार"} कडून "${jobTitle}" साठी नवीन अर्ज आला आहे (साम्य: ${roundedScore}%).`,
+        messageTextHi: `श्रमिक ${workerProfile.fullName || "श्रमिक"} से "${jobTitle}" के लिए नया आवेदन आया है (मैच: ${roundedScore}%)।`,
       },
       refId: application._id,
       idempotencyKey: `app_submitted_${application._id}`,
@@ -417,11 +422,18 @@ export const acceptOrRejectApplication = asyncHandler(async (req, res) => {
     // Notify worker (sent on every successful accept response)
     const workerUserId = app.workerId?.userId?._id || app.workerId?.userId || app.workerId;
     if (workerUserId) {
+      const resolvedJobId = String((job || app.jobId)?._id || app.jobId || "");
       await sendNotificationService({
         userId: workerUserId,
         type: "application_update",
         templateKey: "APPLICATION_ACCEPTED",
-        templateData: { jobTitle: (job || app.jobId)?.title?.en || (job || app.jobId)?.titleText || "Job" },
+        templateData: {
+          jobTitle: (job || app.jobId)?.title?.en || (job || app.jobId)?.titleText || "Job",
+          jobId: resolvedJobId,
+          applicationId: String(app._id),
+          recipientRole: "worker",
+          link: "/applications",
+        },
         refId: app._id,
         idempotencyKey: `app_accepted_${app._id}`,
       });
@@ -453,11 +465,18 @@ export const acceptOrRejectApplication = asyncHandler(async (req, res) => {
     // Notify worker of rejection
     const workerUserId = app.workerId?.userId?._id || app.workerId?.userId || app.workerId;
     if (workerUserId) {
+      const resolvedJobId = String(app.jobId?._id || app.jobId || "");
       await sendNotificationService({
         userId: workerUserId,
         type: "application_update",
         templateKey: "APPLICATION_REJECTED",
-        templateData: { jobTitle: app.jobId?.title?.en || app.jobId?.titleText || "Job" },
+        templateData: {
+          jobTitle: app.jobId?.title?.en || app.jobId?.titleText || "Job",
+          jobId: resolvedJobId,
+          applicationId: String(app._id),
+          recipientRole: "worker",
+          link: "/applications",
+        },
         refId: app._id,
         idempotencyKey: `app_rejected_${app._id}`,
       });
@@ -498,11 +517,18 @@ export const completeApplication = asyncHandler(async (req, res) => {
   // Notify worker of job completion
   const workerUserId = app.workerId?.userId?._id || app.workerId?.userId || app.workerId;
   if (workerUserId) {
+    const resolvedJobId = String(app.jobId?._id || app.jobId || "");
     await sendNotificationService({
       userId: workerUserId,
       type: "application_update",
       templateKey: "APPLICATION_COMPLETED",
-      templateData: { jobTitle: app.jobId?.title?.en || app.jobId?.titleText || "Job" },
+      templateData: {
+        jobTitle: app.jobId?.title?.en || app.jobId?.titleText || "Job",
+        jobId: resolvedJobId,
+        applicationId: String(app._id),
+        recipientRole: "worker",
+        link: "/applications",
+      },
       refId: app._id,
       idempotencyKey: `app_completed_${app._id}`,
     });
@@ -648,8 +674,13 @@ export const inviteWorker = asyncHandler(async (req, res) => {
       jobTitle: job.title?.en || job.titleText || "Job",
       payAmount: application.proposedPay || job.payAmount,
       payType: job.payType,
+      jobId: String(job._id),
+      applicationId: String(application._id),
+      recipientRole: "worker",
+      link: "/job-requests",
     },
     refId: application._id,
+    idempotencyKey: `job_invite_${application._id}`,
   });
 
   return res.status(201).json(new ApiResponse(201, application, "Job request sent to worker"));
@@ -740,12 +771,20 @@ export const respondToInvitation = asyncHandler(async (req, res) => {
     if (!declined) throw new ApiError(409, "This job request has just been answered");
 
     if (employer) {
+      const resolvedJobId = String(app.jobId?._id || app.jobId || "");
       await sendNotificationService({
         userId: employer.userId,
         type: "application_update",
         templateKey: "APPLICATION_REJECTED",
-        templateData: { jobTitle },
+        templateData: {
+          jobTitle,
+          jobId: resolvedJobId,
+          applicationId: String(app._id),
+          recipientRole: "employer",
+          link: resolvedJobId ? `/applicants/${resolvedJobId}` : "/employer-dashboard",
+        },
         refId: app._id,
+        idempotencyKey: `job_invite_declined_${app._id}`,
       });
     }
 
@@ -761,12 +800,20 @@ export const respondToInvitation = asyncHandler(async (req, res) => {
   await Application.updateOne({ _id: app._id }, { $set: { respondedAt: new Date() } });
 
   if (employer) {
+    const resolvedJobId = String(app.jobId?._id || app.jobId || "");
     await sendNotificationService({
       userId: employer.userId,
       type: "application_update",
       templateKey: "APPLICATION_ACCEPTED",
-      templateData: { jobTitle },
+      templateData: {
+        jobTitle,
+        jobId: resolvedJobId,
+        applicationId: String(app._id),
+        recipientRole: "employer",
+        link: resolvedJobId ? `/applicants/${resolvedJobId}` : "/employer-dashboard",
+      },
       refId: app._id,
+      idempotencyKey: `job_invite_accepted_${app._id}`,
     });
   }
 

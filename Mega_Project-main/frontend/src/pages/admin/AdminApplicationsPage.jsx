@@ -78,9 +78,23 @@ export function AdminApplicationsPage() {
       key: "worker",
       header: t("admin.applications.colWorker"),
       render: (row) => (
-        <div>
-          <span style={{ fontWeight: 600, display: "block" }}>{row.workerId?.fullName || "Worker"}</span>
-          <span style={{ fontSize: "11px", color: "var(--color-muted)" }}>{row.workerId?.userId?.phone || "-"}</span>
+        <div style={{ display: "flex", flexDirection: "column", minWidth: "150px" }}>
+          <span
+            style={{
+              fontWeight: 600,
+              color: "#0f172a",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "180px",
+            }}
+            title={row.workerId?.fullName || "Worker"}
+          >
+            {row.workerId?.fullName || "Worker"}
+          </span>
+          <span style={{ fontSize: "0.72rem", color: "#64748b", fontFamily: "ui-monospace, monospace" }}>
+            {row.workerId?.userId?.phone || "-"}
+          </span>
         </div>
       ),
     },
@@ -88,9 +102,23 @@ export function AdminApplicationsPage() {
       key: "job",
       header: t("admin.applications.colJob"),
       render: (row) => (
-        <div>
-          <span style={{ fontWeight: 600, display: "block" }}>{getJobTitle(row.jobId?.title)}</span>
-          <span style={{ fontSize: "11px", color: "var(--color-muted)" }}>{row.jobId?.employerId?.businessName || "-"}</span>
+        <div style={{ display: "flex", flexDirection: "column", minWidth: "160px" }}>
+          <span
+            style={{
+              fontWeight: 600,
+              color: "#0f172a",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "200px",
+            }}
+            title={getJobTitle(row.jobId?.title)}
+          >
+            {getJobTitle(row.jobId?.title)}
+          </span>
+          <span style={{ fontSize: "0.72rem", color: "#64748b" }}>
+            {row.jobId?.employerId?.businessName || "-"}
+          </span>
         </div>
       ),
     },
@@ -98,14 +126,16 @@ export function AdminApplicationsPage() {
       key: "initiatedBy",
       header: t("admin.applications.colInitiator"),
       render: (row) => (
-        <span style={{ fontSize: "12px", textTransform: "capitalize" }}>{row.initiatedBy || "worker"}</span>
+        <span style={{ fontSize: "0.78rem", textTransform: "capitalize", whiteSpace: "nowrap", color: "#475569" }}>
+          {row.initiatedBy || "worker"}
+        </span>
       ),
     },
     {
       key: "matchScore",
       header: t("admin.applications.colMatchScore"),
       render: (row) => (
-        <span style={{ fontWeight: 600, color: "var(--color-primary)" }}>
+        <span style={{ fontWeight: 700, color: "#2563eb", fontSize: "0.82rem", whiteSpace: "nowrap" }}>
           {row.matchScore != null ? `${row.matchScore}%` : "-"}
         </span>
       ),
@@ -113,7 +143,11 @@ export function AdminApplicationsPage() {
     {
       key: "createdAt",
       header: t("admin.applications.colAppliedAt"),
-      render: (row) => new Date(row.createdAt).toLocaleDateString(),
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#64748b", fontSize: "0.8rem" }}>
+          {new Date(row.createdAt).toLocaleDateString()}
+        </span>
+      ),
     },
     {
       key: "status",
@@ -129,6 +163,7 @@ export function AdminApplicationsPage() {
           className="admin-btn-sm admin-btn-outline"
           onClick={() => openInspector(row._id)}
           title={t("common.view")}
+          aria-label={`${t("common.view")} application`}
         >
           <Eye size={13} />
           <span>{t("common.view")}</span>

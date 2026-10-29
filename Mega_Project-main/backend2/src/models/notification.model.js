@@ -73,8 +73,12 @@ const notificationSchema = new mongoose.Schema(
 
     idempotencyKey: {
       type: String,
-      default: null,
       trim: true,
+      set: (val) => {
+        if (typeof val !== "string") return undefined;
+        const trimmed = val.trim();
+        return trimmed.length > 0 ? trimmed : undefined;
+      },
     },
 
     externalId: {
@@ -105,7 +109,10 @@ notificationSchema.index({
 
 notificationSchema.index(
   { idempotencyKey: 1 },
-  { unique: true, sparse: true }
+  {
+    unique: true,
+    partialFilterExpression: { idempotencyKey: { $type: "string", $gt: "" } },
+  }
 );
 
 const Notification = mongoose.model("Notification", notificationSchema);

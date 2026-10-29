@@ -11,8 +11,9 @@ import {
   getUnreadCount,
   markNotificationRead,
   markAllNotificationsRead,
+  resolveNotificationTarget,
 } from "../src/controllers/notification.controller.js";
-import { sendAnnouncement } from "../src/controllers/admin.controller.js";
+import { sendAnnouncement, getNotificationStats } from "../src/controllers/admin.controller.js";
 import { sendNotificationService } from "../src/services/notification.service.js";
 import {
   executeWithRetry,
@@ -476,4 +477,195 @@ test("Admin Announcements: Returns delivery stats and channel report", async (t)
   assert.strictEqual(res.body.data.deliveryStats.totalTargeted, 2);
   assert.strictEqual(res.body.data.deliveryStats.delivered, 2);
   assert.strictEqual(res.body.data.deliveryStats.channel, "in_app");
+});
+
+// ============================================================================
+// 6. Idempotency Index Semantics, Broadcast Deduplication & Role Navigation
+// ============================================================================
+
+test("Notification Schema: Uses partialFilterExpression on idempotencyKey and omits null/empty keys", () => {
+  const docWithNull = new Notification({
+    userId: USER_A_ID,
+    type: "system",
+    title: { en: "Hello" },
+    body: { en: "World" },
+    idempotencyKey: null,
+  });
+  const docWithEmpty = new Notification({
+    userId: USER_B_ID,
+    type: "system",
+    title: { en: "Hello" },
+    body: { en: "World" },
+    idempotencyKey: "   ",
+  });
+  const docWithKey = new Notification({
+    userId: USER_A_ID,
+    type: "system",
+    title: { en: "Hello" },
+    body: { en: "World" },
+    idempotencyKey: " valid_key_123 ",
+  });
+
+  assert.strictEqual(docWithNull.idempotencyKey, undefined, "null idempotencyKey must be omitted");
+  assert.strictEqual(docWithEmpty.idempotencyKey, undefined, "whitespace idempotencyKey must be omitted");
+  assert.strictEqual(docWithKey.idempotencyKey, "valid_key_123", "valid idempotencyKey must be trimmed and kept");
+
+  const indexes = Notification.schema.indexes();
+  const idempIdx = indexes.find(([fields]) => fields.idempotencyKey === 1);
+  assert.ok(idempIdx, "idempotencyKey index must exist on Notification schema");
+  assert.strictEqual(idempIdx[1].unique, true);
+  assert.deepStrictEqual(idempIdx[1].partialFilterExpression, {
+    idempotencyKey: { $type: "string", $gt: "" },
+  });
+});
+
+test("Admin Announcements: Generates unique per-recipient idempotencyKeys and deduplicates retries", async (t) => {
+  let capturedQuery = null;
+  let insertedBatches = [];
+
+  mock.method(User, "find", (query) => {
+    capturedQuery = query;
+    return {
+      select: async () => [{ _id: USER_A_ID }, { _id: USER_B_ID }],
+    };
+  });
+
+  mock.method(Notification, "insertMany", async (notifications) => {
+    insertedBatches.push(notifications);
+    return notifications;
+  });
+  mock.method(AdminAction, "create", async (entry) => entry);
+
+  t.after(() => {
+    mock.reset();
+  });
+
+  // First send to "all"
+  const { req: req1, res: res1, next: next1, done: done1 } = fakeReqRes({
+    user: { _id: ADMIN_ID, roles: ["admin"] },
+    body: {
+      targetRole: "all",
+      idempotencyKey: "broadcast_2026_test",
+      title: { en: "Platform Ready" },
+      body: { en: "The platform is ready to use" },
+    },
+  });
+
+  await sendAnnouncement(req1, res1, next1);
+  await done1;
+
+  assert.strictEqual(res1.statusCode, 201);
+  assert.deepStrictEqual(capturedQuery, { isBlocked: { $ne: true } });
+  assert.strictEqual(insertedBatches.length, 1);
+  assert.strictEqual(insertedBatches[0].length, 2);
+  assert.strictEqual(
+    insertedBatches[0][0].idempotencyKey,
+    `announcement_broadcast_2026_test_${USER_A_ID}`
+  );
+  assert.strictEqual(
+    insertedBatches[0][1].idempotencyKey,
+    `announcement_broadcast_2026_test_${USER_B_ID}`
+  );
+
+  // Simulate retry where USER_A_ID already received it
+  mock.method(Notification, "find", () => ({
+    select: async () => [{ idempotencyKey: `announcement_broadcast_2026_test_${USER_A_ID}` }],
+  }));
+
+  const { req: req2, res: res2, next: next2, done: done2 } = fakeReqRes({
+    user: { _id: ADMIN_ID, roles: ["admin"] },
+    body: {
+      targetRole: "all",
+      idempotencyKey: "broadcast_2026_test",
+      title: { en: "Platform Ready" },
+      body: { en: "The platform is ready to use" },
+    },
+  });
+
+  await sendAnnouncement(req2, res2, next2);
+  await done2;
+
+  assert.strictEqual(res2.statusCode, 201);
+  assert.strictEqual(insertedBatches.length, 2);
+  assert.strictEqual(insertedBatches[1].length, 1, "Only the remaining recipient should be inserted on retry");
+  assert.strictEqual(
+    insertedBatches[1][0].idempotencyKey,
+    `announcement_broadcast_2026_test_${USER_B_ID}`
+  );
+  assert.strictEqual(res2.body.data.sentCount, 2);
+  assert.strictEqual(res2.body.data.deliveryStats.skipped, 1);
+});
+
+test("Role-Based Navigation: Employers and Workers resolve to role-appropriate target routes", () => {
+  const JOB_ID = new mongoose.Types.ObjectId().toString();
+  const APP_ID = new mongoose.Types.ObjectId().toString();
+  const appMap = new Map([[APP_ID, { _id: APP_ID, jobId: JOB_ID, initiatedBy: "worker", status: "applied" }]]);
+  const jobMap = new Map([[JOB_ID, { _id: JOB_ID, status: "open" }]]);
+
+  // 1. Employer receiving application_update -> /applicants/:jobId (never /applications!)
+  const employerNotif = {
+    type: "application_update",
+    refId: APP_ID,
+    data: { senderName: "Ramesh Worker" },
+  };
+  const empResolved = resolveNotificationTarget(
+    employerNotif,
+    { roles: ["employer"] },
+    appMap,
+    jobMap,
+    true
+  );
+  assert.strictEqual(empResolved.targetLink, `/applicants/${JOB_ID}`);
+  assert.strictEqual(empResolved.targetUnavailable, false);
+
+  // 2. Worker receiving application_update -> /applications
+  const workerNotif = {
+    type: "application_update",
+    refId: APP_ID,
+    data: { jobTitle: "Plumbing Repair" },
+  };
+  const workerResolved = resolveNotificationTarget(
+    workerNotif,
+    { roles: ["worker"] },
+    appMap,
+    jobMap,
+    true
+  );
+  assert.strictEqual(workerResolved.targetLink, "/applications");
+  assert.strictEqual(workerResolved.targetUnavailable, false);
+
+  // 3. Worker receiving employer-initiated job invitation -> /job-requests
+  const inviteAppMap = new Map([
+    [APP_ID, { _id: APP_ID, jobId: JOB_ID, initiatedBy: "employer", status: "invited" }],
+  ]);
+  const inviteResolved = resolveNotificationTarget(
+    { type: "job_alert", refId: APP_ID, data: {} },
+    { roles: ["worker"] },
+    inviteAppMap,
+    jobMap,
+    true
+  );
+  assert.strictEqual(inviteResolved.targetLink, "/job-requests");
+
+  // 4. Platform announcement -> null targetLink (opens detail modal on frontend)
+  const announcementResolved = resolveNotificationTarget(
+    { type: "system", data: { announcement: true, targetRole: "all" } },
+    { roles: ["worker"] },
+    appMap,
+    jobMap,
+    true
+  );
+  assert.strictEqual(announcementResolved.targetLink, null);
+
+  // 5. Deleted application/job -> targetUnavailable: true with safe fallback
+  const deletedJobMap = new Map([[JOB_ID, null]]);
+  const unavailableResolved = resolveNotificationTarget(
+    employerNotif,
+    { roles: ["employer"] },
+    appMap,
+    deletedJobMap,
+    true
+  );
+  assert.strictEqual(unavailableResolved.targetUnavailable, true);
+  assert.strictEqual(unavailableResolved.targetLink, "/employer-dashboard");
 });

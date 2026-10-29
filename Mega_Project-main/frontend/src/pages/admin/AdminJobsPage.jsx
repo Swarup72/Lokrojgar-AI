@@ -118,9 +118,30 @@ export function AdminJobsPage() {
       key: "title",
       header: t("admin.jobs.colTitle"),
       render: (row) => (
-        <div>
-          <span style={{ fontWeight: 600, display: "block" }}>{getJobTitle(row.title)}</span>
-          <span style={{ fontSize: "11px", color: "var(--color-muted)" }}>
+        <div style={{ display: "flex", flexDirection: "column", minWidth: "160px" }}>
+          <span
+            style={{
+              fontWeight: 600,
+              color: "#0f172a",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "220px",
+            }}
+            title={getJobTitle(row.title)}
+          >
+            {getJobTitle(row.title)}
+          </span>
+          <span
+            style={{
+              fontSize: "0.72rem",
+              color: "#64748b",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "200px",
+            }}
+          >
             {row.employerId?.businessName || row.employerId?.userId?.fullName || "Employer"}
           </span>
         </div>
@@ -129,22 +150,38 @@ export function AdminJobsPage() {
     {
       key: "category",
       header: t("admin.jobs.colCategory"),
-      render: (row) => row.categoryId?.name?.[language] || row.categoryId?.name?.en || "-",
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#334155" }}>
+          {row.categoryId?.name?.[language] || row.categoryId?.name?.en || "-"}
+        </span>
+      ),
     },
     {
       key: "city",
       header: t("admin.jobs.colLocation"),
-      render: (row) => row.city || "-",
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#334155" }}>
+          {row.city || "-"}
+        </span>
+      ),
     },
     {
       key: "pay",
       header: t("admin.jobs.colWage"),
-      render: (row) => `₹${row.payAmount} / ${row.payType}`,
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", fontWeight: 600, color: "#0f172a", fontSize: "0.82rem" }}>
+          ₹{row.payAmount} / {row.payType}
+        </span>
+      ),
     },
     {
       key: "workers",
       header: t("admin.jobs.colWorkers"),
-      render: (row) => `${row.filledWorkers || 0} / ${row.requiredWorkers || 1}`,
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#475569" }}>
+          {row.filledWorkers || 0} / {row.requiredWorkers || 1}
+        </span>
+      ),
     },
     {
       key: "status",
@@ -155,12 +192,13 @@ export function AdminJobsPage() {
       key: "actions",
       header: t("admin.jobs.colActions"),
       render: (row) => (
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
           <button
             type="button"
             className="admin-btn-sm admin-btn-outline"
             onClick={() => openInspector(row._id)}
             title={t("common.view")}
+            aria-label={`${t("common.view")} ${getJobTitle(row.title)}`}
           >
             <Eye size={13} />
             <span>{t("common.view")}</span>
@@ -171,6 +209,7 @@ export function AdminJobsPage() {
               className="admin-btn-sm admin-btn-danger"
               onClick={() => openModeration(row, "cancel")}
               title={t("admin.jobs.cancelJob")}
+              aria-label={`${t("admin.jobs.cancelJob")} ${getJobTitle(row.title)}`}
             >
               <XCircle size={13} />
               <span>{t("common.cancel")}</span>
@@ -181,6 +220,7 @@ export function AdminJobsPage() {
               className="admin-btn-sm admin-btn-primary"
               onClick={() => openModeration(row, "reopen")}
               title={t("admin.jobs.reopenJob")}
+              aria-label={`${t("admin.jobs.reopenJob")} ${getJobTitle(row.title)}`}
             >
               <RotateCcw size={13} />
               <span>{t("admin.jobs.reopenAction")}</span>

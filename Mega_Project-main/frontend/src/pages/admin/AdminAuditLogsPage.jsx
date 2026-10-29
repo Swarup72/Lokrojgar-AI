@@ -52,7 +52,7 @@ export function AdminAuditLogsPage() {
       key: "createdAt",
       header: t("admin.audit.colDate"),
       render: (row) => (
-        <span style={{ fontSize: "12px", whiteSpace: "nowrap" }}>
+        <span style={{ fontSize: "0.78rem", whiteSpace: "nowrap", color: "#64748b" }}>
           {new Date(row.createdAt).toLocaleString()}
         </span>
       ),
@@ -66,7 +66,7 @@ export function AdminAuditLogsPage() {
       key: "admin",
       header: t("admin.audit.colAdmin"),
       render: (row) => (
-        <span style={{ fontWeight: 600 }}>
+        <span style={{ fontWeight: 600, whiteSpace: "nowrap", color: "#0f172a" }}>
           {row.adminId?.fullName || row.adminId?.phone || "Administrator"}
         </span>
       ),
@@ -76,12 +76,20 @@ export function AdminAuditLogsPage() {
       header: t("admin.audit.colTarget"),
       render: (row) => {
         if (row.targetUserId) {
-          return <span>User: {row.targetUserId.fullName || row.targetUserId.phone}</span>;
+          return (
+            <span style={{ whiteSpace: "nowrap", color: "#334155" }}>
+              User: {row.targetUserId.fullName || row.targetUserId.phone}
+            </span>
+          );
         }
         if (row.targetJobId) {
-          return <span>Job: {row.targetJobId.title?.en || "Job Posting"}</span>;
+          return (
+            <span style={{ whiteSpace: "nowrap", color: "#334155" }}>
+              Job: {row.targetJobId.title?.en || "Job Posting"}
+            </span>
+          );
         }
-        return <span style={{ color: "var(--color-muted)" }}>-</span>;
+        return <span style={{ color: "#94a3b8" }}>-</span>;
       },
     },
     {
@@ -89,7 +97,19 @@ export function AdminAuditLogsPage() {
       header: t("admin.audit.colDetails"),
       render: (row) => (
         <div style={{ maxWidth: "280px" }}>
-          <span style={{ fontSize: "13px" }}>{row.details || "-"}</span>
+          <span
+            style={{
+              fontSize: "0.82rem",
+              color: "#475569",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              display: "block",
+            }}
+            title={row.details || ""}
+          >
+            {row.details || "-"}
+          </span>
         </div>
       ),
     },
@@ -102,6 +122,7 @@ export function AdminAuditLogsPage() {
           className="admin-btn-sm admin-btn-outline"
           onClick={() => setSelectedLog(row)}
           title={t("common.view")}
+          aria-label={`${t("common.view")} audit log`}
         >
           <Eye size={13} />
           <span>{t("common.view")}</span>

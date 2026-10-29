@@ -210,6 +210,12 @@
   gap: var(--space-3);
 }
 
+@media (max-width: 480px) {
+  .admin-detail-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 .admin-detail-item {
   padding: var(--space-3);
   background-color: var(--color-surface-alt);

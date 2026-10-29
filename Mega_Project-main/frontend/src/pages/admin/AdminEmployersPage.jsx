@@ -125,26 +125,38 @@ export function AdminEmployersPage() {
       key: "businessName",
       header: t("admin.employers.colBusiness"),
       render: (row) => (
-        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", minWidth: "170px" }}>
           <div
             style={{
-              width: "32px",
-              height: "32px",
-              borderRadius: "var(--radius-sm)",
-              backgroundColor: "var(--color-primary-50)",
+              width: "34px",
+              height: "34px",
+              borderRadius: "6px",
+              backgroundColor: "#eff6ff",
+              border: "1px solid #bfdbfe",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              color: "var(--color-primary)",
+              color: "#2563eb",
+              flexShrink: 0,
             }}
           >
             <Building2 size={16} />
           </div>
-          <div>
-            <span style={{ fontWeight: 600, display: "block" }}>
+          <div style={{ display: "flex", flexDirection: "column", minWidth: 0 }}>
+            <span
+              style={{
+                fontWeight: 600,
+                color: "#0f172a",
+                whiteSpace: "nowrap",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                maxWidth: "200px",
+              }}
+              title={row.businessName || row.userId?.fullName || "Employer"}
+            >
               {row.businessName || row.userId?.fullName || "Employer"}
             </span>
-            <span style={{ fontSize: "11px", color: "var(--color-muted)" }}>{row.businessType || "-"}</span>
+            <span style={{ fontSize: "0.72rem", color: "#64748b" }}>{row.businessType || "-"}</span>
           </div>
         </div>
       ),
@@ -153,16 +165,18 @@ export function AdminEmployersPage() {
       key: "contact",
       header: t("admin.employers.colContact"),
       render: (row) => (
-        <div>
-          <div>{row.userId?.phone || "-"}</div>
-          {row.userId?.email && <div style={{ fontSize: "11px", color: "var(--color-muted)" }}>{row.userId.email}</div>}
+        <div style={{ whiteSpace: "nowrap" }}>
+          <div style={{ fontFamily: "ui-monospace, monospace", fontSize: "0.82rem", color: "#334155" }}>
+            {row.userId?.phone || "-"}
+          </div>
+          {row.userId?.email && <div style={{ fontSize: "0.72rem", color: "#64748b" }}>{row.userId.email}</div>}
         </div>
       ),
     },
     {
       key: "city",
       header: t("admin.employers.colCity"),
-      render: (row) => row.city || "-",
+      render: (row) => <span style={{ whiteSpace: "nowrap", color: "#334155" }}>{row.city || "-"}</span>,
     },
     {
       key: "isVerified",
@@ -186,12 +200,13 @@ export function AdminEmployersPage() {
       key: "actions",
       header: t("admin.employers.colActions"),
       render: (row) => (
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
           <button
             type="button"
             className="admin-btn-sm admin-btn-outline"
             onClick={() => openInspector(row._id)}
             title={t("common.view")}
+            aria-label={`${t("common.view")} ${row.businessName || "Employer"}`}
           >
             <Eye size={13} />
             <span>{t("common.view")}</span>
@@ -204,6 +219,7 @@ export function AdminEmployersPage() {
               setVerifyReason("");
             }}
             title={t("admin.employers.verifyAction")}
+            aria-label={`${row.isVerified ? t("admin.actions.unverify") : t("admin.actions.verify")} ${row.businessName || "Employer"}`}
           >
             <BadgeCheck size={13} color="var(--color-primary)" />
             <span>{row.isVerified ? t("admin.actions.unverify") : t("admin.actions.verify")}</span>
@@ -215,6 +231,7 @@ export function AdminEmployersPage() {
               setTargetSuspendEmployer(row);
               setSuspendReason("");
             }}
+            aria-label={`${row.userId?.isBlocked ? t("admin.actions.activate") : t("admin.actions.suspend")} ${row.businessName || "Employer"}`}
           >
             {row.userId?.isBlocked ? <CheckCircle2 size={13} /> : <AlertOctagon size={13} />}
             <span>{row.userId?.isBlocked ? t("admin.actions.activate") : t("admin.actions.suspend")}</span>

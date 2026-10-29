@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { NavLink, Link, useNavigate, useLocation, Outlet } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -28,6 +28,23 @@ export function AdminLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  useEffect(() => {
+    document.body.classList.add("admin-body");
+    return () => {
+      document.body.classList.remove("admin-body");
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape" && sidebarOpen) {
+        setSidebarOpen(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [sidebarOpen]);
 
   const handleLogout = async () => {
     await logout();
@@ -69,7 +86,7 @@ export function AdminLayout({ children }) {
       <aside className={`admin-sidebar ${sidebarOpen ? "open" : ""}`}>
         <div className="admin-sidebar-header">
           <Link to="/admin" className="admin-sidebar-logo" onClick={() => setSidebarOpen(false)}>
-            <Shield size={22} color="var(--color-primary)" />
+            <Shield size={22} color="var(--color-primary, #2563eb)" />
             <span>LokRozgar AI</span>
           </Link>
           <span className="admin-badge-pill">{t("admin.roleAdmin")}</span>
@@ -113,6 +130,7 @@ export function AdminLayout({ children }) {
               className="admin-menu-toggle"
               onClick={() => setSidebarOpen(!sidebarOpen)}
               aria-label={t("admin.toggleMenu")}
+              aria-expanded={sidebarOpen}
             >
               {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
             </button>
@@ -120,11 +138,13 @@ export function AdminLayout({ children }) {
           </div>
 
           <div className="admin-topbar-right">
-            <LanguageSwitcher />
+            <div className="admin-topbar-lang">
+              <LanguageSwitcher />
+            </div>
 
-            <div className="admin-user-pill">
-              <Shield size={14} color="var(--color-primary)" />
-              <span>{user?.fullName || user?.phone || t("admin.roleAdmin")}</span>
+            <div className="admin-user-pill" title={user?.fullName || user?.phone || t("admin.roleAdmin")}>
+              <Shield size={14} color="var(--color-primary, #2563eb)" />
+              <span className="admin-user-name">{user?.fullName || user?.phone || t("admin.roleAdmin")}</span>
             </div>
 
             <button
@@ -132,9 +152,10 @@ export function AdminLayout({ children }) {
               className="admin-logout-btn"
               onClick={handleLogout}
               title={t("logout")}
+              aria-label={t("logout")}
             >
               <LogOut size={14} />
-              <span>{t("logout")}</span>
+              <span className="admin-logout-text">{t("logout")}</span>
             </button>
           </div>
         </header>

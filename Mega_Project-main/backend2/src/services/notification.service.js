@@ -44,11 +44,16 @@ export const sendNotificationService = async ({
       return null;
     }
 
+    const normalizedKey =
+      typeof idempotencyKey === "string" && idempotencyKey.trim().length > 0
+        ? idempotencyKey.trim()
+        : undefined;
+
     // 1. Idempotency Check: Avoid duplicates when operations are retried
-    if (idempotencyKey && (mongoose.connection?.readyState === 1 || Notification.findOne?.mock)) {
-      const existing = await Notification.findOne({ idempotencyKey });
+    if (normalizedKey && (mongoose.connection?.readyState === 1 || Notification.findOne?.mock)) {
+      const existing = await Notification.findOne({ idempotencyKey: normalizedKey });
       if (existing) {
-        logger.info(`[sendNotificationService] Duplicate suppressed for idempotencyKey: ${idempotencyKey}`);
+        logger.info(`[sendNotificationService] Duplicate suppressed for idempotencyKey: ${normalizedKey}`);
         return existing;
       }
     }
@@ -64,7 +69,7 @@ export const sendNotificationService = async ({
     // 3. Create In-App Notification in DB
     let notification;
     try {
-      notification = await Notification.create({
+      const payload = {
         userId,
         type,
         title,
@@ -74,14 +79,17 @@ export const sendNotificationService = async ({
         channel,
         deliveryStatus: "delivered", // Immediately delivered in DB for in-app inbox
         attempts: 1,
-        idempotencyKey: idempotencyKey || null,
-      });
+      };
+      if (normalizedKey) {
+        payload.idempotencyKey = normalizedKey;
+      }
+      notification = await Notification.create(payload);
     } catch (err) {
       // Handle race condition duplicate key E11000
-      if (err.code === 11000 && idempotencyKey) {
-        logger.info(`[sendNotificationService] Concurrent duplicate caught for idempotencyKey: ${idempotencyKey}`);
+      if (err.code === 11000 && normalizedKey) {
+        logger.info(`[sendNotificationService] Concurrent duplicate caught for idempotencyKey: ${normalizedKey}`);
         if (mongoose.connection?.readyState === 1 || Notification.findOne?.mock) {
-          return await Notification.findOne({ idempotencyKey });
+          return await Notification.findOne({ idempotencyKey: normalizedKey });
         }
       }
       throw err;
@@ -238,6 +246,9 @@ export const notifyMatchingWorkersForJob = async (job, maxWorkers = 10) => {
           jobTitle: jobTitleEn,
           payAmount,
           payType,
+          jobId: String(job._id),
+          recipientRole: "worker",
+          link: `/jobs/${job._id}`,
         },
         refId: job._id,
         idempotencyKey: `job_alert_${job._id}_${workerUserId}`,

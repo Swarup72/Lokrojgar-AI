@@ -1,240 +1,326 @@
 /*
   Admin Panel Layout Styles
-  Adheres to LokRozgar AI design tokens and modern responsive principles.
+  Professional SaaS Admin Interface
+  Adheres to LokRozgar AI tokens and modern responsive design.
 */
+
+/* 1. Global Reset for Admin Views */
+body.admin-body,
+body:has(.admin-shell),
+body:has(.admin-login-page) {
+  padding-left: 0 !important;
+  padding-top: 0 !important;
+  margin: 0 !important;
+  background-color: var(--color-bg, #f8fafc) !important;
+  background-image: none !important;
+  overflow-x: hidden;
+}
+
+body.admin-body #root,
+body:has(.admin-shell) #root {
+  min-height: 100vh;
+  width: 100%;
+}
 
 .admin-shell {
   display: flex;
   min-height: 100vh;
-  background-color: var(--color-bg);
-  color: var(--color-text);
+  height: 100vh;
+  width: 100%;
+  background-color: var(--color-bg, #f8fafc);
+  color: var(--color-text, #1e293b);
+  overflow: hidden;
+  position: relative;
 }
 
-/* Sidebar Styles */
+/* 2. Sidebar */
 .admin-sidebar {
-  width: 260px;
-  background-color: var(--color-surface);
-  border-right: 1px solid var(--color-border);
+  width: 250px;
+  height: 100vh;
+  background-color: #ffffff;
+  border-right: 1px solid var(--color-border, #e2e8f0);
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
-  transition: transform var(--dur-base) var(--ease);
   z-index: 40;
+  transition: transform var(--dur-base, 0.25s) var(--ease, ease);
 }
 
 .admin-sidebar-header {
-  height: var(--nav-height);
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-5);
-  border-bottom: 1px solid var(--color-border);
+  padding: 0 18px;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
+  box-sizing: border-box;
 }
 
 .admin-sidebar-logo {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
+  gap: 8px;
   font-weight: 800;
-  font-size: var(--text-md);
-  color: var(--color-ink);
+  font-size: 1.05rem;
+  color: var(--color-ink, #0f172a);
   text-decoration: none;
 }
 
+.admin-sidebar-logo span {
+  letter-spacing: -0.01em;
+}
+
 .admin-badge-pill {
-  font-size: var(--text-2xs);
-  padding: 2px 8px;
-  background-color: var(--color-primary-50);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary-200);
-  border-radius: var(--radius-pill);
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  background-color: var(--color-primary-50, #eff6ff);
+  color: var(--color-primary, #2563eb);
+  border: 1px solid var(--color-primary-200, #bfdbfe);
+  border-radius: var(--radius-pill, 9999px);
   font-weight: 700;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .admin-sidebar-nav {
   flex: 1;
-  padding: var(--space-4) var(--space-3);
+  padding: 12px 10px;
   display: flex;
   flex-direction: column;
-  gap: var(--space-1);
+  gap: 3px;
   overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .admin-nav-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  color: var(--color-text-2);
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 6px;
+  color: #475569;
   text-decoration: none;
-  font-size: var(--text-sm);
-  font-weight: 600;
-  transition: background-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease);
+  font-size: 0.85rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.15s ease;
 }
 
 .admin-nav-item:hover {
-  background-color: var(--color-surface-alt);
-  color: var(--color-ink);
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
 .admin-nav-item.active {
-  background-color: var(--color-primary-50);
-  color: var(--color-primary);
-  font-weight: 700;
+  background-color: var(--color-primary-50, #eff6ff);
+  color: var(--color-primary, #2563eb);
+  font-weight: 600;
+  border-left-color: var(--color-primary, #2563eb);
+}
+
+.admin-nav-item:focus-visible {
+  outline: 2px solid var(--color-primary, #2563eb);
+  outline-offset: -2px;
 }
 
 .admin-nav-item svg {
   flex-shrink: 0;
+  color: currentColor;
 }
 
 .admin-sidebar-footer {
-  padding: var(--space-4);
-  border-top: 1px solid var(--color-border);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
+  padding: 12px 14px;
+  border-top: 1px solid var(--color-border, #e2e8f0);
+  background-color: #ffffff;
 }
 
 .admin-back-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--space-2);
+  gap: 8px;
   padding: 8px 12px;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--color-border);
-  background-color: transparent;
-  color: var(--color-text-2);
-  font-size: var(--text-xs);
+  border-radius: 6px;
+  border: 1px solid var(--color-border, #e2e8f0);
+  background-color: #ffffff;
+  color: #64748b;
+  font-size: 0.78rem;
   font-weight: 600;
   text-decoration: none;
-  transition: background-color var(--dur-fast) var(--ease);
+  transition: all 0.15s ease;
 }
 
 .admin-back-btn:hover {
-  background-color: var(--color-surface-alt);
-  color: var(--color-ink);
+  background-color: #f8fafc;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
 
-/* Main Content Area */
+/* 3. Main Content Area */
 .admin-main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
 }
 
-/* Top Header */
+/* 4. Topbar Header */
 .admin-topbar {
-  height: var(--nav-height);
-  background-color: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
+  height: 64px;
+  min-height: 64px;
+  max-height: 64px;
+  background-color: #ffffff;
+  border-bottom: 1px solid var(--color-border, #e2e8f0);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 var(--space-6);
+  padding: 0 24px;
   position: sticky;
   top: 0;
   z-index: 30;
+  box-sizing: border-box;
 }
 
 .admin-topbar-left {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 12px;
+  min-width: 0;
 }
 
 .admin-menu-toggle {
   display: none;
   background: transparent;
-  border: none;
-  padding: 8px;
-  color: var(--color-text);
+  border: 1px solid var(--color-border, #e2e8f0);
+  padding: 6px;
+  color: #334155;
   cursor: pointer;
-  border-radius: var(--radius-sm);
+  border-radius: 6px;
+  transition: all 0.15s ease;
+}
+
+.admin-menu-toggle:hover {
+  background-color: #f1f5f9;
+  color: #0f172a;
 }
 
 .admin-topbar-title {
-  font-size: var(--text-lg);
+  font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-ink);
+  color: var(--color-ink, #0f172a);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .admin-topbar-right {
   display: flex;
   align-items: center;
-  gap: var(--space-4);
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.admin-topbar-lang {
+  display: flex;
+  align-items: center;
 }
 
 .admin-user-pill {
   display: flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 6px 12px;
-  background-color: var(--color-surface-alt);
-  border-radius: var(--radius-pill);
-  font-size: var(--text-xs);
+  gap: 6px;
+  padding: 5px 10px;
+  background-color: #f8fafc;
+  border: 1px solid var(--color-border, #e2e8f0);
+  border-radius: var(--radius-pill, 9999px);
+  font-size: 0.75rem;
   font-weight: 600;
-  color: var(--color-text);
+  color: #334155;
+  max-width: 200px;
+}
+
+.admin-user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .admin-logout-btn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: var(--space-1);
+  gap: 5px;
+  height: 34px;
+  padding: 0 12px;
   background: transparent;
-  border: 1px solid var(--color-danger-border);
-  color: var(--color-danger);
-  padding: 6px 14px;
-  border-radius: var(--radius-sm);
-  font-size: var(--text-xs);
+  border: 1px solid #fecaca;
+  color: #dc2626;
+  border-radius: 6px;
+  font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all var(--dur-fast) var(--ease);
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
 .admin-logout-btn:hover {
-  background-color: var(--color-danger-bg);
-  border-color: var(--color-danger);
+  background-color: #fee2e2;
+  border-color: #ef4444;
+  color: #b91c1c;
 }
 
-/* Content View */
+.admin-logout-btn:focus-visible {
+  outline: 2px solid #ef4444;
+  outline-offset: 1px;
+}
+
+/* 5. Page Content Wrapper */
 .admin-content {
   flex: 1;
-  padding: var(--space-6);
-  max-width: 1400px;
+  padding: 24px 32px 48px;
+  max-width: 1440px;
   width: 100%;
   margin: 0 auto;
+  box-sizing: border-box;
 }
 
-/* Common Admin Components */
+/* 6. Page Header Common */
 .admin-page-header {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--space-4);
-  margin-bottom: var(--space-6);
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .admin-page-title {
-  font-size: var(--text-2xl);
+  font-size: 1.5rem;
   font-weight: 800;
-  color: var(--color-ink);
+  color: var(--color-ink, #0f172a);
+  margin: 0;
+  letter-spacing: -0.01em;
 }
 
 .admin-page-description {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  margin-top: var(--space-1);
+  font-size: 0.875rem;
+  color: #64748b;
+  margin-top: 4px;
+  margin-bottom: 0;
 }
 
-/* Responsive Handling */
+/* 7. Responsive Breakpoints */
 @media (max-width: 992px) {
   .admin-menu-toggle {
-    display: flex;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .admin-sidebar {
@@ -242,7 +328,9 @@
     top: 0;
     bottom: 0;
     left: 0;
+    width: 260px;
     transform: translateX(-100%);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
   }
 
   .admin-sidebar.open {
@@ -257,7 +345,40 @@
     z-index: 35;
   }
 
+  .admin-topbar {
+    padding: 0 16px;
+  }
+
   .admin-content {
-    padding: var(--space-4);
+    padding: 20px 16px 40px;
+  }
+}
+
+@media (max-width: 640px) {
+  .admin-topbar-right {
+    gap: 8px;
+  }
+
+  .admin-topbar-lang .language-option {
+    padding: 4px 8px;
+    font-size: 11px;
+    min-height: 26px;
+  }
+
+  .admin-user-name {
+    display: none;
+  }
+
+  .admin-user-pill {
+    padding: 6px;
+  }
+
+  .admin-logout-text {
+    display: none;
+  }
+
+  .admin-logout-btn {
+    padding: 0 8px;
+    height: 32px;
   }
 }

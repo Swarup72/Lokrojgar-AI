@@ -1,3 +1,5 @@
+import crypto from "node:crypto";
+import mongoose from "mongoose";
 import AdminAction from "../models/adminAction.model.js";
 import User from "../models/user.model.js";
 import WorkerProfile from "../models/workerProfile.model.js";
@@ -1002,21 +1004,24 @@ export const moderateRating = asyncHandler(async (req, res) => {
 // ==========================================
 
 export const getNotificationStats = asyncHandler(async (req, res) => {
-  const [totalNotifications, unreadCount, countsByType, recentAnnouncements] = await Promise.all([
-    Notification.countDocuments(),
-    Notification.countDocuments({ isRead: false }),
-    Notification.aggregate([
-      { $group: { _id: "$type", count: { $sum: 1 } } },
-    ]),
-    Notification.find({ type: "announcement" })
-      .sort({ createdAt: -1 })
-      .limit(5),
-  ]);
+  const announcementFilter = {
+    $or: [{ type: "system", "data.announcement": true }, { type: "announcement" }],
+  };
+
+  const [totalNotifications, unreadCount, countsByType, announcementCount, recentAnnouncements] =
+    await Promise.all([
+      Notification.countDocuments(),
+      Notification.countDocuments({ isRead: false }),
+      Notification.aggregate([{ $group: { _id: "$type", count: { $sum: 1 } } }]),
+      Notification.countDocuments(announcementFilter),
+      Notification.find(announcementFilter).sort({ createdAt: -1 }).limit(5),
+    ]);
 
   const typeStats = {};
   countsByType.forEach((item) => {
     typeStats[item._id] = item.count;
   });
+  typeStats.announcement = announcementCount;
 
   return res.status(200).json(
     new ApiResponse(
@@ -1033,7 +1038,11 @@ export const getNotificationStats = asyncHandler(async (req, res) => {
 });
 
 export const sendAnnouncement = asyncHandler(async (req, res) => {
-  const { targetRole = "all", title, body, channels = ["in_app"] } = req.body;
+  const { targetRole = "all", title, body, channels = ["in_app"], idempotencyKey } = req.body;
+
+  if (!["all", "worker", "employer"].includes(targetRole)) {
+    throw new ApiError(400, "Invalid targetRole. Must be 'all', 'worker', or 'employer'");
+  }
 
   if (!title || (!title.en && !title.mr && !title.hi)) {
     throw new ApiError(400, "Title is required in at least one language");
@@ -1044,7 +1053,7 @@ export const sendAnnouncement = asyncHandler(async (req, res) => {
   }
 
   // Construct target user query
-  const userQuery = { isBlocked: false };
+  const userQuery = { isBlocked: { $ne: true } };
   if (targetRole === "worker") {
     userQuery.roles = "worker";
   } else if (targetRole === "employer") {
@@ -1054,23 +1063,48 @@ export const sendAnnouncement = asyncHandler(async (req, res) => {
   const targetUsers = await User.find(userQuery).select("_id");
   if (targetUsers.length === 0) {
     return res.status(200).json(
-      new ApiResponse(200, { sentCount: 0, inAppDelivered: 0 }, "No eligible recipients found")
+      new ApiResponse(
+        200,
+        {
+          sentCount: 0,
+          inAppDelivered: 0,
+          deliveryStats: {
+            totalTargeted: 0,
+            delivered: 0,
+            skipped: 0,
+            failed: 0,
+            channel: "in_app",
+          },
+        },
+        "No eligible recipients found"
+      )
     );
   }
 
   const titlePayload = {
-    en: title.en || title.mr || title.hi || "",
-    mr: title.mr || title.en || "",
-    hi: title.hi || title.en || "",
+    en: (title.en || title.mr || title.hi || "").trim(),
+    mr: (title.mr || title.en || title.hi || "").trim(),
+    hi: (title.hi || title.en || title.mr || "").trim(),
   };
 
   const bodyPayload = {
-    en: body.en || body.mr || body.hi || "",
-    mr: body.mr || body.en || "",
-    hi: body.hi || body.en || "",
+    en: (body.en || body.mr || body.hi || "").trim(),
+    mr: (body.mr || body.en || body.hi || "").trim(),
+    hi: (body.hi || body.en || body.mr || "").trim(),
   };
 
-  // Bulk insert in-app notifications
+  const broadcastKey =
+    typeof idempotencyKey === "string" && idempotencyKey.trim()
+      ? idempotencyKey.trim()
+      : crypto
+          .createHash("sha256")
+          .update(
+            `${req.user?._id}:${targetRole}:${titlePayload.en}:${titlePayload.mr}:${titlePayload.hi}:${bodyPayload.en}:${bodyPayload.mr}:${bodyPayload.hi}`
+          )
+          .digest("hex")
+          .slice(0, 24);
+
+  // Build in-app notifications with deterministic per-recipient idempotency keys
   const notificationsToCreate = targetUsers.map((u) => ({
     userId: u._id,
     type: "system",
@@ -1078,14 +1112,47 @@ export const sendAnnouncement = asyncHandler(async (req, res) => {
     deliveryStatus: "delivered",
     title: titlePayload,
     body: bodyPayload,
-    data: { sentByAdminId: req.user._id, targetRole, announcement: true },
+    idempotencyKey: `announcement_${broadcastKey}_${u._id}`,
+    data: {
+      sentByAdminId: req.user._id,
+      targetRole,
+      announcement: true,
+      broadcastKey,
+    },
   }));
 
-  const inserted = await Notification.insertMany(notificationsToCreate);
+  let existingKeySet = new Set();
+  if (mongoose.connection?.readyState === 1 || Notification.find?.mock) {
+    const existingDocs = await Notification.find({
+      idempotencyKey: { $in: notificationsToCreate.map((n) => n.idempotencyKey) },
+    }).select("idempotencyKey");
+    if (Array.isArray(existingDocs)) {
+      existingKeySet = new Set(existingDocs.map((d) => d.idempotencyKey).filter(Boolean));
+    }
+  }
+
+  const pendingNotifications = notificationsToCreate.filter(
+    (n) => !existingKeySet.has(n.idempotencyKey)
+  );
+
+  let inserted = [];
+  if (pendingNotifications.length > 0) {
+    try {
+      inserted = await Notification.insertMany(pendingNotifications, { ordered: false });
+    } catch (err) {
+      if (err.code === 11000 && Array.isArray(err.insertedDocs)) {
+        inserted = err.insertedDocs;
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  const deliveredCount = inserted.length + existingKeySet.size;
 
   // Check and report external channel delivery capabilities
   const deliveryReport = {
-    in_app: { status: "delivered", count: inserted.length },
+    in_app: { status: "delivered", count: deliveredCount },
   };
 
   const selectedChannels = Array.isArray(channels) ? channels : ["in_app"];
@@ -1106,21 +1173,22 @@ export const sendAnnouncement = asyncHandler(async (req, res) => {
   }
 
   await logAdminAudit(req.user._id, "SEND_ANNOUNCEMENT", {
-    details: `Broadcast announcement sent to ${targetUsers.length} ${targetRole} users via ${selectedChannels.join(", ")}`,
+    details: `Broadcast announcement sent to ${deliveredCount} ${targetRole} users via ${selectedChannels.join(", ")}`,
     metadata: {
       targetRole,
-      recipientCount: targetUsers.length,
+      recipientCount: deliveredCount,
       channels: selectedChannels,
       deliveryReport,
       title: titlePayload.en,
+      broadcastKey,
     },
   });
 
   const deliveryStats = {
     totalTargeted: targetUsers.length,
-    delivered: inserted.length,
-    skipped: 0,
-    failed: 0,
+    delivered: deliveredCount,
+    skipped: existingKeySet.size,
+    failed: Math.max(0, targetUsers.length - deliveredCount),
     channel: selectedChannels[0] || "in_app",
   };
 
@@ -1128,15 +1196,15 @@ export const sendAnnouncement = asyncHandler(async (req, res) => {
     new ApiResponse(
       201,
       {
-        sentCount: inserted.length,
-        inAppDelivered: inserted.length,
+        sentCount: deliveredCount,
+        inAppDelivered: deliveredCount,
         deliveryStats,
         targetRole,
         channels: selectedChannels,
         deliveryReport,
         title: titlePayload,
       },
-      `Announcement successfully broadcast to ${inserted.length} users`
+      `Announcement successfully broadcast to ${deliveredCount} users`
     )
   );
 });

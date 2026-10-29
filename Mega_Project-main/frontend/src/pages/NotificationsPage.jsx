@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   Bell,
   CheckCheck,
@@ -15,14 +15,17 @@ import {
   ExternalLink,
   Check,
   Loader2,
+  X,
 } from "lucide-react";
 import { getNotifications, markAsRead, markAllAsRead } from "../api/notifications";
+import { useAuth } from "../hooks/useAuth";
 import { useLanguage } from "../hooks/useLanguage";
 import { pickLocalizedText } from "../utils/localizedText";
 import "./NotificationsPage.css";
 
 export function NotificationsPage() {
   const { t, language } = useLanguage();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [notifications, setNotifications] = useState([]);
@@ -35,6 +38,16 @@ export function NotificationsPage() {
   const [filterType, setFilterType] = useState("all");
   const [onlyUnread, setOnlyUnread] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null);
+  const [unavailableMsg, setUnavailableMsg] = useState(null);
+
+  const userRoles = Array.isArray(user?.roles)
+    ? user.roles
+    : user?.role
+    ? [user.role]
+    : [];
+  const isEmployerOnly = userRoles.includes("employer") && !userRoles.includes("worker");
+  const isWorkerOnly = userRoles.includes("worker") && !userRoles.includes("employer");
 
   const fetchList = useCallback(async () => {
     setLoading(true);
@@ -133,29 +146,67 @@ export function NotificationsPage() {
   };
 
   const getTargetLink = (item) => {
-    if (item?.data?.link && typeof item.data.link === "string") {
-      return item.data.link;
+    if (!item) return null;
+
+    const candidateLink =
+      typeof item.targetLink === "string" && item.targetLink.startsWith("/")
+        ? item.targetLink
+        : typeof item.data?.link === "string" && item.data.link.startsWith("/")
+        ? item.data.link
+        : null;
+
+    if (candidateLink) {
+      if (
+        isEmployerOnly &&
+        (candidateLink === "/applications" ||
+          candidateLink === "/job-requests" ||
+          candidateLink === "/worker-availability")
+      ) {
+        return item.data?.jobId ? `/applicants/${item.data.jobId}` : "/employer-dashboard";
+      }
+      if (
+        isWorkerOnly &&
+        (candidateLink.startsWith("/applicants/") ||
+          candidateLink === "/employer-dashboard" ||
+          candidateLink === "/employer-appointments")
+      ) {
+        return "/applications";
+      }
+      return candidateLink;
     }
-    if (!item.refId) return null;
-    switch (item.type) {
-      case "job_alert":
-        return `/jobs/${item.refId}`;
-      case "application_update":
-        return `/applications`;
-      case "chat":
-        return `/messages`;
-      default:
-        return null;
+
+    if (item.type === "chat") return "/messages";
+
+    if (item.type === "application_update") {
+      if (isEmployerOnly || item.data?.recipientRole === "employer" || item.data?.senderName) {
+        return item.data?.jobId ? `/applicants/${item.data.jobId}` : "/employer-dashboard";
+      }
+      return "/applications";
     }
+
+    if (item.type === "job_alert") {
+      const jobId = item.data?.jobId || item.refId;
+      return jobId ? `/jobs/${jobId}` : "/jobs";
+    }
+
+    return null;
   };
 
   const handleCardClick = (item) => {
     if (!item.isRead) {
       handleMarkAsRead(item._id);
     }
+    if (item.targetUnavailable) {
+      setUnavailableMsg(t("notifications.targetUnavailable"));
+      setSelectedNotification(item);
+      return;
+    }
+    setUnavailableMsg(null);
     const target = getTargetLink(item);
     if (target) {
       navigate(target);
+    } else {
+      setSelectedNotification(item);
     }
   };
 
@@ -336,7 +387,7 @@ export function NotificationsPage() {
                   <h3 className="notification-item-title">{titleText}</h3>
                   {bodyText && <p className="notification-item-body">{bodyText}</p>}
 
-                  {targetLink && (
+                  {(targetLink || item.type === "system") && (
                     <div className="notification-action-link">
                       <span>{t("notifications.viewDetails")}</span>
                       <ExternalLink size={13} />
@@ -393,6 +444,75 @@ export function NotificationsPage() {
             <span>{t("admin.nextPage")}</span>
             <ChevronRight size={16} />
           </button>
+        </div>
+      )}
+
+      {/* Notification / Announcement Detail Modal */}
+      {selectedNotification && (
+        <div
+          className="notification-detail-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="notification-detail-title"
+          onClick={() => setSelectedNotification(null)}
+        >
+          <div
+            className="notification-detail-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="notification-detail-header">
+              <div className="notification-detail-badge-wrap">
+                <div className={`notification-icon-badge badge-${selectedNotification.type}`}>
+                  {getNotificationIcon(selectedNotification.type)}
+                </div>
+                <div className="notification-detail-badge-meta">
+                  <span className="notification-type-tag">
+                    {getTypeLabel(selectedNotification.type)}
+                  </span>
+                  <div className="notification-time">
+                    <Clock size={12} />
+                    {formatTimestamp(selectedNotification.createdAt)}
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="notification-detail-close"
+                onClick={() => setSelectedNotification(null)}
+                aria-label={t("notifications.closeDetails")}
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {unavailableMsg && (
+              <div className="notification-unavailable-banner" role="alert">
+                <AlertTriangle size={16} />
+                <span>{unavailableMsg}</span>
+              </div>
+            )}
+
+            <h2 id="notification-detail-title" className="notification-detail-title">
+              {pickLocalizedText(selectedNotification.rawTitle, language, "en") ||
+                selectedNotification.title ||
+                t("notifications.detailModalTitle")}
+            </h2>
+            <p className="notification-detail-body">
+              {pickLocalizedText(selectedNotification.rawBody, language, "en") ||
+                selectedNotification.body ||
+                ""}
+            </p>
+
+            <div className="notification-detail-footer">
+              <button
+                type="button"
+                className="mark-all-btn"
+                onClick={() => setSelectedNotification(null)}
+              >
+                {t("notifications.closeDetails")}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

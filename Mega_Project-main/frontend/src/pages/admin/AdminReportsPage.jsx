@@ -115,25 +115,58 @@ export function AdminReportsPage() {
     {
       key: "job",
       header: t("admin.reports.colJob"),
-      render: (row) => getJobTitle(row.jobId?.title),
+      render: (row) => (
+        <span
+          style={{
+            fontWeight: 600,
+            color: "#0f172a",
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            maxWidth: "180px",
+            display: "inline-block",
+          }}
+          title={getJobTitle(row.jobId?.title)}
+        >
+          {getJobTitle(row.jobId?.title)}
+        </span>
+      ),
     },
     {
       key: "raisedBy",
       header: t("admin.reports.colRaisedBy"),
-      render: (row) => row.raisedByUserId?.fullName || row.raisedByUserId?.phone || "User",
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#334155" }}>
+          {row.raisedByUserId?.fullName || row.raisedByUserId?.phone || "User"}
+        </span>
+      ),
     },
     {
       key: "against",
       header: t("admin.reports.colAgainst"),
-      render: (row) => row.againstUserId?.fullName || row.againstUserId?.phone || "User",
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#334155" }}>
+          {row.againstUserId?.fullName || row.againstUserId?.phone || "User"}
+        </span>
+      ),
     },
     {
       key: "reason",
       header: t("admin.reports.colReason"),
       render: (row) => (
-        <div>
-          <span style={{ fontWeight: 600, display: "block" }}>{row.reason}</span>
-          <span style={{ fontSize: "11px", color: "var(--color-muted)" }}>
+        <div style={{ display: "flex", flexDirection: "column", minWidth: "150px" }}>
+          <span style={{ fontWeight: 600, color: "#0f172a" }}>{row.reason}</span>
+          <span
+            style={{
+              fontSize: "0.72rem",
+              color: "#64748b",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              maxWidth: "220px",
+            }}
+            title={row.description}
+          >
             {row.description ? `${row.description.slice(0, 50)}...` : ""}
           </span>
         </div>
@@ -142,7 +175,11 @@ export function AdminReportsPage() {
     {
       key: "createdAt",
       header: t("admin.reports.colDate"),
-      render: (row) => new Date(row.createdAt).toLocaleDateString(),
+      render: (row) => (
+        <span style={{ whiteSpace: "nowrap", color: "#64748b", fontSize: "0.8rem" }}>
+          {new Date(row.createdAt).toLocaleDateString()}
+        </span>
+      ),
     },
     {
       key: "status",
@@ -153,12 +190,13 @@ export function AdminReportsPage() {
       key: "actions",
       header: t("admin.reports.colActions"),
       render: (row) => (
-        <div style={{ display: "flex", gap: "6px" }}>
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", whiteSpace: "nowrap" }}>
           <button
             type="button"
             className="admin-btn-sm admin-btn-outline"
             onClick={() => openInspector(row._id)}
             title={t("common.view")}
+            aria-label={`${t("common.view")} dispute`}
           >
             <Eye size={13} />
             <span>{t("common.view")}</span>
@@ -168,6 +206,7 @@ export function AdminReportsPage() {
             className="admin-btn-sm admin-btn-primary"
             onClick={() => openStatusModal(row)}
             title={t("admin.reports.updateStatus")}
+            aria-label={`${t("admin.reports.updateStatus")} dispute`}
           >
             <span>{t("admin.reports.actionUpdate")}</span>
           </button>
