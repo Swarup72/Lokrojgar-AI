@@ -26,9 +26,8 @@ _FACTOR_DISPLAY_NAMES: dict[str, str] = {
 # poor rating.
 _UNAVAILABLE_REASONS: dict[str, str] = {
     "pay": (
-        "Pay compatibility is unavailable: the worker's expected pay has no "
-        "declared unit in the current schema, so it cannot be safely "
-        "compared to the job's offered pay. This does not mean the pay is "
+        "Pay compatibility is unavailable: expected pay was not provided or pay unit "
+        "period cannot be directly converted to daily wages. This does not mean the pay is "
         "incompatible - no comparison could be made at all."
     ),
     "rating": (

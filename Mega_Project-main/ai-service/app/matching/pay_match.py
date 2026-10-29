@@ -1,6 +1,31 @@
+"""
+Pay compatibility calculation between worker expected pay and job offered pay.
+
+Policy:
+1. In LokRozgar AI, worker expectedPay is denominated as a daily wage (₹/day),
+   as established across the worker profile form, translations, and voice prompts.
+2. Job pay types supported:
+   - "daily": directly comparable to worker daily expected pay.
+   - "monthly": normalized to daily equivalent using 26 working days per month
+     (standard industrial & statutory convention in Maharashtra / India).
+   - "fixed": project/contract based compensation without declared duration.
+     Cannot be directly compared to a daily wage without duration, so it is
+     safely treated as non-comparable (score = None) per policy.
+   - other / missing: non-comparable (score = None).
+3. Score scale (0 - 100):
+   - If offered >= expected: 100.0 (job meets or exceeds worker expectation).
+   - If 0.5 <= (offered / expected) < 1.0: proportional match score:
+     round((offered / expected) * 100.0, 1).
+   - If (offered / expected) < 0.5: 0.0 (severely below expectation, < 50%).
+4. When either pay value is missing or <= 0:
+   - score = None, comparable = False (excluded from ranking weighted average).
+"""
+
 from typing import Optional
 
 from pydantic import BaseModel
+
+WORKING_DAYS_PER_MONTH = 26.0
 
 
 class PayMatchResult(BaseModel):
@@ -20,18 +45,6 @@ def calculate_pay_match(
     """
     Calculate pay compatibility between a worker's expected pay and a
     job's offered pay.
-
-    v1 limitation, driven by the actual schema, not a placeholder:
-    WorkerProfile.expected_pay has no field declaring what unit/period it
-    is denominated in, while Job always declares pay_type (daily/monthly/
-    fixed). Without a worker-side unit, there is no way to confirm the two
-    numbers share the same basis - treating them as directly comparable
-    would silently assume an equivalence the schema does not support.
-
-    So v1 never produces a numeric score: `comparable` is always False,
-    and `score` is always None. Both raw values are still returned so a
-    later recommendation explanation can show them side by side even
-    though the system isn't claiming to have verified they're compatible.
     """
 
     if worker_expected_pay is None or job_offered_pay is None:
@@ -60,16 +73,74 @@ def calculate_pay_match(
             reason="Pay values must be greater than zero.",
         )
 
-    pay_type_note = f" '{job_pay_type}'" if job_pay_type else ""
+    norm_pay_type = (job_pay_type or "").strip().lower()
+
+    if not norm_pay_type:
+        return PayMatchResult(
+            score=None,
+            comparable=False,
+            worker_expected_pay=worker_expected_pay,
+            job_offered_pay=job_offered_pay,
+            job_pay_type=job_pay_type,
+            reason="Job pay type is missing, so pay comparison cannot be performed.",
+        )
+
+    if norm_pay_type == "fixed":
+        return PayMatchResult(
+            score=None,
+            comparable=False,
+            worker_expected_pay=worker_expected_pay,
+            job_offered_pay=job_offered_pay,
+            job_pay_type=job_pay_type,
+            reason=(
+                "Fixed-contract compensation cannot be directly converted to "
+                "a daily expected wage without project duration."
+            ),
+        )
+
+    if norm_pay_type == "daily":
+        normalized_job_daily = float(job_offered_pay)
+    elif norm_pay_type == "monthly":
+        normalized_job_daily = float(job_offered_pay) / WORKING_DAYS_PER_MONTH
+    else:
+        return PayMatchResult(
+            score=None,
+            comparable=False,
+            worker_expected_pay=worker_expected_pay,
+            job_offered_pay=job_offered_pay,
+            job_pay_type=job_pay_type,
+            reason=f"Unsupported pay type '{job_pay_type}' cannot be normalized for comparison.",
+        )
+
+    # Calculate compatibility score
+    worker_daily = float(worker_expected_pay)
+
+    if normalized_job_daily >= worker_daily:
+        score = 100.0
+        reason = (
+            f"Offered pay (₹{normalized_job_daily:.0f}/day) meets or exceeds "
+            f"worker expected pay (₹{worker_daily:.0f}/day)."
+        )
+    else:
+        ratio = normalized_job_daily / worker_daily
+        if ratio >= 0.5:
+            score = round(ratio * 100.0, 1)
+            reason = (
+                f"Offered pay (₹{normalized_job_daily:.0f}/day) is {ratio * 100.0:.1f}% "
+                f"of worker expected pay (₹{worker_daily:.0f}/day)."
+            )
+        else:
+            score = 0.0
+            reason = (
+                f"Offered pay (₹{normalized_job_daily:.0f}/day) is significantly below "
+                f"worker expected pay (₹{worker_daily:.0f}/day) (< 50%)."
+            )
 
     return PayMatchResult(
-        score=None,
-        comparable=False,
+        score=score,
+        comparable=True,
         worker_expected_pay=worker_expected_pay,
         job_offered_pay=job_offered_pay,
         job_pay_type=job_pay_type,
-        reason=(
-            "Worker's expected pay has no declared unit, so it cannot be "
-            f"safely compared to a{pay_type_note} job pay amount."
-        ),
+        reason=reason,
     )

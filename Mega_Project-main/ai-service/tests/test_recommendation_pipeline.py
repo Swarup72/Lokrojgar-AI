@@ -190,14 +190,24 @@ def test_all_six_match_factors_populated_correctly():
     ).score
 
 
-def test_pay_remains_none_not_zero():
-    worker = _build_worker(expected_pay=800)
+def test_pay_remains_none_not_zero_when_expected_pay_missing():
+    worker = _build_worker(expected_pay=None)
     job = _build_job(pay_amount=900, pay_type="daily")
 
     result = score_worker_job_pair(worker, [], job)
 
     assert result.match_factors.pay is None
     assert "pay" in result.unavailable_factors
+
+
+def test_pay_computed_when_both_present():
+    worker = _build_worker(expected_pay=800)
+    job = _build_job(pay_amount=900, pay_type="daily")
+
+    result = score_worker_job_pair(worker, [], job)
+
+    assert result.match_factors.pay == 100.0
+    assert "pay" in result.available_factors
 
 
 def test_rating_none_preserved_for_unrated_worker():

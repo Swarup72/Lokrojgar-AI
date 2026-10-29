@@ -54,7 +54,7 @@ def test_extract_job_pay_type():
     assert extract_job_pay_type(job) == "monthly"
 
 
-def test_worker_profile_to_job_pay_match_reports_not_comparable():
+def test_worker_profile_to_job_pay_match_reports_comparable():
     worker = _build_worker(expected_pay=800)
     job = _build_job(pay_amount=900, pay_type="daily")
 
@@ -64,11 +64,25 @@ def test_worker_profile_to_job_pay_match_reports_not_comparable():
 
     result = calculate_pay_match(worker_expected_pay, job_offered_pay, job_pay_type)
 
-    assert result.comparable is False
-    assert result.score is None
+    assert result.comparable is True
+    assert result.score == 100.0
     assert result.worker_expected_pay == 800
     assert result.job_offered_pay == 900
     assert result.job_pay_type == "daily"
+
+
+def test_worker_profile_to_fixed_job_pay_reports_not_comparable():
+    worker = _build_worker(expected_pay=800)
+    job = _build_job(pay_amount=5000, pay_type="fixed")
+
+    result = calculate_pay_match(
+        extract_worker_expected_pay(worker),
+        extract_job_offered_pay(job),
+        extract_job_pay_type(job),
+    )
+
+    assert result.comparable is False
+    assert result.score is None
 
 
 def test_worker_profile_with_no_expected_pay_reports_missing_data():

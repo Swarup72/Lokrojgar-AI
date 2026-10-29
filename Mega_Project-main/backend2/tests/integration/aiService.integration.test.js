@@ -86,9 +86,11 @@ test("integration: getRecommendedJobsForWorker returns a real ranked result from
   assert.strictEqual(match.job_id, job._id);
   assert.ok(typeof match.ranking.overall_score === "number");
   // Real, live proof (not mocked) that None survives the full HTTP round
-  // trip rather than being coerced to 0.
-  assert.strictEqual(match.ranking.match_factors.pay, null);
+  // trip rather than being coerced to 0. Rating is unrated -> null.
   assert.strictEqual(match.ranking.match_factors.rating, null);
+  // Pay: worker expects 800/day, job offers 900/daily -> comparable (see
+  // ai-service/app/matching/pay_match.py), so it meets expectation = 100.
+  assert.strictEqual(match.ranking.match_factors.pay, 100);
 });
 
 test("integration: getRecommendedWorkersForJob returns a real ranked result from FastAPI", async () => {
