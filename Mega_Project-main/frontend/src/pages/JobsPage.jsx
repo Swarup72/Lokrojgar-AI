@@ -153,6 +153,7 @@ export function JobsPage() {
   const [error, setError] = useState(null);
   const [isListening, setIsListening] = useState(false);
   const [voiceError, setVoiceError] = useState("");
+  const [ttsError, setTtsError] = useState("");
 
   const recognitionRef = useRef(null);
   const { requestLocation, status: geoStatus } = useGeolocation();
@@ -260,6 +261,7 @@ export function JobsPage() {
 
   const startVoiceSearch = () => {
     setVoiceError("");
+    stopSpeech();
 
     if (isListening) {
       recognitionRef.current?.stop();
@@ -287,7 +289,11 @@ export function JobsPage() {
     };
 
     recognition.onerror = (event) => {
-      if (event.error !== "aborted") {
+      if (event.error === "not-allowed" || event.error === "permission-denied") {
+        setVoiceError(t("jobs.search.micDenied"));
+      } else if (event.error === "no-speech") {
+        setVoiceError(t("jobs.search.noSpeech"));
+      } else if (event.error !== "aborted") {
         setVoiceError(ui.voiceFailed);
       }
       setIsListening(false);
@@ -307,18 +313,59 @@ export function JobsPage() {
 
   const speakInstructions = () => {
     stopSpeech();
+    setTtsError("");
 
-    speakText({
+    if (isListening) {
+      recognitionRef.current?.abort();
+      setIsListening(false);
+    }
+
+    const started = speakText({
       text: `${ui.popularJobs}. ${ui.helper} ${ui.locationHint}`,
       lang: speechLang,
       rate: 0.88,
-      onError: () => setVoiceError(ui.voiceUnavailable),
-      onNoVoice: () => setVoiceError(ui.voiceUnavailable),
+      onError: () => setTtsError(t("jobs.search.ttsUnavailable")),
+      onNoVoice: () => setTtsError(t("jobs.search.ttsUnavailable")),
     });
+
+    if (!started) {
+      setTtsError(t("jobs.search.ttsUnavailable"));
+    }
   };
 
-  const jobs =
+  const rawJobs =
     mode === "search" ? result?.docs || [] : result || [];
+
+  const jobs = useMemo(() => {
+    let list = rawJobs;
+
+    if (searchText && searchText.trim()) {
+      const q = searchText.trim().toLowerCase();
+      list = list.filter((j) => {
+        const title = (j.titleText || pickLocalizedText(j.title, language) || "").toLowerCase();
+        const desc = (j.descriptionText || pickLocalizedText(j.description, language) || "").toLowerCase();
+        const city = (j.city || "").toLowerCase();
+        const emp = (j.employerId?.businessName || j.employerId?.userId?.fullName || "").toLowerCase();
+        return title.includes(q) || desc.includes(q) || city.includes(q) || emp.includes(q);
+      });
+    }
+
+    if (filters.city && filters.city.trim()) {
+      const c = filters.city.trim().toLowerCase();
+      list = list.filter((j) => (j.city || "").toLowerCase().includes(c));
+    }
+
+    if (filters.maxPay && !isNaN(Number(filters.maxPay))) {
+      const max = Number(filters.maxPay);
+      list = list.filter((j) => j.payAmount == null || Number(j.payAmount) <= max);
+    }
+
+    if (filters.verifiedOnly) {
+      list = list.filter((j) => Boolean(j.employerId?.isVerified || j.isVerified));
+    }
+
+    return list;
+  }, [rawJobs, searchText, filters.city, filters.maxPay, filters.verifiedOnly, language]);
 
   return (
     <div className="container jobs-page page-animate">
@@ -339,6 +386,12 @@ export function JobsPage() {
           <Volume2 size={20} aria-hidden="true" />
           <span>{ui.listen}</span>
         </button>
+
+        {ttsError && (
+          <p className="jobs-tts-error" role="status">
+            {ttsError}
+          </p>
+        )}
       </header>
 
       <section className="jobs-visual-search" aria-label={ui.searchButton}>
@@ -391,9 +444,17 @@ export function JobsPage() {
         </form>
 
         {voiceError && (
-          <p className="jobs-voice-error" role="alert">
-            {voiceError}
-          </p>
+          <div className="jobs-voice-error-banner" role="alert">
+            <p className="jobs-voice-error">{voiceError}</p>
+            <button
+              type="button"
+              className="jobs-error-dismiss"
+              onClick={() => setVoiceError("")}
+              aria-label={t("common.close")}
+            >
+              <X size={16} aria-hidden="true" />
+            </button>
+          </div>
         )}
       </section>
 

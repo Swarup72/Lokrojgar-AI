@@ -13,6 +13,8 @@ import {
   Sparkles,
   Volume2,
   VolumeX,
+  AlertCircle,
+  RotateCcw,
 } from "lucide-react";
 
 import { useLanguage } from "../hooks/useLanguage";
@@ -49,6 +51,7 @@ export function HomePage() {
 
   const [speaking, setSpeaking] = useState(false);
   const [audioMessage, setAudioMessage] = useState("");
+  const [fallbackVisible, setFallbackVisible] = useState(false);
 
   const lang = String(language || "en")
     .toLowerCase()
@@ -162,6 +165,7 @@ export function HomePage() {
     stopSpeech();
     setSpeaking(false);
     setAudioMessage("");
+    setFallbackVisible(false);
   }, [language]);
 
   const handleCategoryClick = (category) => {
@@ -171,6 +175,12 @@ export function HomePage() {
     navigate(`/jobs?${params.toString()}`);
   };
 
+  const instructions = isMarathi
+    ? "लोक रोजगार ए आय मध्ये आपले स्वागत आहे. तुमचं काम, तुमची ओळख! नोकरी शोधण्यासाठी नोकरी शोधा या पानावर जा. तुम्ही खाली दिलेल्या कामाच्या चित्रावर क्लिक करून नोकऱ्या शोधू शकता. तुमच्या प्रोफाइलमध्ये तुमची माहिती आणि कौशल्ये भरू शकता."
+    : isHindi
+    ? "लोक रोजगार ए आई में आपका स्वागत है। आपका काम, आपकी पहचान! नौकरी खोजने के लिए नौकरी खोजें पेज पर जाएं। आप नीचे दिए गए काम के चित्र पर क्लिक करके नौकरी खोज सकते हैं। अपनी प्रोफ़ाइल में जानकारी और कौशल जोड़ सकते हैं।"
+    : "Welcome to Lokrozgar AI. Your Work, Your Identity! To find a job, open the Find Jobs page. You can also select a job category below. Complete your profile to show employers your skills and experience.";
+
   const handleAudioHelp = () => {
     if (speaking) {
       stopSpeech();
@@ -179,33 +189,33 @@ export function HomePage() {
     }
 
     setAudioMessage("");
-
-    const instructions = isMarathi
-      ? "लोक रोजगार ए आय मध्ये आपले स्वागत आहे. तुमचं काम, तुमची ओळख! नोकरी शोधण्यासाठी नोकरी शोधा या पानावर जा. तुम्ही खाली दिलेल्या कामाच्या चित्रावर क्लिक करून नोकऱ्या शोधू शकता. तुमच्या प्रोफाइलमध्ये तुमची माहिती आणि कौशल्ये भरू शकता."
-      : isHindi
-      ? "लोक रोजगार ए आई में आपका स्वागत है। आपका काम, आपकी पहचान! नौकरी खोजने के लिए नौकरी खोजें पेज पर जाएं। आप नीचे दिए गए काम के चित्र पर क्लिक करके नौकरी खोज सकते हैं। अपनी प्रोफ़ाइल में जानकारी और कौशल जोड़ सकते हैं।"
-      : "Welcome to Lokrozgar AI. Your Work, Your Identity! To find a job, open the Find Jobs page. You can also select a job category below. Complete your profile to show employers your skills and experience.";
+    setFallbackVisible(false);
 
     const started = speakText({
       text: instructions,
       lang,
       rate: 0.88,
-      onStart: () => setSpeaking(true),
-      onEnd: () => setSpeaking(false),
-      onError: () => setSpeaking(false),
-      onNoVoice: ({ reason }) => {
+      onStart: () => {
+        setSpeaking(true);
+        setFallbackVisible(false);
+        setAudioMessage("");
+      },
+      onEnd: () => {
         setSpeaking(false);
-        setAudioMessage(
-          isMarathi
-            ? "तुमच्या ब्राऊझरमध्ये मराठी आवाज उपलब्ध नाही. कृपया स्क्रीनवरील सूचना वाचा."
-            : isHindi
-            ? "आपके ब्राउज़र में हिंदी आवाज़ उपलब्ध नहीं है। कृपया स्क्रीन पर दिए गए निर्देश पढ़ें।"
-            : labels.audioUnavailable
-        );
+      },
+      onError: () => {
+        setSpeaking(false);
+        setAudioMessage(labels.audioUnavailable);
+        setFallbackVisible(true);
+      },
+      onNoVoice: () => {
+        setSpeaking(false);
+        setAudioMessage(labels.audioUnavailable);
+        setFallbackVisible(true);
       },
     });
 
-    if (!started && !audioMessage) {
+    if (!started) {
       setSpeaking(false);
     }
   };
@@ -233,7 +243,7 @@ export function HomePage() {
             {/* AUDIO GUIDANCE */}
             <button
               type="button"
-              className="home-audio-help"
+              className={`home-audio-help ${speaking ? "speaking" : ""}`}
               onClick={handleAudioHelp}
               aria-label={
                 speaking
@@ -254,13 +264,36 @@ export function HomePage() {
               </span>
             </button>
 
-            {audioMessage && (
-              <p
-                className="home-voice-feedback"
-                role="status"
-              >
-                {audioMessage}
-              </p>
+            {fallbackVisible && (
+              <div className="home-voice-fallback-card" role="region" aria-label="Audio Guidance Fallback">
+                <div className="home-voice-fallback-header">
+                  <AlertCircle size={18} aria-hidden="true" />
+                  <span>{audioMessage || labels.audioUnavailable}</span>
+                </div>
+                <div className="home-voice-fallback-text">
+                  <p>{instructions}</p>
+                </div>
+                <div className="home-voice-fallback-actions">
+                  <button
+                    type="button"
+                    className="home-voice-retry-btn"
+                    onClick={handleAudioHelp}
+                  >
+                    <RotateCcw size={15} aria-hidden="true" />
+                    <span>{t("common.retry")}</span>
+                  </button>
+                  <button
+                    type="button"
+                    className="home-voice-dismiss-btn"
+                    onClick={() => {
+                      setFallbackVisible(false);
+                      setAudioMessage("");
+                    }}
+                  >
+                    <span>{t("common.close")}</span>
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>

@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Briefcase,
@@ -17,12 +18,16 @@ import {
   Package,
   ArrowRight,
   CheckCircle2,
+  Star,
 } from "lucide-react";
 
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { MatchScoreBadge } from "../recommendations/MatchScoreBadge";
 import { MatchFactorsList } from "../recommendations/MatchFactorsList";
+import { getSkillMessageKey } from "../../utils/matchDisplay";
+import { RatingStars } from "../common/RatingStars";
+import { EmployerReviewsModal } from "../reviews/EmployerReviewsModal";
 import { employerName } from "../../utils/displayName";
 
 import "./JobCard.css";
@@ -47,6 +52,7 @@ const LABELS = {
     salary: "Salary",
     away: "away",
     postedBy: "Posted by",
+    viewReviews: "Read reviews",
   },
   hi: {
     viewJob: "नौकरी की जानकारी देखें",
@@ -55,6 +61,7 @@ const LABELS = {
     salary: "वेतन",
     away: "दूर",
     postedBy: "नौकरी देने वाला",
+    viewReviews: "रिव्यू देखें",
   },
   mr: {
     viewJob: "नोकरीची माहिती पहा",
@@ -63,6 +70,7 @@ const LABELS = {
     salary: "पगार",
     away: "अंतर",
     postedBy: "नोकरी देणारे",
+    viewReviews: "रिव्ह्यू पाहा",
   },
 };
 
@@ -76,13 +84,14 @@ export function JobCard({
   matchingSkills,
   missingSkills,
   skillMatchStatus,
-  penaltyApplied,
   onApply,
   applyDisabled,
   applyLabel,
 }) {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
+
+  const skillMessageKey = getSkillMessageKey({ skillMatchStatus, matchingSkills, job });
 
   const lang = String(language || "en").toLowerCase().slice(0, 2);
   const ui = LABELS[lang] || LABELS.en;
@@ -129,6 +138,33 @@ export function JobCard({
     ? `₹${Number(job.payAmount).toLocaleString("en-IN")}`
     : null;
 
+  const employerRatingAvg =
+    typeof job.employerId?.ratingAvg === "number"
+      ? job.employerId.ratingAvg
+      : typeof job.employerRatingAvg === "number"
+      ? job.employerRatingAvg
+      : undefined;
+
+  const employerRatingCount =
+    typeof job.employerId?.ratingCount === "number"
+      ? job.employerId.ratingCount
+      : typeof job.employerRatingCount === "number"
+      ? job.employerRatingCount
+      : 0;
+
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
+
+  const employerUserId =
+    job.employerId?.userId?._id ||
+    job.employerId?.userId ||
+    job.employerUserId ||
+    (typeof job.employerId === "string" ? job.employerId : null);
+
+  const handleOpenReviews = (event) => {
+    event.stopPropagation();
+    setShowReviewsModal(true);
+  };
+
   const handleApply = (event) => {
     event.stopPropagation();
 
@@ -155,15 +191,45 @@ export function JobCard({
           <div className="job-card-title-row">
             <h2 className="job-card-title">{title}</h2>
 
-            {matchScore != null && (
-              <MatchScoreBadge score={matchScore} />
+            {(matchScore != null || originalMatchScore != null || matchFactors) && (
+              // The badge shows the backend's own overall score (the same figure the
+              // match factors below are computed from). matchScore may carry the
+              // frontend's skill-first ranking adjustment, which only affects order.
+              <MatchScoreBadge
+                score={originalMatchScore ?? matchScore}
+                showUnavailable={Boolean(matchFactors)}
+              />
             )}
           </div>
 
+          {matchFactors && (
+            <p className="job-card-match-helper">{t("match.scoreHelper")}</p>
+          )}
+
           {postedBy && (
-            <p className="job-card-employer">
-              {ui.postedBy}: {postedBy}
-            </p>
+            <div className="job-card-employer-row">
+              <button
+                type="button"
+                className="job-card-employer-btn"
+                onClick={handleOpenReviews}
+                title={ui.viewReviews}
+                aria-label={`${ui.postedBy}: ${postedBy}. ${ui.viewReviews}`}
+              >
+                <span className="job-card-employer-name">
+                  {ui.postedBy}: <strong>{postedBy}</strong>
+                </span>
+                <span className="job-card-employer-rating">
+                  <RatingStars
+                    value={employerRatingAvg}
+                    count={employerRatingCount}
+                    compact
+                  />
+                </span>
+                <span className="job-card-reviews-pill">
+                  {ui.viewReviews}
+                </span>
+              </button>
+            </div>
           )}
 
           {categoryName && (
@@ -224,36 +290,27 @@ export function JobCard({
       {/* Skill matching breakdown */}
       {matchFactors && (
         <div className="job-card-skills-overview">
-          {skillMatchStatus === "matched" || (matchingSkills && matchingSkills.length > 0) ? (
+          {skillMessageKey === null ? (
             <div className="job-skills-matched">
               <span className="skills-badge matched">
                 <CheckCircle2 size={14} aria-hidden="true" />
                 <strong>{t("recommendations.matchingSkills")}:</strong>
               </span>
               <div className="skills-chip-list">
-                {matchingSkills.map((s) => (
+                {(matchingSkills || []).map((s) => (
                   <span key={s._id || s} className="skill-chip match">
                     {pickLocalizedText(s.nameMultilingual || s.name, language) || (typeof s.name === "string" ? s.name : "") || "Skill"}
                   </span>
                 ))}
               </div>
             </div>
-          ) : skillMatchStatus === "unmatched" || (Array.isArray(job.skillIds) && job.skillIds.length > 0) ? (
-            <div className="job-skills-unmatched">
-              <span className="skills-badge unmatched">
-                {t("recommendations.noMatchingSkills")}
-              </span>
-              {penaltyApplied > 0 && (
-                <span className="skills-penalty-tag">
-                  -{penaltyApplied}
-                </span>
-              )}
+          ) : skillMessageKey === "recommendations.skillsNotSpecified" ? (
+            <div className="job-skills-unspecified">
+              <span className="skills-badge unspecified">{t(skillMessageKey)}</span>
             </div>
           ) : (
-            <div className="job-skills-unspecified">
-              <span className="skills-badge unspecified">
-                {t("recommendations.skillsNotSpecified")}
-              </span>
+            <div className="job-skills-unmatched">
+              <span className="skills-badge unmatched">{t(skillMessageKey)}</span>
             </div>
           )}
         </div>
@@ -264,6 +321,7 @@ export function JobCard({
           <MatchFactorsList
             matchFactors={matchFactors}
             explanation={explanation}
+            showSummary={false}
           />
         </div>
       )}
@@ -295,6 +353,16 @@ export function JobCard({
           <span>{applyLabel || ui.apply}</span>
         </button>
       </div>
+
+      <EmployerReviewsModal
+        isOpen={showReviewsModal}
+        onClose={() => setShowReviewsModal(false)}
+        employerName={postedBy}
+        userId={employerUserId}
+        employerProfile={typeof job.employerId === "object" ? job.employerId : null}
+        ratingAvg={employerRatingAvg}
+        ratingCount={employerRatingCount}
+      />
     </article>
   );
 }

@@ -8,16 +8,16 @@
 
 .job-form-section {
   background: #ffffff;
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: 18px;
   padding: 24px;
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.03);
+  box-shadow: var(--surface-shadow, 0 2px 8px rgba(30, 64, 175, 0.06));
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .job-form-section:hover {
-  border-color: #cbd5e1;
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  border-color: var(--interactive-border-hover, #7da8f8);
+  box-shadow: var(--surface-shadow-hover, 0 8px 22px rgba(30, 64, 175, 0.1));
 }
 
 .job-form-section-header {

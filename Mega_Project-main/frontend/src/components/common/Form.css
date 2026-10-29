@@ -5,11 +5,28 @@
 .form-field {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 18px;
+  gap: 7px;
+  margin-bottom: 20px;
   font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-text-2);
+}
+
+.form-field > span:first-child,
+.form-field > label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.form-field-required,
+.form-required-star {
+  color: var(--color-danger);
+  font-weight: 800;
+  margin-left: 2px;
 }
 
 .form-field-row {
@@ -21,26 +38,60 @@
 .form-field input,
 .form-field select,
 .form-field textarea {
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: var(--radius-md);
   padding: 12px 14px;
   font-size: var(--text-base);
   color: var(--color-text);
-  background: var(--color-surface);
-  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  background: #ffffff;
+  min-height: 46px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
 }
 
+.form-field input:hover:not(:disabled),
+.form-field select:hover:not(:disabled),
+.form-field textarea:hover:not(:disabled) {
+  border-color: var(--interactive-border-hover, #7da8f8);
+}
+
+.form-field input:focus,
+.form-field select:focus,
+.form-field textarea:focus,
 .form-field input:focus-visible,
 .form-field select:focus-visible,
 .form-field textarea:focus-visible {
   border-color: var(--color-primary);
-  box-shadow: var(--ring-focus);
+  box-shadow: var(--interactive-focus-ring, 0 0 0 3.5px rgba(37, 99, 235, 0.22));
   outline: none;
+}
+
+.form-field input:disabled,
+.form-field select:disabled,
+.form-field textarea:disabled {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: var(--color-muted);
+  cursor: not-allowed;
+  opacity: 0.75;
 }
 
 .form-field textarea {
   resize: vertical;
   font-family: inherit;
+  min-height: 96px;
+}
+
+.form-field-error,
+.form-error {
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 700;
+  margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .form-chip-group {
@@ -50,19 +101,41 @@
 }
 
 .form-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: var(--color-surface);
   color: var(--color-text-3);
-  border: 1px solid var(--color-border);
-  padding: 8px 14px;
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
+  padding: 8px 16px;
+  min-height: 38px;
   border-radius: var(--radius-pill);
   font-size: var(--text-xs);
   font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition: all 0.18s ease;
+}
+
+.form-chip:hover:not(.active):not(:disabled) {
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  border-color: var(--interactive-border-hover, #7da8f8);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(37, 99, 235, 0.12);
 }
 
 .form-chip.active {
   background: var(--color-primary-50);
   color: var(--color-primary);
-  border-color: var(--color-primary-200);
+  border-color: var(--color-primary);
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.16);
+  font-weight: 800;
+}
+
+.form-chip:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
 }
 
 @media (max-width: 600px) {

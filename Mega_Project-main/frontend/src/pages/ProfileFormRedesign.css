@@ -175,30 +175,38 @@
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  padding: 12px 13px;
-  border: 1px solid #dfe5ef;
+  padding: 12px 14px;
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: 11px;
   outline: none;
-  background: #fbfcfe;
+  background: #ffffff;
   color: #202b40;
   font: inherit;
-  font-size: 13px;
+  font-size: 14px;
+  min-height: 46px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: border-color 180ms ease, box-shadow 180ms ease,
     background 180ms ease;
+}
+
+.pf-field input:not([type="checkbox"]):hover:not(:disabled),
+.pf-field textarea:hover:not(:disabled),
+.pf-inline-number:hover:not(:disabled) {
+  border-color: var(--interactive-border-hover, #7da8f8);
 }
 
 .pf-field input:focus,
 .pf-field textarea:focus,
 .pf-inline-number:focus {
-  border-color: #6b91ed;
+  border-color: #2563eb;
   background: #fff;
-  box-shadow: 0 0 0 3px rgba(67, 116, 224, 0.12);
+  box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.22);
 }
 
 .pf-field input::placeholder,
 .pf-field textarea::placeholder,
 .pf-inline-number::placeholder {
-  color: #a0a9b8;
+  color: #94a3b8;
 }
 
 .pf-field textarea {
@@ -229,27 +237,42 @@
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 9px 12px;
-  border: 1px solid #e0e6f0;
+  padding: 9px 14px;
+  min-height: 38px;
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: 10px;
   background: #fff;
-  color: #5d687b;
+  color: #475569;
   font-size: 12px;
+  font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   transition: all 180ms ease;
 }
 
 .pf-choice:hover,
 .pf-category-card:hover,
 .pf-experience-card:hover {
-  border-color: #9ab3ef;
+  border-color: var(--interactive-border-hover, #7da8f8);
+  background: #f8fbff;
+  color: #0f172a;
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
 }
 
 .pf-choice.selected {
-  border-color: #7da0ef;
-  background: #edf3ff;
-  color: #315fc5;
+  border-color: #2563eb;
+  border-width: 2px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.16);
+}
+
+.pf-choice.selected:hover {
+  background: #e0edff;
+  border-color: #1d4ed8;
+  color: #1e40af;
 }
 
 .pf-choice-check {
@@ -264,26 +287,39 @@
 
 .pf-category-card {
   display: flex;
-  min-height: 85px;
+  min-height: 90px;
   flex-direction: column;
   align-items: flex-start;
   justify-content: space-between;
   gap: 9px;
-  padding: 12px;
-  border: 1px solid #e2e8f1;
+  padding: 13px;
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: 13px;
   background: #fff;
-  color: #445168;
+  color: #334155;
   text-align: left;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: all 180ms ease;
 }
 
 .pf-category-card.selected {
-  border-color: #79a0ef;
-  background: #f0f5ff;
-  color: #315fc5;
-  box-shadow: 0 3px 12px rgba(49, 95, 197, 0.08);
+  border-color: #2563eb;
+  border-width: 2px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16);
+}
+
+.pf-category-card.selected:hover {
+  background: #e0edff;
+  border-color: #1d4ed8;
+  color: #1e40af;
+}
+
+.pf-category-card.selected .pf-category-name {
+  color: #1d4ed8;
+  font-weight: 800;
 }
 
 .pf-category-symbol {
@@ -319,11 +355,12 @@
   align-items: center;
   gap: 8px;
   padding: 13px 5px;
-  border: 1px solid #e2e8f1;
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: 12px;
   background: #fff;
-  color: #566278;
+  color: #475569;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: all 180ms ease;
 }
 
@@ -337,9 +374,17 @@
 }
 
 .pf-experience-card.selected {
-  border-color: #77a0ed;
-  background: #eef4ff;
-  color: #315fc5;
+  border-color: #2563eb;
+  border-width: 2px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16);
+}
+
+.pf-experience-card.selected:hover {
+  background: #e0edff;
+  border-color: #1d4ed8;
+  color: #1e40af;
 }
 
 .pf-inline-number {

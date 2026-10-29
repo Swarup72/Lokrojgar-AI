@@ -683,7 +683,7 @@ export function ProfilePage() {
                   onClick={() => scrollToSection("worker-form")}
                 >
                   <Pencil size={15} />
-                  Edit details
+                  {t("jobs.review.editDetails")}
                 </button>
               </div>
               <div id="worker-form">
@@ -774,7 +774,7 @@ export function ProfilePage() {
                   onClick={() => scrollToSection("employer-form")}
                 >
                   <Pencil size={15} />
-                  Edit details
+                  {t("jobs.review.editDetails")}
                 </button>
               </div>
 

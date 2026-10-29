@@ -87,6 +87,16 @@
   --ring-focus: 0 0 0 3px rgba(37, 99, 235, 0.1);
   --outline-focus: 3px solid rgba(37, 99, 235, 0.35);
 
+  /* Unified Interactive Affordance & Surface Tokens */
+  --interactive-border: #9cb5d9;
+  --interactive-border-hover: #4f87e8;
+  --interactive-focus: #2563eb;
+  --interactive-focus-ring: 0 0 0 3.5px rgba(37, 99, 235, 0.22);
+  --surface-shadow: 0 2px 8px rgba(30, 64, 175, 0.06);
+  --surface-shadow-hover: 0 8px 22px rgba(30, 64, 175, 0.12);
+  --interactive-radius: 12px;
+  --interactive-transition: 180ms ease;
+
   /* Gradients */
   --gradient-hero: linear-gradient(135deg, #f8fbff 0%, #eef5ff 50%, #f8fbff 100%);
   --gradient-card-blue: linear-gradient(145deg, #eff6ff, #ffffff);
@@ -170,25 +180,87 @@ button {
   font-size: var(--text-sm);
   font-weight: 700;
   transition: background var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease),
-    transform var(--dur-fast) var(--ease);
+    transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
+    color var(--dur-fast) var(--ease);
   -webkit-tap-highlight-color: transparent;
 }
 
-button:hover:not(:disabled) {
-  background: var(--color-primary-hover);
+button:not([class]):hover:not(:disabled),
+button.btn-primary:hover:not(:disabled) {
+  background: var(--color-primary-hover, #1d4ed8);
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.22);
+}
+
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button:focus-visible {
+  outline: 2.5px solid var(--interactive-focus, #2563eb);
+  outline-offset: 2px;
 }
 
 button:disabled {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
-input,
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
 select,
 textarea {
   font-family: inherit;
   font-size: var(--text-base);
   color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
+  border-radius: var(--radius-md);
+  padding: 10px 14px;
+  min-height: 44px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease),
+    background-color var(--dur-fast) var(--ease);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):hover:not(:disabled),
+select:hover:not(:disabled),
+textarea:hover:not(:disabled) {
+  border-color: var(--interactive-border-hover, #7da8f8);
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):focus,
+select:focus,
+textarea:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-focus-ring);
+  outline: none;
+}
+
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #f1f5f9;
+  border-color: #e2e8f0;
+  color: var(--color-muted);
+  cursor: not-allowed;
+  opacity: 0.75;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
+  opacity: 1;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--color-primary);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  vertical-align: middle;
 }
 
 button,
@@ -204,7 +276,7 @@ a:focus-visible,
 select:focus-visible,
 input:focus-visible,
 textarea:focus-visible {
-  outline: var(--outline-focus);
+  outline: 2px solid #2563eb;
   outline-offset: 2px;
 }
 

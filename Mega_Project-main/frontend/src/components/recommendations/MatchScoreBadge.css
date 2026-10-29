@@ -1,9 +1,29 @@
 .match-score-badge {
-  display: inline-block;
-  padding: 4px 12px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 96px;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
-  font-size: var(--text-xs);
+  font-size: var(--text-sm, 0.95rem);
   font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+}
+
+.match-score-bar {
+  display: block;
+  height: 4px;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.12);
+  overflow: hidden;
+}
+
+.match-score-bar-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .match-score-high {
@@ -19,4 +39,17 @@
 .match-score-low {
   background: var(--color-surface-alt);
   color: var(--color-text-3);
+}
+
+.match-score-unavailable {
+  background: var(--color-surface-alt);
+  color: var(--color-text-3);
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+@media (max-width: 480px) {
+  .match-score-badge {
+    min-width: 88px;
+  }
 }

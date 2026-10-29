@@ -79,14 +79,19 @@
   align-items: center;
   gap: 10px;
   background: white;
-  border: 1.5px solid var(--color-border);
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.visual-input:hover {
+  border-color: var(--interactive-border-hover, #7da8f8);
 }
 
 .visual-input:focus-within {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.10);
+  box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.22);
   transform: translateY(-1px);
 }
 
@@ -116,6 +121,7 @@
   border-radius: 50%;
   border: none;
   cursor: pointer;
+  transition: all 0.15s ease;
 }
 
 .password-toggle:hover {
@@ -140,23 +146,27 @@
   gap: 4px;
   background: white;
   color: var(--color-text-2);
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--interactive-border, #cbdaf0);
   border-radius: 12px;
   cursor: pointer;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .visual-role-option:hover {
   transform: translateY(-2px);
-  border-color: var(--color-primary-300);
-  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.06);
+  border-color: var(--interactive-border-hover, #7da8f8);
+  background: var(--color-primary-50);
+  color: var(--color-primary);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
 }
 
 .visual-role-option.active {
   border-color: var(--color-primary);
   background: var(--color-primary-50);
   color: var(--color-primary);
-  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.18);
+  font-weight: 700;
 }
 
 .role-big-icon {

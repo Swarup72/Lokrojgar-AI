@@ -22,21 +22,47 @@
   flex-direction: column;
   align-items: flex-start;
   gap: 6px;
-  padding: 20px;
+  padding: 22px;
   text-align: left;
   background: var(--color-surface);
   color: var(--color-ink);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: var(--radius-lg);
   cursor: pointer;
-  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+  box-shadow: var(--surface-shadow, 0 2px 8px rgba(30, 64, 175, 0.06));
+  transition: all var(--dur-fast) var(--ease);
   min-height: var(--touch-target-min);
 }
 
-.post-job-mode:hover,
+.post-job-mode:hover:not(:disabled),
 .post-job-mode:focus-visible {
-  border-color: var(--color-primary);
-  box-shadow: var(--shadow-card);
+  border-color: #3b82f6;
+  background: #f8fbff;
+  color: var(--color-ink);
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.12);
+  transform: translateY(-2px);
+}
+
+.post-job-mode.selected {
+  border-color: #2563eb;
+  border-width: 2px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.16);
+}
+
+.post-job-mode.selected:hover {
+  background: #e0edff;
+  border-color: #1d4ed8;
+  color: #1d4ed8;
+}
+
+.post-job-mode.selected strong {
+  color: #1d4ed8;
+}
+
+.post-job-mode.selected span {
+  color: #2563eb;
 }
 
 .post-job-mode svg {

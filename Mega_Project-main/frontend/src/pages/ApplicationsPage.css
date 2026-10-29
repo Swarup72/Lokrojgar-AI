@@ -36,27 +36,31 @@
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
+  min-height: 38px;
   border-radius: var(--radius-full);
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   background: var(--color-surface);
   color: var(--color-text);
   font-size: var(--text-sm);
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: all 0.18s ease;
 }
 
 .app-filter-tab:hover {
-  background: var(--color-surface-alt);
-  border-color: var(--color-border-strong);
-  color: var(--color-ink);
+  background: var(--color-primary-50);
+  border-color: var(--interactive-border-hover, #7da8f8);
+  color: var(--color-primary);
+  transform: translateY(-1px);
 }
 
 .app-filter-tab.active {
   background: var(--color-primary);
   border-color: var(--color-primary);
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 700;
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
 }
 
 .app-filter-count {

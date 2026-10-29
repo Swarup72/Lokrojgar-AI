@@ -72,19 +72,27 @@
   justify-content: center;
   gap: 10px;
   min-height: 54px;
-  padding: 14px 20px;
+  padding: 14px 22px;
   flex-shrink: 0;
   background: #146ec4;
   color: #fff;
-  border: none;
+  border: 1.5px solid #09559d;
   border-radius: 15px;
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
+  box-shadow: 0 4px 14px rgba(20, 110, 196, 0.28);
+  transition: all 0.2s ease;
 }
 
 .worker-audio-button:hover:not(:disabled) {
   background: #09559d;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(20, 110, 196, 0.38);
+}
+
+.worker-audio-button:active:not(:disabled) {
+  transform: scale(0.98);
 }
 
 /* Quick actions */
@@ -124,15 +132,21 @@
   min-height: 170px;
   padding: 22px 13px;
   border-radius: 22px;
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1.5px solid rgba(37, 99, 235, 0.14);
   text-align: center;
   text-decoration: none;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .worker-icon-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.09);
+  border-color: #3b82f6;
+  box-shadow: 0 12px 28px rgba(37, 99, 235, 0.15);
+}
+
+.worker-icon-card:active {
+  transform: scale(0.98);
 }
 
 .worker-icon-card:focus-visible {

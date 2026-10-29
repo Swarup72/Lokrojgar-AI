@@ -489,7 +489,6 @@ export function WorkerDashboardPage() {
                       matchingSkills={match.matchingSkills}
                       missingSkills={match.missingSkills}
                       skillMatchStatus={match.skillMatchStatus}
-                      penaltyApplied={match.penaltyApplied}
                       onApply={() => handleApply(match.job._id)}
                       applyDisabled={
                         appliedJobIds.has(match.job._id) ||

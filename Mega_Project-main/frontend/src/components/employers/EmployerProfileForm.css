@@ -199,34 +199,53 @@
 
 .voice-input-container input {
   width: 100%;
-  padding-right: 42px;
+  min-height: 48px;
+  padding: 12px 48px 12px 14px;
+  background: #ffffff;
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
+  border-radius: var(--radius-md);
+  color: var(--color-text);
+  font-size: var(--text-base);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.voice-input-container input:hover:not(:disabled) {
+  border-color: var(--interactive-border-hover, #7da8f8);
+}
+
+.voice-input-container input:focus {
+  border-color: var(--color-primary);
+  box-shadow: var(--interactive-focus-ring, 0 0 0 3.5px rgba(37, 99, 235, 0.22));
+  outline: none;
 }
 
 .field-mic-btn {
   position: absolute;
   right: 8px;
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   background: #f1f5f9;
-  border: 1px solid #e2e8f0;
+  border: 1.5px solid #cbd5e1;
   border-radius: 50%;
   display: grid;
   place-items: center;
   color: #475569;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.18s ease;
 }
 
 .field-mic-btn:hover {
   background: #e0f2fe;
   color: #0284c7;
-  border-color: #bae0fd;
+  border-color: #38bdf8;
+  transform: scale(1.08);
 }
 
 .field-mic-btn.active {
   background: #ef4444;
   color: #ffffff;
-  border-color: #ef4444;
+  border-color: #dc2626;
   animation: pulse 1.5s infinite;
 }
 

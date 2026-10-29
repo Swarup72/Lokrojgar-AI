@@ -32,7 +32,7 @@ const LABEL_KEYS = {
  * match is bad.
  * @param {{matchFactors: Record<string, number|null>}} props
  */
-export function MatchFactorsList({ matchFactors, explanation }) {
+export function MatchFactorsList({ matchFactors, explanation, showSummary = true }) {
   const { t } = useLanguage();
   if (!matchFactors) return null;
 
@@ -67,7 +67,7 @@ export function MatchFactorsList({ matchFactors, explanation }) {
           );
         })}
       </ul>
-      {explanation?.summary && (
+      {showSummary && explanation?.summary && (
         <p className="match-factors-summary">{explanation.summary}</p>
       )}
       {matchFactors.skill === 0 && (

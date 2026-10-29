@@ -85,10 +85,81 @@
   overflow-wrap: anywhere;
 }
 
+.job-card-employer-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 6px 0 10px;
+}
+
+.job-card-employer-btn {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  color: #64748b;
+  cursor: pointer;
+  text-align: left;
+  transition: all 180ms ease;
+  font-size: 0.95rem;
+}
+
+.job-card-employer-btn:hover:not(:disabled) {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #1e293b;
+}
+
+.job-card-employer-btn:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
+.job-card-employer-btn strong {
+  color: #1e293b;
+  font-weight: 700;
+}
+
+.job-card-reviews-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 3px 9px;
+  border-radius: 9999px;
+  transition: all 180ms ease;
+}
+
+.job-card-employer-btn:hover:not(:disabled) .job-card-reviews-pill {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #1d4ed8;
+}
+
 .job-card-employer {
-  margin: 7px 0 10px;
+  margin: 0;
   font-size: 0.95rem;
   color: #64748b;
+}
+
+.job-card-employer strong {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.job-card-employer-rating {
+  display: inline-flex;
+  align-items: center;
 }
 
 .job-card-category {
@@ -206,25 +277,14 @@
 }
 
 .skills-badge.unmatched {
-  color: #64748b;
+  color: #475569;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
-  padding: 4px 10px;
-  border-radius: 999px;
+  padding: 6px 12px;
+  border-radius: 12px;
+  line-height: 1.4;
   font-size: 0.82rem;
   font-weight: 600;
-}
-
-.skills-penalty-tag {
-  display: inline-block;
-  background: #fee2e2;
-  color: #b91c1c;
-  border: 1px solid #fecaca;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 0.76rem;
-  font-weight: 800;
-  margin-left: 6px;
 }
 
 .skills-badge.unspecified {
@@ -366,4 +426,11 @@ button.job-card-apply-btn:focus-visible {
   .job-card {
     transition: none;
   }
+}
+
+.job-card-match-helper {
+  margin: 4px 0 0;
+  font-size: var(--text-xs, 0.8rem);
+  color: #475569;
+  line-height: 1.4;
 }

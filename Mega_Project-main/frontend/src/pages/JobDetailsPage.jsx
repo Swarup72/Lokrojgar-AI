@@ -12,6 +12,9 @@ import {
   Users,
   Volume2,
   Square,
+  Play,
+  Pause,
+  Star,
   Send,
   CheckCircle2,
   LogIn,
@@ -33,10 +36,12 @@ import { normalizeError } from "../api/client";
 import { Card } from "../components/common/Card";
 import { StatusPill } from "../components/common/StatusPill";
 import { Spinner } from "../components/common/Spinner";
-import { speakText, stopSpeech } from "../utils/speech";
+import { speakText, stopSpeech, pauseSpeech, resumeSpeech } from "../utils/speech";
 import { ErrorBanner } from "../components/common/ErrorBanner";
 import { EmptyState } from "../components/common/EmptyState";
 import { JobStatusActions } from "../components/jobs/JobStatusActions";
+import { RatingStars } from "../components/common/RatingStars";
+import { RatingList } from "../components/reviews/RatingList";
 
 import "./JobDetailsPage.css";
 
@@ -44,6 +49,14 @@ const LABELS = {
   en: {
     listen: "Listen to job details",
     stop: "Stop audio",
+    pause: "Pause",
+    resume: "Resume",
+    speaking: "Speaking...",
+    paused: "Paused",
+    reviews: "Employer Reviews",
+    viewReviews: "View Reviews",
+    years: "years",
+    postedBy: "Posted by",
     salary: "Salary",
     location: "Work Location",
     workers: "Workers Needed",
@@ -71,6 +84,14 @@ const LABELS = {
   hi: {
     listen: "नौकरी की जानकारी सुनें",
     stop: "आवाज़ बंद करें",
+    pause: "रोकें",
+    resume: "फिर से चलाएं",
+    speaking: "बोल रहे हैं...",
+    paused: "रुका हुआ",
+    reviews: "मालिक की समीक्षाएं",
+    viewReviews: "समीक्षाएं देखें",
+    years: "वर्ष",
+    postedBy: "नौकरी देने वाला",
     salary: "वेतन",
     location: "काम की जगह",
     workers: "कामगारों की ज़रूरत",
@@ -98,6 +119,14 @@ const LABELS = {
   mr: {
     listen: "नोकरीची माहिती ऐका",
     stop: "आवाज बंद करा",
+    pause: "थांबवा",
+    resume: "पुढे सुरू करा",
+    speaking: "माहिती सांगत आहे...",
+    paused: "थांबवले आहे",
+    reviews: "मालकाचे रिव्ह्यू",
+    viewReviews: "रिव्ह्यू पाहा",
+    years: "वर्षे",
+    postedBy: "नोकरी देणारे",
     salary: "पगार",
     location: "कामाचे ठिकाण",
     workers: "कामगारांची गरज",
@@ -151,6 +180,7 @@ export function JobDetailsPage() {
   const [applyError, setApplyError] = useState(null);
   const [applied, setApplied] = useState(false);
   const [speaking, setSpeaking] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const [audioError, setAudioError] = useState("");
 
   const fetchJob = useCallback(() => {
@@ -173,10 +203,14 @@ export function JobDetailsPage() {
   }, [id, job, fetchJob]);
 
   useEffect(() => {
+    stopSpeech();
+    setSpeaking(false);
+    setIsPaused(false);
+    setAudioError("");
     return () => {
       stopSpeech();
     };
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     setApplied(false);
@@ -235,6 +269,25 @@ export function JobDetailsPage() {
   const postedBy = employerName(job.employerId);
   const isWorker = user?.roles?.includes(USER_ROLES.WORKER);
 
+  const employerRatingAvg =
+    typeof job.employerId?.ratingAvg === "number"
+      ? job.employerId.ratingAvg
+      : typeof job.employerRatingAvg === "number"
+      ? job.employerRatingAvg
+      : undefined;
+
+  const employerRatingCount =
+    typeof job.employerId?.ratingCount === "number"
+      ? job.employerId.ratingCount
+      : typeof job.employerRatingCount === "number"
+      ? job.employerRatingCount
+      : 0;
+
+  const employerUserId =
+    job.employerId?.userId?._id ||
+    job.employerId?.userId ||
+    (typeof job.employerId === "string" ? job.employerId : null);
+
   const isOwner =
     job.isOwner ||
     (employerProfile &&
@@ -265,40 +318,74 @@ export function JobDetailsPage() {
     );
   };
 
-  const speakJob = () => {
+  const handleToggleSpeak = () => {
     setAudioError("");
 
     if (speaking) {
       stopSpeech();
       setSpeaking(false);
+      setIsPaused(false);
       return;
     }
 
-    const content = [
+    const parts = [
       title,
-      `${ui.location}: ${job.city || ""}`,
-      `${ui.salary}: ${formattedPay} ${payType}`,
-      description || "",
-    ]
-      .filter(Boolean)
-      .join(". ");
+      postedBy ? `${ui.postedBy}: ${postedBy}` : null,
+      job.city ? `${ui.location}: ${job.city}${job.address ? `, ${job.address}` : ""}` : null,
+      formattedPay ? `${ui.salary}: ${formattedPay} ${payType}` : null,
+      shift ? `${ui.shift}: ${shift}` : null,
+      job.experienceRequired ? `${ui.experience}: ${job.experienceRequired} ${ui.years}` : null,
+      job.requiredWorkers ? `${ui.workers}: ${job.requiredWorkers}` : null,
+      description || null,
+    ].filter(Boolean);
+
+    const speechText = parts.join(". ");
 
     const started = speakText({
-      text: content,
+      text: speechText,
       lang,
       rate: 0.88,
-      onStart: () => setSpeaking(true),
-      onEnd: () => setSpeaking(false),
-      onError: () => setSpeaking(false),
+      onStart: () => {
+        setSpeaking(true);
+        setIsPaused(false);
+      },
+      onPause: () => setIsPaused(true),
+      onResume: () => setIsPaused(false),
+      onEnd: () => {
+        setSpeaking(false);
+        setIsPaused(false);
+      },
+      onError: () => {
+        setSpeaking(false);
+        setIsPaused(false);
+      },
       onNoVoice: () => {
         setSpeaking(false);
+        setIsPaused(false);
         setAudioError(ui.audioUnavailable);
       },
     });
 
     if (!started) {
       setSpeaking(false);
+      setIsPaused(false);
     }
+  };
+
+  const handlePauseAudio = () => {
+    pauseSpeech();
+    setIsPaused(true);
+  };
+
+  const handleResumeAudio = () => {
+    resumeSpeech();
+    setIsPaused(false);
+  };
+
+  const handleStopAudio = () => {
+    stopSpeech();
+    setSpeaking(false);
+    setIsPaused(false);
   };
 
   const handleApply = async (event) => {
@@ -387,22 +474,80 @@ export function JobDetailsPage() {
             </div>
 
             {postedBy && (
-              <p className="job-details-employer">{postedBy}</p>
+              <div className="job-details-employer-meta">
+                <p className="job-details-employer">
+                  {ui.postedBy}: <strong>{postedBy}</strong>
+                </p>
+                <div className="job-details-employer-rating">
+                  <RatingStars
+                    value={employerRatingAvg}
+                    count={employerRatingCount}
+                  />
+                  {employerUserId && (
+                    <a href="#reviews" className="job-details-reviews-link">
+                      {employerRatingCount > 0
+                        ? `${ui.reviews} (${employerRatingCount})`
+                        : ui.reviews}
+                    </a>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         </div>
 
         <div className="job-details-audio">
-          <button
-            type="button"
-            className={`job-details-listen ${speaking ? "active" : ""}`}
-            onClick={speakJob}
-          >
-            {speaking ? <Square size={19} /> : <Volume2 size={21} />}
-            <span>{speaking ? ui.stop : ui.listen}</span>
-          </button>
+          {!speaking ? (
+            <button
+              type="button"
+              className="job-details-listen"
+              onClick={handleToggleSpeak}
+              aria-label={ui.listen}
+            >
+              <Volume2 size={21} aria-hidden="true" />
+              <span>{ui.listen}</span>
+            </button>
+          ) : (
+            <div className="job-details-audio-controls" role="group" aria-label="Audio controls">
+              <span className="job-details-audio-status" aria-live="polite">
+                {isPaused ? ui.paused : ui.speaking}
+              </span>
 
-          {audioError && <p role="alert">{audioError}</p>}
+              {isPaused ? (
+                <button
+                  type="button"
+                  className="job-details-audio-btn resume"
+                  onClick={handleResumeAudio}
+                  aria-label={ui.resume}
+                >
+                  <Play size={18} aria-hidden="true" />
+                  <span>{ui.resume}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  className="job-details-audio-btn pause"
+                  onClick={handlePauseAudio}
+                  aria-label={ui.pause}
+                >
+                  <Pause size={18} aria-hidden="true" />
+                  <span>{ui.pause}</span>
+                </button>
+              )}
+
+              <button
+                type="button"
+                className="job-details-audio-btn stop"
+                onClick={handleStopAudio}
+                aria-label={ui.stop}
+              >
+                <Square size={18} aria-hidden="true" />
+                <span>{ui.stop}</span>
+              </button>
+            </div>
+          )}
+
+          {audioError && <p className="job-details-audio-error" role="alert">{audioError}</p>}
         </div>
 
         <div className="job-details-grid">
@@ -644,6 +789,34 @@ export function JobDetailsPage() {
           </section>
         )}
       </Card>
+
+      {employerUserId && (
+        <section id="reviews" className="job-details-reviews-section">
+          <Card className="job-details-reviews-card">
+            <div className="job-details-reviews-header">
+              <div>
+                <h2>
+                  <Star size={22} aria-hidden="true" />
+                  {ui.reviews}
+                </h2>
+                <p className="job-details-reviews-subtitle">
+                  {t("rating.workerRatingsSubtitle")}
+                </p>
+              </div>
+              <div className="job-details-reviews-rating-badge">
+                <RatingStars value={employerRatingAvg} count={employerRatingCount} />
+              </div>
+            </div>
+            <RatingList
+              userId={String(employerUserId)}
+              employerProfile={typeof job.employerId === "object" ? job.employerId : null}
+              isEmployer={true}
+              isWorker={false}
+              activeTab="employer"
+            />
+          </Card>
+        </section>
+      )}
     </div>
   );
 }

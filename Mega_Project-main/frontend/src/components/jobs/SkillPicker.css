@@ -100,7 +100,7 @@
   gap: 6px;
   background: var(--color-surface);
   color: var(--color-ink);
-  border: 1px solid var(--color-border-strong);
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: var(--radius-pill);
   padding: 7px 14px;
   font-size: var(--text-sm);
@@ -108,12 +108,16 @@
   min-height: var(--touch-target-min);
   max-width: 100%;
   overflow-wrap: anywhere;
+  cursor: pointer;
+  transition: all 0.18s ease;
 }
 
 .skill-picker-option:hover:not(:disabled) {
   background: var(--color-surface);
   color: var(--color-primary);
   border-color: var(--color-primary);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(37, 99, 235, 0.12);
 }
 
 .skill-picker-option:focus-visible,
@@ -127,16 +131,22 @@
   display: flex;
   align-items: center;
   gap: 8px;
-  border: 1px solid var(--color-border);
+  border: 1.5px solid var(--interactive-border, #cbdaf0);
   border-radius: var(--radius-sm);
-  padding: 0 10px;
-  background: var(--color-surface);
+  padding: 0 12px;
+  background: #ffffff;
   color: var(--color-muted);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+  transition: border-color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
+}
+
+.skill-picker-search:hover {
+  border-color: var(--interactive-border-hover, #7da8f8);
 }
 
 .skill-picker-search:focus-within {
   border-color: var(--color-primary);
-  box-shadow: var(--ring-focus);
+  box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.22);
 }
 
 .skill-picker-search input {

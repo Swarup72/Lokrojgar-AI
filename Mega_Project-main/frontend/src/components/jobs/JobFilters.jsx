@@ -1,4 +1,4 @@
-import { Search, Navigation, RotateCcw } from "lucide-react";
+import { Search, Navigation, RotateCcw, ShieldCheck } from "lucide-react";
 import { useLanguage } from "../../hooks/useLanguage";
 import { pickLocalizedText } from "../../utils/localizedText";
 import { PAY_TYPES } from "../../utils/enums";
@@ -13,7 +13,14 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
 
   const update = (key, value) => onFilterChange({ ...filters, [key]: value || undefined });
 
-  const hasActiveFilters = Boolean(filters.categoryId || filters.payType || filters.minPay);
+  const hasActiveFilters = Boolean(
+    filters.categoryId ||
+    filters.payType ||
+    filters.minPay ||
+    filters.maxPay ||
+    filters.city ||
+    filters.verifiedOnly
+  );
 
   const handleClearFilters = () => {
     onFilterChange({
@@ -21,6 +28,9 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
       categoryId: undefined,
       payType: undefined,
       minPay: undefined,
+      maxPay: undefined,
+      city: undefined,
+      verifiedOnly: undefined,
     });
   };
 
@@ -72,13 +82,49 @@ export function JobFilters({ mode, onModeChange, filters, onFilterChange, catego
           </select>
 
           <input
-            type="number"
-            min="0"
-            placeholder={t("jobs.search.minPay")}
-            value={filters.minPay || ""}
-            onChange={(event) => update("minPay", event.target.value)}
-            aria-label={t("jobs.search.minPay")}
+            type="text"
+            placeholder={t("jobs.search.city")}
+            value={filters.city || ""}
+            onChange={(event) => update("city", event.target.value)}
+            aria-label={t("jobs.search.city")}
+            className="job-filter-city-input"
           />
+
+          <div className="job-filter-wage-wrap">
+            <span className="job-filter-wage-prefix" aria-hidden="true">₹</span>
+            <input
+              type="number"
+              min="0"
+              placeholder={t("jobs.search.minPay")}
+              value={filters.minPay || ""}
+              onChange={(event) => update("minPay", event.target.value)}
+              aria-label={t("jobs.search.minPay")}
+            />
+          </div>
+
+          <div className="job-filter-wage-wrap">
+            <span className="job-filter-wage-prefix" aria-hidden="true">₹</span>
+            <input
+              type="number"
+              min="0"
+              placeholder={t("jobs.search.maxPay")}
+              value={filters.maxPay || ""}
+              onChange={(event) => update("maxPay", event.target.value)}
+              aria-label={t("jobs.search.maxPay")}
+            />
+          </div>
+
+          <button
+            type="button"
+            role="switch"
+            aria-checked={Boolean(filters.verifiedOnly)}
+            className={`job-filter-toggle ${filters.verifiedOnly ? "active" : ""}`}
+            onClick={() => update("verifiedOnly", !filters.verifiedOnly)}
+            title={t("jobs.search.verifiedEmployer")}
+          >
+            <ShieldCheck size={16} aria-hidden="true" />
+            <span>{t("jobs.search.verifiedEmployer")}</span>
+          </button>
 
           {hasActiveFilters && (
             <button
