@@ -477,6 +477,7 @@ export const searchAndFilterJobs = asyncHandler(async (req, res) => {
 
 export const getNearbyJobs = asyncHandler(async (req, res) => {
   const { longitude, latitude, radiusKm = 20 } = req.query;
+  const lang = req.lang || req.query.lang || "en";
   const lng = Number(longitude);
   const lat = Number(latitude);
   const radiusInMeters = Number(radiusKm) * 1000;
@@ -498,7 +499,18 @@ export const getNearbyJobs = asyncHandler(async (req, res) => {
     { $limit: 50 },
   ]);
 
-  return res.status(200).json(new ApiResponse(200, nearbyJobs, "Nearby jobs retrieved"));
+  const populatedJobs = await Job.populate(nearbyJobs, [
+    { path: "categoryId skillIds" },
+    { path: "employerId", populate: { path: "userId", select: "fullName" } },
+  ]);
+
+  const localizedJobs = populatedJobs.map((j) => ({
+    ...j,
+    titleText: pickLanguage(j.title, lang, j.originalLanguage),
+    descriptionText: pickLanguage(j.description, lang, j.originalLanguage),
+  }));
+
+  return res.status(200).json(new ApiResponse(200, localizedJobs, "Nearby jobs retrieved"));
 });
 
 export const getRecommendedJobs = asyncHandler(async (req, res) => {
